@@ -1,19 +1,35 @@
+/*
+Copyright (C) 2015 Goncharov Andrei.
+
+This file is part of the 'Active Directory Contact Book'.
+'Active Directory Contact Book' is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+'Active Directory Contact Book' is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 // SettingsDlg.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "AdBook.h"
-#include "error.h"
 #include "SettingsDlg.h"
 #include "afxdialogex.h"
-#include "AdConnector.h"
 
 // CSettingsDlg dialog
 
 IMPLEMENT_DYNAMIC(CSettingsDlg, CDialogEx)
 
 CSettingsDlg::CSettingsDlg(AppSettings & appSettings, CWnd* pParent /*=NULL*/)
-	: CDialogEx(CSettingsDlg::IDD, pParent), appSettings_(appSettings)
+    : CDialogEx(CSettingsDlg::IDD, pParent), appSettings_(appSettings)
 {
 
 }
@@ -34,13 +50,11 @@ BOOL CSettingsDlg::OnInitDialog()
     defaultPasswordChar_ = password_.GetPasswordChar();
     const UINT reasonableMaxPassLen = 40;
     password_.SetLimitText(reasonableMaxPassLen);
-    
-    CheckDlgButton(IDC_CHECK_CLOSE_TO_TRAY, appSettings_.GetMainWndSettings().CloseToTray() ? BST_CHECKED: BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_MINIMIZE_TO_TRAY, appSettings_.GetMainWndSettings().MinimizeToTray() ? BST_CHECKED : BST_UNCHECKED);
+        
     const ConnectionSettings & cs = appSettings_.GetConnectionSettings();
-    SetDlgItemText(IDC_EDIT_DC, cs.GetDC());
-    SetDlgItemText(IDC_EDIT_USERNAME, cs.GetLogin());
-    SetDlgItemText(IDC_EDIT_PASSWORD, cs.GetPassword());
+    SetDlgItemText(IDC_EDIT_DC, cs.GetDC().c_str());
+    SetDlgItemText(IDC_EDIT_USERNAME, cs.GetLogin().c_str());
+    SetDlgItemText(IDC_EDIT_PASSWORD, cs.GetPassword().c_str());
     CheckDlgButton(IDC_CHECK_USER_DOMAIN, appSettings_.GetConnectionSettings().CurrentDomain() ? BST_CHECKED : BST_UNCHECKED);
     CheckDlgButton(IDC_CHECK_USE_CURUSERCRED, appSettings_.GetConnectionSettings().CurrentUserCredentials() ? BST_CHECKED : BST_UNCHECKED);
     CheckDlgButton(IDC_CHECK_FORGET_PASS, appSettings_.GetConnectionSettings().ForgetPassword() ? BST_CHECKED : BST_UNCHECKED);
@@ -69,10 +83,7 @@ END_MESSAGE_MAP()
 // CSettingsDlg message handlers
 
 void CSettingsDlg::ProcessUserInput()
-{
-    appSettings_.GetMainWndSettings().CloseToTray(IsDlgButtonChecked(IDC_CHECK_CLOSE_TO_TRAY) == BST_CHECKED);
-    appSettings_.GetMainWndSettings().MinimizeToTray(IsDlgButtonChecked(IDC_CHECK_MINIMIZE_TO_TRAY) == BST_CHECKED);
-
+{    
     CString dc;
     ConnectionSettings & cs = appSettings_.GetConnectionSettings();
     cs.CurrentDomain(IsDlgButtonChecked(IDC_CHECK_USER_DOMAIN) == BST_CHECKED);
@@ -82,7 +93,7 @@ void CSettingsDlg::ProcessUserInput()
     {
         AfxMessageBox(IDS_ENTER_DC_NAME, MB_ICONEXCLAMATION);
         GetDlgItem(IDC_EDIT_DC)->SetFocus();
-        throw HrError(E_INVALIDARG);
+        throw adbook::HrError(E_INVALIDARG);
     }
     cs.SetDC(dc);
 
@@ -90,8 +101,7 @@ void CSettingsDlg::ProcessUserInput()
     CString login;
     GetDlgItemText(IDC_EDIT_USERNAME, login);
     login.Trim();
-    cs.SetLogin(login);
-
+    cs.SetLogin(login);    
     CString password;
     GetDlgItemText(IDC_EDIT_PASSWORD, password);
     password.Trim();
@@ -103,15 +113,15 @@ void CSettingsDlg::ProcessUserInput()
         {
             AfxMessageBox(IDS_ENTER_LOGIN, MB_ICONEXCLAMATION);
             GetDlgItem(IDC_EDIT_USERNAME)->SetFocus();
-            throw HrError(E_INVALIDARG);
+            throw adbook::HrError(E_INVALIDARG);
         }
         if (password.IsEmpty())
         {
             AfxMessageBox(IDS_ENTER_PASSWORD, MB_ICONEXCLAMATION);
             GetDlgItem(IDC_EDIT_PASSWORD)->SetFocus();
-            throw HrError(E_INVALIDARG);
+            throw adbook::HrError(E_INVALIDARG);
         }
-    }
+    }    
     cs.DisplayPassword(IsDlgButtonChecked(IDC_CHECK_DISPLAY_PASS) == BST_CHECKED);
     cs.ForgetPassword(IsDlgButtonChecked(IDC_CHECK_FORGET_PASS) == BST_CHECKED);
 }
@@ -123,7 +133,7 @@ void CSettingsDlg::OnBnClickedOk()
         ProcessUserInput();
         CDialogEx::OnOK();
     }
-    catch (const HrError & )
+    catch (const adbook::HrError & )
     {
         
     }    
@@ -164,17 +174,17 @@ void CSettingsDlg::OnBnClickedButtonVerify()
         
     try
     {
-        AdConnector ac(appSettings_.GetConnectionSettings());
+        adbook::AdConnector ac(appSettings_.GetConnectionSettings());
         CWaitCursor wc;
         ac.Connect();
         AfxMessageBox(IDS_CONNECTION_SUCCEEDED);        
     }
-    catch (const Error & e)
+    catch (const adbook::Error & e)
     {
         CString error;
         VERIFY(error.LoadString(IDS_FAILED_TO_CONNECT));
         error += L" ";
-        error += e.What();
+        error += e.What().c_str();
         AfxMessageBox(error, MB_ICONERROR);
     }
     catch (const std::exception & )

@@ -1,0 +1,13 @@
+/GenTestData/
+/ipch/
+/.vs/
+/AdBook.sln.ide/
+/Debug/
+/x64/
+*.opensdf
+*.sdf
+*.v14.suo
+/Release/
+*.VC.opendb
+*.VC.db
+/backup/

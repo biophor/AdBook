@@ -2,3 +2,8 @@
 /x64/
 *.aps
 *.vcxproj.user
+*.zip
+*.vcxproj.filters
+/Release/
+*.cpp_
+*.h_

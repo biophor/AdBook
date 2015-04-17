@@ -1,29 +1,36 @@
+/*
+Copyright (C) 2015 Goncharov Andrei.
+
+This file is part of the 'Active Directory Contact Book'.
+'Active Directory Contact Book' is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+'Active Directory Contact Book' is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #pragma once
 
-class ConnectionSettings
+class ConnectionSettings: public adbook::ConnectionParams
 {
 public:
-    ConnectionSettings();
-    void SetDC(const CString & dc);
-    CString GetDC() const;
-    void SetLogin(const CString & login);
-    void SetPassword(const CString & password);
-    void CurrentUserCredentials(const bool currentUserCred);
-    bool CurrentUserCredentials() const;
-    void CurrentDomain(const bool currentDomain);
-    bool CurrentDomain() const;
-    CString GetLogin() const;
-    CString GetPassword() const;
-    void ForgetPassword(const bool forget);
-    bool ForgetPassword() const;
-    void DisplayPassword(const bool display);
-    bool DisplayPassword() const;
-private:
-    CString dc_;    // domain controller name
-    bool currentUserCred_ = true;
-    bool currentDomain_ = true;
+    void Save();
+    void Load();
+    
+    void ForgetPassword(const bool forget) noexcept;
+    bool ForgetPassword() const noexcept;
+    void DisplayPassword(const bool display) noexcept;
+    bool DisplayPassword() const noexcept;
+    
+private:    
     bool displayPassword_ = false;
-    bool forgetPassword_ = true;
-    CString login_, password_;
+    bool forgetPassword_ = true;    
 };
 
