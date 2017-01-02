@@ -35,9 +35,9 @@ const wchar_t mutexName[] = L"{F22EEC20-56B6-443A-8C65-5D1DC38F1D78}";
 class SimpleInterprocessSync
 {
 public:
-    SimpleInterprocessSync(const wchar_t * mutexName)
+    SimpleInterprocessSync(const wchar_t * mtxName)
     {
-        _mutexHandle = CreateMutexW(nullptr, FALSE, mutexName);
+        _mutexHandle = CreateMutexW(nullptr, FALSE, mtxName);
         if (nullptr == _mutexHandle)
         {
             throw HrError(HRESULT_FROM_WIN32(GetLastError()), __FUNCTIONW__);
@@ -71,10 +71,7 @@ std::wstring GetFileName()
     }
     return fullPath;
 }
-namespace
-{
 
-}
 void AdPersonDescList::Load()
 {    
     try
@@ -284,7 +281,7 @@ void AdPersonDescList::InternalLoad()
         AdPersonDesc personDesc;
         jet::ColumnPtr waCol(table->GetColumn(writableAttrsColName));
         jet::ThrowIfNull(waCol, table);
-        uint32_t buffSize = static_cast<uint32_t>(binary.size());
+        uint32_t buffSize = boost::numeric_cast<uint32_t>(binary.size());
         auto hr = waCol->GetBinary(&binary[0], buffSize);
         if (SUCCEEDED(hr))
         {
@@ -315,7 +312,7 @@ void AdPersonDescList::InternalLoad()
             }
             else
             {
-                buffSize = static_cast<uint32_t>(binary.size());
+                buffSize = boost::numeric_cast<uint32_t>(binary.size());
                 if (SUCCEEDED(col.second->GetBinary(&binary[0], buffSize)) && buffSize)
                 {
                     std::vector<BYTE> bav(binary.cbegin(), binary.cbegin() + buffSize);

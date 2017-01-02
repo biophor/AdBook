@@ -1,5 +1,13 @@
 #pragma once
 #include <boost/assert.hpp>
+#include <activeds.h>
+#include <atlbase.h>
+#include <set>
+#include <mutex>
+#include <deque>
+#include <future>
+#include <atomic>
+#include <functional>
 
 #include "AdBookBLExport.h"
 #include "error.h"
@@ -7,7 +15,6 @@
 #include "AdPersonDesc.h"
 #include "AdPersonDescList.h"
 #include "AdSearcher.h"
-#include "adsi.h"
 #include "Attributes.h"
 #include "ConnectionParams.h"
 #include "LdapRequest.h"

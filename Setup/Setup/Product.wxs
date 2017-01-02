@@ -20,14 +20,10 @@
     <?define Win64 = "no" ?>
     <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?endif ?>
-  <!--
-	<Product Id="*" Name="Active Directory Contact Book" Language="1033" Version="1.1.1.1" Manufacturer="Goncharov Andrei" UpgradeCode="cb561d1a-6073-4c1d-a92f-f6a343d149b5">
-  -->
+  
   <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
            Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
-    <!--
-		<Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" />
-    -->
+    
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="$(var.Platform)" />
     
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
@@ -99,6 +95,19 @@
                 Name="AdBook.exe"
                 Source="../../Release/AdBook.exe"
                 KeyPath="yes" />
+        <?endif?>
+      </Component>
+      <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
+        <?if $(var.Platform) = x64 ?>
+        <File Id="FILE_INSTALLFOLDER_QtAdBookBL"
+              Name="AdBookBL.dll"
+              Source="../../x64/Release/AdBookBL.dll"
+              KeyPath="yes" />
+        <?else?>
+        <File Id="FILE_INSTALLFOLDER_QtAdBookBL"
+              Name="AdBookBL.dll"
+              Source="../../Release/AdBookBL.dll"
+              KeyPath="yes" />
         <?endif?>
       </Component>
       <Component Id="CMP_EskimoDll" Guid="7CBF2D58-D25F-462D-9507-0EA210B07F13" >

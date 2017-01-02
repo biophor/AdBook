@@ -1,0 +1,5 @@
+*.aps
+/Release/
+/x64/
+/GeneratedFiles/
+*.ui.bak

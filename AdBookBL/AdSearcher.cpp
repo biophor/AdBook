@@ -167,7 +167,7 @@ void ExecuteSearch(IDirectorySearchPtr & dsp, WcharBuf & searchFilter, std::vect
     ADS_SEARCH_HANDLE & searchHandle)
 {
     HRESULT hr = dsp->ExecuteSearch(&searchFilter[0], &attrsToRetrieve[0],
-        static_cast<DWORD>(attrsToRetrieve.size()), &searchHandle);
+        boost::numeric_cast<DWORD>(attrsToRetrieve.size()), &searchHandle);
     if (FAILED(hr))
     {
         HR_ERROR(hr);
@@ -276,7 +276,7 @@ void AdSearcher::ReadNextEntry(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & se
     }
     if (onNewItem_)
     {
-        onNewItem_(std::move(personDesc));
+        onNewItem_(std::move(personDesc));        
     }
 }
 

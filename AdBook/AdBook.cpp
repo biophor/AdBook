@@ -117,8 +117,9 @@ BOOL CAdBookApp::InitInstance()
     if (pShellManager != NULL)
     {
         delete pShellManager;
-    }
+    }    
     appSet_.SaveSettings();
+    adbook::Attributes::GetInstance().PreExitUnload(); // prevent false positive warnings about memory leaks
     // Since the dialog has been closed, return FALSE so that we exit the
     //  application, rather than start the application's message pump.
     

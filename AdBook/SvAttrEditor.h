@@ -36,7 +36,7 @@ public:
 private:
     WindowAnchor wndAnchor_;
     CSize minSize_;
-    adbook::AdPersonDesc & person_;
+    const adbook::AdPersonDesc & person_;
     const adbook::Attributes::AttrId attrToChange_;
 
     HICON icon_;

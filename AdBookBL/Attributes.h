@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License along with
 #pragma once
 
 #include "AdBookBLExport.h"
-#include "adsi.h"
+#include "shared.h"
 
 namespace adbook
 {
@@ -44,6 +44,7 @@ public:
     size_t GetAttrCount() const noexcept;
     std::wstring GetUiAttrName(const AttrId id) const;
     std::wstring GetLdapAttrName(const AttrId id) const;
+    const wchar_t * GetLdapAttrNamePtr(const AttrId id) const;
     size_t GetAttrMaxLength(const AttrId id) const;
     size_t GetTextAttrMaxLength() const;
     size_t GetBinaryAttrMaxLength() const;
@@ -53,7 +54,7 @@ public:
     std::vector<AttrId> GetAttrIds() const;
     bool IsAttrSupported(const AttrId attrId) const noexcept;
     bool IsAttrSupported(const wchar_t * ldapAttrName) const;
-
+    void PreExitUnload();
 public:
     Attributes(const Attributes &) = delete;
     Attributes(Attributes &&) = delete;

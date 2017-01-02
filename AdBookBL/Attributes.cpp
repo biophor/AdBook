@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with
 */
 
 #include "stdafx.h"
+#include "adsi.h"
 #include "error.h"
 #include "dllmain.h"
 #include "resource.h"
@@ -80,6 +81,11 @@ bool Attributes::IsEditableString(const AttrId id) const
 std::wstring Attributes::GetLdapAttrName(const AttrId id) const
 {
     return std::wstring(mainAttrInfo.at(id).ldapAttrName);
+}
+
+const wchar_t * Attributes::GetLdapAttrNamePtr(const AttrId id) const
+{
+    return mainAttrInfo.at(id).ldapAttrName;
 }
 
 size_t Attributes::GetAttrMaxLength(const AttrId id) const
@@ -189,6 +195,12 @@ Attributes::Attributes()
     {
         nameToIdMap.emplace(i.second.ldapAttrName, i.first);
     }
+}
+
+void Attributes::PreExitUnload()
+{
+    nameToIdMap.clear();
+    mainAttrInfo.clear();
 }
 
 }   // namespace adbook

@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License along with
 
 #include "stdafx.h"
 #include "error.h"
+#include "shared.h"
 #include "AdConnector.h"
 
 namespace adbook
@@ -77,7 +78,7 @@ void AdConnector::Connect()
             throw HrError(E_UNEXPECTED);
         }
         wchar_t rootDse[] = L"rootDSE";
-        size_t rootDsePos = ldapPathName.find_last_of(rootDse);
+        size_t rootDsePos = ldapPathName.rfind(rootDse);
         if (rootDsePos != std::wstring::npos)
         {
             ldapPathName.replace(rootDsePos, _countof(rootDse), defaultNamingContextDN);
@@ -207,7 +208,7 @@ void AdConnector::UploadBinaryAttr(const std::wstring & attrName, const BinaryAt
         adsValue.dwType = ADSTYPE_OCTET_STRING;
         BinaryAttrVal newAttrValue = bav;
         adsValue.OctetString.lpValue = &newAttrValue.at(0);
-        adsValue.OctetString.dwLength = static_cast<DWORD>(newAttrValue.size());
+        adsValue.OctetString.dwLength = boost::numeric_cast<DWORD>(newAttrValue.size());
         const HRESULT hr = objectPtr_->SetObjectAttributes(&attrInfo[0], _countof(attrInfo), &numChanged);
         if (FAILED(hr))
         {

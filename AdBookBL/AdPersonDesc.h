@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License along with
 
 #pragma once
 #include "AdBookBLExport.h"
+#include "adsi.h"
 #include "Attributes.h"
 
 namespace adbook
@@ -37,11 +38,14 @@ public:
     void SetStringAttr(const LdapAttrName & an, StringAttrValType && sav);
 
     StringAttrVal GetStringAttr(const LdapAttrName & an) const;
-
+    StringAttrVal GetStringAttr(Attributes::AttrId id) const;    
+    bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const;
+    
     template <class BinaryAttrValType>
     void SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && bav);
 
     BinaryAttrVal GetBinaryAttr(const LdapAttrName & an) const;
+    BinaryAttrVal GetBinaryAttr(Attributes::AttrId id) const;
 
     using AttrIds = std::set<Attributes::AttrId>;
 

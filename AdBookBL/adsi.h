@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License along with
 #pragma once
 
 #include "AdBookBLExport.h"
-#include "shared.h"
+
 
 namespace adbook
 {
@@ -39,5 +39,6 @@ const wchar_t * const AdAttrPhoto = L"thumbnailPhoto";
 using LdapAttrName = std::wstring;
 using StringAttrVal = std::wstring;
 using BinaryAttrVal = std::vector<BYTE>;
+
 
 }   // namespace adbook

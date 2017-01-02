@@ -26,7 +26,30 @@ namespace adbook
 class ADBOOKBL_API Error : public std::exception
 {
 public:
-    Error(const wchar_t * where = nullptr)
+    Error(const wchar_t * what, const wchar_t * where)
+    {
+        if (what)
+        {
+            size_t numCharsConverted = 0;
+            wcstombs_s(&numCharsConverted, whatBuf_, what, _countof(whatBuf_));
+        }
+        if (where)
+        {
+            wcscpy_s(whereBuf_, where);
+        }
+    }
+    Error(const char * what, const wchar_t * where)
+    {
+        if (what)
+        {
+            strcpy_s(whatBuf_, what);
+        }
+        if (where)
+        {
+            wcscpy_s(whereBuf_, where);
+        }
+    }
+    Error(const wchar_t * where)
     {
         if (where)
         {
@@ -55,11 +78,14 @@ protected:
 class ADBOOKBL_API HrError : public Error
 {
 public:
-    HrError(const HRESULT hr, const wchar_t * where = nullptr) : Error(where), hr_(hr)
+    HrError(const HRESULT hr, const wchar_t * where = nullptr) : Error(where), hr_(hr) 
     {
         sprintf_s(whatBuf_, "0x%X.", hr);
     }
-
+    HrError(const HRESULT hr, const wchar_t * what, const wchar_t * where) : Error(what, where), hr_(hr) 
+    {
+        sprintf_s(whatBuf_, "0x%X.", hr);
+    }
     virtual std::wstring What() const;
 
 private:

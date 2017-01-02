@@ -11,3 +11,4 @@
 *.VC.opendb
 *.VC.db
 /backup/
+*.7z

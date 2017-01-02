@@ -117,7 +117,7 @@ std::wstring GetHrErrorDesc(const HRESULT hr)
     }
     else if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
     {
-        errorDesc = GetWin32ErrorDesc(static_cast<DWORD>(hr));
+        errorDesc = GetWin32ErrorDesc(boost::numeric_cast<DWORD>(hr));
     }
     std::wstring adsiExtErr = GetAdsiExtErrorDesc();
     if (!adsiExtErr.empty())
