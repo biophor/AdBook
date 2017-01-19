@@ -25,13 +25,8 @@ public:
     void Save();
     void Load();
     
-    void ForgetPassword(const bool forget) noexcept;
-    bool ForgetPassword() const noexcept;    
-    
 private:
     ConnectionSettings() {}
-    void Load(QSettings & settings);
-private:
-    bool forgetPassword_ = false;
+    void Load(QSettings & settings, bool dontDecryptPassword);
 };
 

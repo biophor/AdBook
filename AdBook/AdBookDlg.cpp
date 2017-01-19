@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -290,8 +292,7 @@ void CAdBookDlg::InitSearchFiltersList()
     auto & attributes = adbook::Attributes::GetInstance();
     for (const auto & i : mws_.GetSearchFilters())
     {
-        int idx;
-        CString uiName;
+        int idx;        
         adbook::Attributes::AttrId attrId = boost::numeric_cast<adbook::Attributes::AttrId>(i.attrId);
         if (attributes.IsAttrSupported(attrId))
         {
@@ -674,12 +675,13 @@ void CAdBookDlg::OnBnClickedButtonFind()
         }
         else
         {
-            adSearcher_.Start(ConstructLdapRequest());
+            adSearcher_.Start(ConstructLdapRequest(), theApp.GetAppSettings().GetConnectionSettings());
             GetDlgItem(IDC_BUTTON_FIND)->EnableWindow(FALSE);   // disable 'find' button until the search thread is started.
             GetDlgItem(IDC_BUTTON_ADD)->EnableWindow(FALSE);
             GetDlgItem(IDC_BUTTON_REMOVE)->EnableWindow(FALSE);
             GetDlgItem(IDC_BUTTON_CHANGE1)->EnableWindow(FALSE);
             GetDlgItem(IDC_BUTTON_CHANGE2)->EnableWindow(FALSE);
+            GetDlgItem(IDC_BUTTON_SELECT)->EnableWindow(FALSE);
             CleanSortArrow();
         }
     }
@@ -789,9 +791,9 @@ adbook::LdapRequest CAdBookDlg::ConstructLdapRequest()
             const auto attrNames = adbook::Attributes::GetInstance().GetLdapAttrNames();
             for (const auto & ii : attrNames)
             {
-                lr.AddRule(ii, mr, static_cast<PCWSTR>(val));
-                lr.AddOR();
+                lr.AddRule(ii, mr, static_cast<PCWSTR>(val));                
             }
+            lr.AddOR();
         }
         else
         {
@@ -946,7 +948,7 @@ void CAdBookDlg::DisplayPersonDetails(const int personIdx)
     ResizeContactDetailsCols();
     const adbook::BinaryAttrVal bav = person.GetBinaryAttr(
         adbook::Attributes::GetInstance().GetLdapAttrName(
-            adbook::Attributes::thumbnailPhoto
+            adbook::Attributes::ThumbnailPhoto
         )
     );
     if (!bav.empty())
@@ -1011,7 +1013,7 @@ void CAdBookDlg::RefreshPersonButtons(int personIdx, int attrIdx1, int attrIdx2)
         !contactDetails2_.GetItemText(attrIdx2, ContactDetailsAttrValueCol).IsEmpty());
     edit1->EnableWindow(person.IsAttributeWritable(id1) && !searchingIsRunning);
     edit2->EnableWindow(person.IsAttributeWritable(id2) && !searchingIsRunning);
-    selectPhoto->EnableWindow(person.IsAttributeWritable(adbook::Attributes::thumbnailPhoto));
+    selectPhoto->EnableWindow(person.IsAttributeWritable(adbook::Attributes::ThumbnailPhoto));
 }
 
 void CAdBookDlg::OnLvnGetdispinfoListResults(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1258,7 +1260,7 @@ void CAdBookDlg::OnSelectPhoto()
     VERIFY(filter.LoadString(IDS_SELECT_PHOTO_DLG_FILTER));
     CFileDialog fd(TRUE, nullptr, nullptr, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST, filter, this);
     const auto photoMaxSizeInBytes = 
-        adbook::Attributes::GetInstance().GetAttrMaxLength(adbook::Attributes::thumbnailPhoto);
+        adbook::Attributes::GetInstance().GetAttrMaxLength(adbook::Attributes::ThumbnailPhoto);
     CString title;
     title.Format(IDS_OPEN_PHOTO_DLG_TITLE, photoMaxSizeInBytes / 1024);
     VERIFY(!title.IsEmpty());
@@ -1299,7 +1301,7 @@ void CAdBookDlg::OnSelectPhoto()
     std::lock_guard<decltype(personsMutex_)> lg(personsMutex_);
     auto & person = persons_.at(selPerson);
     const auto dn = person.GetDn();
-    const auto attrName = adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::thumbnailPhoto);
+    const auto attrName = adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
     CString confirm;
     confirm.Format(IDS_PHOTO_UPLOAD_CONFIRM, dn.c_str(), attrName.c_str());
     if (IDOK != AfxMessageBox(confirm, MB_ICONQUESTION | MB_OKCANCEL))
@@ -1340,7 +1342,7 @@ void CAdBookDlg::OnClearPhoto()
     {
         CWaitCursor wc;
         ac.Connect();
-        const auto attrName = adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::thumbnailPhoto);
+        const auto attrName = adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
         ac.UploadBinaryAttr(attrName, adbook::BinaryAttrVal());
         person.SetBinaryAttr(attrName, adbook::BinaryAttrVal());
         DisplayPersonDetails(selPerson);

@@ -2,6 +2,9 @@
 #include <QtWidgets>
 #pragma warning(pop)
 
+#include <Dpapi.h>
+#include <Wincrypt.h>
+
 #pragma warning(push)
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)

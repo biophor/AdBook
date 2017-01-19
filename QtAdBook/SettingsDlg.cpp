@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015-2017 Goncharov Andrei.
 
@@ -161,8 +163,7 @@ void SettingsDlg::ReadSettings()
     ui.login->setText(QString::fromStdWString(connectionSettings.GetLogin()));
     ui.defaultDc->setChecked(connectionSettings.CurrentDomain());
     ui.currentUser->setChecked(connectionSettings.CurrentUserCredentials());
-    ui.password->setText(QString::fromStdWString(connectionSettings.GetPassword()));
-    ui.forgetPassword->setChecked(connectionSettings.ForgetPassword());    
+    ui.password->setText(QString::fromStdWString(connectionSettings.GetPassword()));    
 }
 
 void SettingsDlg::WriteSettings()
@@ -172,8 +173,7 @@ void SettingsDlg::WriteSettings()
     connectionSettings.SetLogin(ui.login->text().trimmed().toStdWString());
     connectionSettings.SetPassword(ui.password->text().trimmed().toStdWString());
     connectionSettings.CurrentDomain(ui.defaultDc->isChecked());
-    connectionSettings.CurrentUserCredentials(ui.currentUser->isChecked());
-    connectionSettings.ForgetPassword(ui.forgetPassword->isChecked());
+    connectionSettings.CurrentUserCredentials(ui.currentUser->isChecked());    
     connectionSettings.Save();    
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2017 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,14 +29,15 @@ class ADBOOKBL_API Attributes
 public:
     enum AttrId {
         CommonName, Email, Company, Title, Department, State, EmpId,
-        SurName, GivenName, DisplayName, WorkPhone, HomePhone, MobilePhone, Locality, thumbnailPhoto, dn, AttrIdEnd
+        SurName, GivenName, DisplayName, WorkPhone, HomePhone, MobilePhone, 
+        Locality, ThumbnailPhoto, Dn, AttrIdEnd
     };
 
     static Attributes & GetInstance()
     {
         static Attributes instance;
         return instance;
-    }
+    }    
     bool IsEditable(const AttrId id) const;
     bool IsString(const AttrId id) const;
     bool IsEditableString(const AttrId id) const;
@@ -50,8 +51,8 @@ public:
     size_t GetBinaryAttrMaxLength() const;
     AttrId GetAttrId(const wchar_t * attrName) const;
     std::vector<WcharBuf> GetWritableLdapAttrNames() const;
-    std::list<std::wstring> GetLdapAttrNames() const;
-    std::vector<AttrId> GetAttrIds() const;
+    const std::list<std::wstring> & GetLdapAttrNames() const;
+    const std::vector<AttrId> & GetAttrIds() const;    
     bool IsAttrSupported(const AttrId attrId) const noexcept;
     bool IsAttrSupported(const wchar_t * ldapAttrName) const;
     void PreExitUnload();
@@ -62,6 +63,9 @@ public:
     void operator = (Attributes &&) = delete;
 private:
     Attributes();
+private:
+    std::vector<AttrId> attrIds_;
+    std::list<std::wstring> ldapAttrNames_;
 };
 
 }

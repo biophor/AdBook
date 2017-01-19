@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Compatible with WiX Toolset v3.10-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   
   <?define ProductName = "Active Directory Contact Book" ?>
@@ -99,30 +100,17 @@
       </Component>
       <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
         <?if $(var.Platform) = x64 ?>
-        <File Id="FILE_INSTALLFOLDER_QtAdBookBL"
+        <File Id="FILE_INSTALLFOLDER_AdBookBL"
               Name="AdBookBL.dll"
               Source="../../x64/Release/AdBookBL.dll"
               KeyPath="yes" />
         <?else?>
-        <File Id="FILE_INSTALLFOLDER_QtAdBookBL"
+        <File Id="FILE_INSTALLFOLDER_AdBookBL"
               Name="AdBookBL.dll"
               Source="../../Release/AdBookBL.dll"
               KeyPath="yes" />
         <?endif?>
-      </Component>
-      <Component Id="CMP_EskimoDll" Guid="7CBF2D58-D25F-462D-9507-0EA210B07F13" >
-        <?if $(var.Platform) = x64 ?>
-          <File Id="FILE_INSTALLFOLDER_EskimoDll"
-                Name="Eskimo.dll"
-                Source="../../x64/Release/Eskimo.dll"
-                KeyPath="yes" />
-        <?else?>
-        <File Id="FILE_INSTALLFOLDER_EskimoDll"
-                Name="Eskimo.dll"
-                Source="../../Release/Eskimo.dll"
-                KeyPath="yes" />
-        <?endif?>
-      </Component>
+      </Component>      
       <Component Id="CMP_GplLicence" Guid="224100D8-DA70-4FA5-B8DA-24E576B991FA" >
         <File Id="FILE_INSTALLFOLDER_GplRtf"
               Name="gpl.rtf"

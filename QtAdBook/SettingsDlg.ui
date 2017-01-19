@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>346</width>
-    <height>421</height>
+    <width>350</width>
+    <height>376</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -178,16 +178,6 @@
           <widget class="QCheckBox" name="displayPassword">
            <property name="text">
             <string>&amp;Display the password</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="forgetPassword">
-           <property name="text">
-            <string>&amp;Forget the password at exit</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
            </property>
           </widget>
          </item>

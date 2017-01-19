@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -31,9 +33,33 @@ inline T GetAttrVal(const LdapAttrName & an, const std::map<LdapAttrName, T> & m
     auto i = m.find(an);
     if (i != m.end())
     {
-        ret = i->second;        
+        ret = i->second;
     }
-    return ret;    
+    return ret;
+}
+
+const wchar_t * AdPersonDesc::GetStringAttrPtr(const LdapAttrName & an) const
+{    
+    auto attrIter = stringAttrs_.find(an);
+    if (attrIter == stringAttrs_.cend()) {
+        throw HrError(E_INVALIDARG, L"an param", __FUNCTIONW__);
+    }
+    return attrIter->second.c_str();
+}
+
+const BYTE * AdPersonDesc::GetBinaryAttrPtr(const LdapAttrName & an, size_t & attrSize) const
+{
+    auto attrIter = binaryAttrs_.find(an);
+    if (attrIter == binaryAttrs_.cend()) {
+        throw HrError(E_INVALIDARG, L"an param", __FUNCTIONW__);
+    }
+    if (attrIter->second.empty())
+    {
+        attrSize = 0;
+        return nullptr;
+    }
+    attrSize = attrIter->second.size();
+    return &attrIter->second[0];
 }
 
 StringAttrVal AdPersonDesc::GetStringAttr(const LdapAttrName & an) const

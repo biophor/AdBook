@@ -50,7 +50,6 @@ public:
     afx_msg void OnBnClickedOk();    
     afx_msg void OnBnClickedCheckUseCurusercred();
     afx_msg void OnBnClickedCheckUserDomain();
-    afx_msg void OnBnClickedCheckDisplayPassword();
-    
+    afx_msg void OnBnClickedCheckDisplayPassword();    
     afx_msg void OnBnClickedButtonVerify();
 };

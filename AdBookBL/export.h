@@ -3,10 +3,11 @@
 #include <activeds.h>
 #include <atlbase.h>
 #include <set>
-#include <mutex>
+#include <map>
+#include <vector>
 #include <deque>
-#include <future>
-#include <atomic>
+#include <list>
+#include <memory>
 #include <functional>
 
 #include "AdBookBLExport.h"

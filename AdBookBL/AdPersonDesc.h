@@ -36,7 +36,8 @@ public:
 
     template <class StringAttrValType>
     void SetStringAttr(const LdapAttrName & an, StringAttrValType && sav);
-
+    
+    const wchar_t * GetStringAttrPtr(const LdapAttrName & an) const;
     StringAttrVal GetStringAttr(const LdapAttrName & an) const;
     StringAttrVal GetStringAttr(Attributes::AttrId id) const;    
     bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const;
@@ -44,6 +45,7 @@ public:
     template <class BinaryAttrValType>
     void SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && bav);
 
+    const BYTE * GetBinaryAttrPtr(const LdapAttrName & an, size_t & attrSize) const;
     BinaryAttrVal GetBinaryAttr(const LdapAttrName & an) const;
     BinaryAttrVal GetBinaryAttr(Attributes::AttrId id) const;
 

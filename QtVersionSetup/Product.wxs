@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Compatible with WiX Toolset v3.10-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   
   <?define ProductName = "Active Directory Contact Book" ?>
-  <?define ProductVersion = "1.2.1" ?>
-  <?define ProductFullVersion = "1.2.1.1" ?>
+  <?define ProductVersion = "1.3.2" ?>
+  <?define ProductFullVersion = "1.3.2.1" ?>
   <?define ProductAuthor = "Andrei Goncharov" ?>
   <?define ProductAppFolder = "InstallLocation" ?>
 
@@ -75,13 +76,7 @@
               Name="AdBookBL.dll"
               Source="$(var.MySource)AdBookBL.dll"
               KeyPath="yes" />
-      </Component>
-      <Component Id="CMP_EskimoDll" Guid="7CBF2D58-D25F-462D-9507-0EA210B07F13" >
-        <File Id="FILE_INSTALLFOLDER_EskimoDll"
-              Name="Eskimo.dll"
-              Source="$(var.MySource)Eskimo.dll"
-              KeyPath="yes" />
-      </Component>
+      </Component>      
       <Component Id="CMP_GplLicence" Guid="224100D8-DA70-4FA5-B8DA-24E576B991FA" >
         <File Id="FILE_INSTALLFOLDER_GplRtf"
               Name="gpl.rtf"

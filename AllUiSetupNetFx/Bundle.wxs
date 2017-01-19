@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Compatible with WiX Toolset v3.10-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+  <?define MySource = "../AllUiSetup/bin/x64/Release/" ?>
+  <Bundle Name="Active Directory Contact Book"
+          Version="1.5.0.1"
+          Manufacturer="Andrei Goncharov"
+          UpgradeCode="8879000c-dd5f-4495-bc6e-ad4487f17584">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
+      <bal:WixStandardBootstrapperApplication
+        LicenseFile="gpl.rtf"
+        ShowVersion="yes"
+            />
+    </BootstrapperApplicationRef>
+
+    <Chain>
+      <PackageGroupRef Id="NetFx452Web"/>
+      <PackageGroupRef Id="Windows61KB2999226"/>
+      <PackageGroupRef Id="AllUiAdBook"/>      
+    </Chain>
+  </Bundle>
+
+  <Fragment>
+    <PackageGroup Id="AllUiAdBook">
+      <MsiPackage
+        SourceFile="$(var.MySource)AllUiSetup.msi"
+        InstallCondition="VersionNT64 >= v6.1" />
+    </PackageGroup>
+    <PackageGroup Id="Windows61KB2999226">
+      <MsuPackage
+        SourceFile="Windows6.1-KB2999226-x64.msu"
+        InstallCondition="VersionNT64 = v6.1" />
+    </PackageGroup>
+    <PackageGroup Id="Windows81KB2999226">
+      <MsuPackage
+        SourceFile="Windows8.1-KB2999226-x64.msu"
+        InstallCondition="VersionNT64 = v8.1" />
+    </PackageGroup>
+  </Fragment>
+
+</Wix>
+
+

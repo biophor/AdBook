@@ -25,10 +25,12 @@ You should have received a copy of the GNU General Public License along with
 namespace adbook
 {
 
+struct AdSearcherData;
+
 class ADBOOKBL_API AdSearcher
 {
 public:
-    AdSearcher(const ConnectionParams & cs);
+    AdSearcher();
     ~AdSearcher();
 
     AdSearcher(const AdSearcher &) = delete;
@@ -41,7 +43,7 @@ public:
     using OnStart = std::function<void()>;  // SearchThread has just been started.
 
     void SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop);
-    void Start(const LdapRequest & ldapRequest);
+    void Start(const LdapRequest & ldapRequest, const ConnectionParams & cs);
     bool IsStarted() const;
     void Stop();
     void Wait();
@@ -51,17 +53,9 @@ private:
     void IterateThroughSearchResults(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle, std::vector<WcharBuf> & attrNames);
     void ReadNextEntry(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle, std::vector<WcharBuf> & attrNames);
     void SetCancelationHandle(const IDirectorySearchPtr & dsp, const ADS_SEARCH_HANDLE & searchHandle);
-private:
-    IDirectorySearchPtr dsp_;   // to cancel async search
-    ADS_SEARCH_HANDLE searchHandle_ = nullptr;  // to cancel async search
-    std::recursive_mutex searchHandleMutex_;  // sync access to searchHandle_
-
-    std::atomic<bool> stopFlag_ = false;    // to stop searching
-    std::future<void> sr_; // search activity monitoring
-    const ConnectionParams & cs_;
-    OnNewItem onNewItem_;
-    OnStart onStart_;
-    OnStop onStop_;
+private:    
+    std::shared_ptr<AdSearcherData> dataPtr_;
 };
 
 }
+

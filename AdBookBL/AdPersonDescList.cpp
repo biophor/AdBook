@@ -1,3 +1,21 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+/*
+Copyright(C) 2015 Goncharov Andrei.
+
+This file is part of the 'Active Directory Contact Book'.
+'Active Directory Contact Book' is free software : you can redistribute it
+and / or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+'Active Directory Contact Book' is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the GNU General
+Public License for more details.
+*/
+
 #include "stdafx.h"
 #include "error.h"
 #include "shared.h"
@@ -55,17 +73,17 @@ private:
 
 }   // anon namespace
 
-std::wstring GetFileName()
+std::wstring GetFileName2()
 {
-    std::wstring appName = LoadString(IDS_APP_TITLE);    
+    std::wstring appName = LoadString(IDS_APP_TITLE);
     wchar_t fullPath[MAX_PATH];
-    const HRESULT hr = SHGetFolderPathAndSubDir(nullptr, CSIDL_FLAG_CREATE | CSIDL_APPDATA,
+    const HRESULT hr = SHGetFolderPathAndSubDirW(nullptr, CSIDL_FLAG_CREATE | CSIDL_APPDATA,
         nullptr, SHGFP_TYPE_CURRENT, appName.c_str(), fullPath);
     if (FAILED(hr))
     {
         HR_ERROR(hr);
     }
-    if (!PathAppendW(fullPath, L"SearchResult.edb"))
+    if (!PathAppendW(fullPath, L"SearchResult.sqlite3"))
     {
         HR_ERROR(E_UNEXPECTED);
     }
@@ -73,16 +91,16 @@ std::wstring GetFileName()
 }
 
 void AdPersonDescList::Load()
-{    
+{
     try
-    {        
+    {
         // Another instance of AdBook may do the same operations at the same time.
-        // So we neen to serialize.
+        // So we need to serialize.
         SimpleInterprocessSync simpleSync(mutexName);
         InternalLoad();
     }
     catch (std::exception & )
-    {        
+    {
         HR_ERROR(E_UNEXPECTED);
     }
 }
@@ -97,239 +115,380 @@ void AdPersonDescList::Save()
         InternalSave();
     }
     catch (std::exception & )
-    {        
+    {
         HR_ERROR(E_UNEXPECTED);
     }
 }
 
+class SqliteSimpleWrapper
+{
+public:
+    SqliteSimpleWrapper(const SqliteSimpleWrapper &) = delete;
+    SqliteSimpleWrapper & operator = (const SqliteSimpleWrapper &) = delete;
+    SqliteSimpleWrapper(SqliteSimpleWrapper &&) = delete;
+    SqliteSimpleWrapper & operator = (SqliteSimpleWrapper &&) = delete;
+
+    SqliteSimpleWrapper(const std::wstring & dbFileName, DWORD flags)
+    {        
+        const int rc = sqlite3_open_v2(CW2A(dbFileName.c_str()), &db_, flags, nullptr);
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_open_v2() failed.", __FUNCTIONW__);
+        }
+    }
+    static void InitSqlite()
+    {
+        int rc = sqlite3_initialize();
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_initialize() failed.", __FUNCTIONW__);
+        }
+    }
+    static void DeinitSqlite()
+    {
+        const int rc = sqlite3_shutdown();
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_shutdown() failed.", __FUNCTIONW__);
+        }
+    }
+    void CloseDb()
+    {
+        if (db_ != nullptr)
+        {
+            int rc = sqlite3_close(db_);
+            if (rc != SQLITE_OK)
+            {
+                throw Sqlite3Error(rc, L"sqlite3_close() failed.", __FUNCTIONW__);
+            }
+            db_ = nullptr;
+        }
+    }
+    void PrepareStatement(const std::wstring & sql)
+    {
+        const int rc = sqlite3_prepare16_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
+        if (rc != SQLITE_OK)
+        {
+            auto m = std::wstring(L"sqlite3_prepare16_v2 failed. sql: ") + sql;
+            throw Sqlite3Error(rc, m.c_str(), __FUNCTIONW__);
+        }
+    }
+    int Step()
+    {
+        const int rc = sqlite3_step(stmt_);
+        if (rc != SQLITE_DONE && rc != SQLITE_ROW)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_step() failed", __FUNCTIONW__);
+        }
+        return rc;
+    }    
+    void FinalizeStatement()
+    {
+        const int rc = sqlite3_finalize(stmt_);
+        stmt_ = nullptr;
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_finalize() failed.", __FUNCTIONW__);
+        }
+    }
+    void ResetStatement()
+    {
+        const int rc = sqlite3_reset(stmt_);
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_reset() failed.", __FUNCTIONW__);
+        }
+    }
+    void ClearBindings()
+    {
+        const int rc = sqlite3_clear_bindings(stmt_);
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_clear_bindings() failed.", __FUNCTIONW__);
+        }
+    }
+    int GetParameterIndex(const std::wstring & paramName)
+    {
+        const int paramIndex = sqlite3_bind_parameter_index(stmt_, CW2A(paramName.c_str()));
+        if (0 == paramIndex)
+        {
+            throw HrError(E_INVALIDARG, L"sqlite3_bind_parameter_index() failed.", __FUNCTIONW__);
+        }
+        return paramIndex;
+    }
+    void BindText(const std::wstring & paramName, const wchar_t * value)
+    {
+        const int paramIndex = GetParameterIndex(paramName);
+        const int rc = sqlite3_bind_text16(stmt_, paramIndex, value, -1, SQLITE_STATIC);
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_bind_text16()", __FUNCTIONW__);
+        }
+    }
+    void BindBlob(const std::wstring & paramName, const BYTE * value, int len)
+    {
+        const int paramIndex = GetParameterIndex(paramName);
+        const int rc = sqlite3_bind_blob(stmt_, paramIndex, value, len, SQLITE_STATIC);
+        if (rc != SQLITE_OK)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_bind_blob()", __FUNCTIONW__);
+        }
+    }
+    int GetColumnCount()
+    {
+        const int rc = sqlite3_column_count(stmt_);
+        if (0 == rc)
+        {
+            throw Sqlite3Error(rc, L"sqlite3_column_count()", __FUNCTIONW__);
+        }
+        return rc;
+    }
+    std::wstring GetColName(int index)
+    {
+        const wchar_t * p = reinterpret_cast<const wchar_t*>(sqlite3_column_name16(stmt_, index));
+        if (nullptr == p)
+        {
+            throw Sqlite3Error(SQLITE_FAIL, L"sqlite3_column_name16()", __FUNCTIONW__);
+        }
+        return std::wstring(p);
+    }
+    int GetColumnType(int index)
+    {
+        int rc = sqlite3_column_type(stmt_, index);
+        switch (rc)
+        {
+        case SQLITE_INTEGER: case SQLITE_FLOAT: case SQLITE_TEXT: case SQLITE_BLOB: case SQLITE_NULL:
+            return rc;
+        }
+        throw Sqlite3Error(rc, L"sqlite3_column_type()", __FUNCTIONW__);
+    }
+    std::wstring GetColumnText(int index)
+    {
+        const wchar_t * text = reinterpret_cast<const wchar_t*>(sqlite3_column_text16(stmt_, index));
+        const int sizeInBytes = sqlite3_column_bytes16(stmt_, index);
+        if (0 == sizeInBytes || nullptr == text)
+        {
+            return std::wstring();
+        }
+        return std::wstring(text, text + boost::numeric_cast<size_t>(sizeInBytes) / sizeof(wchar_t));
+    }
+    std::vector<BYTE> GetColumnBlob(int index)
+    {
+        const BYTE * data = reinterpret_cast<const BYTE*>(sqlite3_column_blob(stmt_, index));
+        int sizeInBytes = sqlite3_column_bytes(stmt_, index);
+        if (nullptr == data || 0 == sizeInBytes)
+        {
+            return std::vector<BYTE>();
+        }
+        return std::vector<BYTE>(data, data + boost::numeric_cast<size_t>(sizeInBytes));
+    }
+    ~SqliteSimpleWrapper()
+    {
+        if (stmt_ != nullptr)
+        {
+            sqlite3_finalize(stmt_);            
+        }
+        if (db_ != nullptr)
+        {
+            sqlite3_close(db_);
+        }
+    }
+private:
+    sqlite3 * db_ = nullptr;
+    sqlite3_stmt * stmt_ = nullptr;
+};
+
 void AdPersonDescList::InternalSave()
 {
-    auto edbFilePath = GetFileName();
-    auto edbFileDir = ExtractDirFromFilePath(edbFilePath);
-    jet::FactoryPtr factory(jet::CreateFactory());    
-    jet::InstancePtr inst(factory->CreateInstance2(nullptr));
-    jet::ThrowIfNull(inst, factory);    
-    jet::ThrowIfError(inst->SetLogsDir(edbFileDir.c_str()), inst);
-    jet::ThrowIfError(inst->SetCheckpointDir(edbFileDir.c_str()), inst);
-    jet::ThrowIfError(inst->EnableCircularLog(true), inst);
-    jet::ThrowIfError(inst->Init(), inst);
-    jet::SessionPtr ses(inst->CreateSession());
-    jet::ThrowIfNull(ses, inst);
-    jet::DatabasePtr db(ses->CreateDatabase(edbFilePath.c_str(), jet::OverwritePolicy::Overwrite, 
-                                            jet::RecoveryPolicy::Recover));
-    jet::ThrowIfNull(db, ses);
-    jet::TablePtr tbl(db->CreateTable(personsTableName));
-    jet::ThrowIfNull(tbl, db);    
+    const std::wstring tmpFileName = GetFileName2() + L".tmp";
+    SqliteSimpleWrapper::InitSqlite();
+    if (PathFileExistsW(tmpFileName.c_str()))
+    {
+        if (!DeleteFileW(tmpFileName.c_str()))
+        {
+            throw HrError(HRESULT_FROM_WIN32(GetLastError()), L"DeleteFile() failed.", __FUNCTIONW__);
+        }
+    }
+    // begin transaction
+    SqliteSimpleWrapper sqlite(tmpFileName, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+    std::wstring sql = L"BEGIN TRANSACTION";
+    sqlite.PrepareStatement(sql);
+    sqlite.Step();
+    sqlite.FinalizeStatement();
 
+    // create a table for the contacts
     const auto & attrMgr = Attributes::GetInstance();
     const auto attrIds = attrMgr.GetAttrIds();
-
-    std::map<Attributes::AttrId, jet::ColumnPtr> cols;
-
-    jet::ColumnConstructorPtr colConstructionPtr(tbl->CreateColumnConstructor());
-    colConstructionPtr->SelectAutoIncInt32();
-    jet::ColumnPtr indexCol(colConstructionPtr->CreateColumn(indexColName));
-    jet::ThrowIfNull(indexCol, colConstructionPtr);
-#ifdef max
-#undef max
-#endif
-    colConstructionPtr->SelectBinaryVariableSize(std::numeric_limits<BYTE>::max(),
-                                                 jet::ValQuantityPolicy::SingleValued,
-                                                 jet::NullPolicy::MayBeNull);
-    jet::ColumnPtr waCol(colConstructionPtr->CreateColumn(writableAttrsColName));
-    jet::ThrowIfNull(waCol, tbl);
-
-    for (const auto id : attrIds)
+    sql = L"CREATE TABLE contacts(rowid INTEGER PRIMARY KEY NOT NULL";
+    for (auto id : attrIds)
     {
         const std::wstring colName = attrMgr.GetLdapAttrName(id);
         if (attrMgr.IsString(id))
         {
-            colConstructionPtr->SelectUtf16TextVariableSize(boost::numeric_cast<ULONG>(attrMgr.GetAttrMaxLength(id)), 
-                                                            jet::ValQuantityPolicy::SingleValued,
-                                                            jet::NullPolicy::MayBeNull);
+            sql += L", " + colName + L" TEXT";
         }
         else
         {
-            colConstructionPtr->SelectBinaryVariableSize(boost::numeric_cast<ULONG>(attrMgr.GetAttrMaxLength(id)), 
-                                                         jet::ValQuantityPolicy::SingleValued,
-                                                         jet::NullPolicy::MayBeNull);
+            sql += L", " + colName + L" BLOB";
         }
-        jet::ThrowIfNull(cols[id] = std::move(jet::ColumnPtr(colConstructionPtr->CreateColumn(colName.c_str()))), tbl);
     }
-    jet::IndexConstructorPtr indexCtrPtr(tbl->CreateIndexConstructor());
+    sql += L", ";
+    sql += writableAttrsColName;
+    sql += L" BLOB";
+    sql += L");";
+    sqlite.PrepareStatement(sql);
+    sqlite.Step();
+    sqlite.FinalizeStatement();
 
-    jet::ThrowIfError(indexCtrPtr->SetIndexName(L"PrimaryKey"), indexCtrPtr);
-    jet::ThrowIfError(indexCtrPtr->Primary(), indexCtrPtr);
-    jet::ThrowIfError(indexCtrPtr->AddColumn(indexColName, jet::IIndexConstructor::SortDirection::Ascending), indexCtrPtr);
-    jet::ThrowIfError(indexCtrPtr->CreateIndex(), indexCtrPtr);
-
+    // populate the table
+    sql = L"INSERT INTO contacts (";
+    for (auto id : attrIds)
+    {
+        const std::wstring colName = attrMgr.GetLdapAttrName(id);
+        sql += colName + L",";
+    }
+    sql += writableAttrsColName;
+    sql += L") VALUES (";
+    for (auto id : attrIds)
+    {
+        const std::wstring colName = attrMgr.GetLdapAttrName(id);
+        sql += L":" + colName + L",";
+    }
+    sql += L":";
+    sql += writableAttrsColName;
+    sql += L")";
+    sqlite.PrepareStatement(sql);
     for (auto iter = cbegin(), end = cend(); iter != end; ++iter)
     {
-        jet::TransactionHelper th(ses);
-        jet::UpdateHelper uh(tbl, jet::UpdateHelper::UpdateType::Insert);
         const auto & personDesc = *iter;
         auto wa = personDesc.GetWritableAttributes();
         std::vector<BYTE> waVec(wa.cbegin(), wa.cend());
         if (!waVec.empty())
         {
-            jet::ThrowIfError(waCol->SetBinary(&waVec[0], boost::numeric_cast<uint32_t>(waVec.size())), waCol);
+            std::wstring paramName = std::wstring(L":") + writableAttrsColName;
+            sqlite.BindBlob(paramName, &waVec[0], boost::numeric_cast<int>(waVec.size()));            
         }
         for (const auto id : attrIds)
         {
             const auto attrName = attrMgr.GetLdapAttrName(id);
-            if (personDesc.IsAttributeSet(attrName))
-            {
-                if (attrMgr.IsString(id))
-                {
-                    jet::ThrowIfError(cols.at(id)->SetUtf16String(
-                        personDesc.GetStringAttr(attrName).c_str()), cols[id]
-                    );
-                }
-                else
-                {
-                    auto ba = personDesc.GetBinaryAttr(attrName);
-                    if (!ba.empty())
-                    {
-                        jet::ThrowIfError(cols.at(id)->SetBinary(
-                            &ba[0], boost::numeric_cast<uint32_t>(ba.size())), cols[id]
-                        );
-                    }
-                }
-            }
-        }
-        uh.Update();
-        th.Commit(jet::ISession::CommitOption::DontWaitFlush);
-    }
-    jet::ThrowIfError(tbl->ComputeStats(), tbl);
-    jet::ThrowIfError(tbl->Close(), tbl);
-    jet::ThrowIfError(db->Close(), db);
-    jet::ThrowIfError(ses->Close(), ses);
-    jet::ThrowIfError(inst->Close(), inst);
-}
-
-void AdPersonDescList::InternalLoad()
-{    
-    const auto fileName = GetFileName();
-    if (!PathFileExistsW(fileName.c_str()))
-    {
-        return;
-    }
-    auto edbFilePath = GetFileName();
-    auto edbFileDir = ExtractDirFromFilePath(edbFilePath);
-    jet::FactoryPtr factory(jet::CreateFactory());    
-    jet::InstancePtr inst(factory->CreateInstance2(nullptr));
-    jet::ThrowIfNull(inst, factory);
-    jet::ThrowIfError(inst->SetLogsDir(edbFileDir.c_str()), inst);
-    jet::ThrowIfError(inst->SetCheckpointDir(edbFileDir.c_str()), inst);
-    jet::ThrowIfError(inst->EnableRecovery(false), inst);
-    jet::ThrowIfError(inst->Init(), inst);
-
-    jet::SessionPtr ses(inst->CreateSession());
-    jet::ThrowIfNull(ses, inst);
-
-    using jet::ISession;
-    jet::ThrowIfError(ses->AttachDatabase(fileName.c_str(), jet::DbAccessLevel::ReadOnly), ses);
-    jet::DatabasePtr db(ses->OpenDatabase(fileName.c_str(), jet::DbAccessLevel::ReadOnly, jet::DbAccessType::Exclusive));
-    jet::ThrowIfNull(db, ses);
-
-    std::vector<std::wstring> tableNames;
-    uint32_t numTables = 0;
-    jet::ThrowIfError(db->GetNumTables(numTables), db);
-    for (uint32_t i = 0; i < numTables; ++i)
-    {
-        wchar_t tableName[jet::ITable::TableNameMaxLenInWcharsWithZero];
-        uint32_t tableNameSize = _countof(tableName);
-        jet::ThrowIfError(db->GetTableName(i, tableName, tableNameSize), db);
-        tableNames.emplace_back(tableName);
-    }
-    if (tableNames.end() == std::find(tableNames.cbegin(), tableNames.cend(), personsTableName))
-    {
-        throw std::exception("personsTable was not found");
-    }
-    jet::TablePtr table(db->OpenTable(personsTableName, jet::TableAccessLevel::ReadOnly));
-    jet::ThrowIfNull(table, db);
-
-    std::map<std::wstring, jet::ColumnPtr> cols;
-    std::vector<std::wstring> colNames;
-    uint32_t numCols = 0;
-    jet::ThrowIfError(table->GetNumCols(numCols), table);
-    for (uint32_t i = 0; i < numCols; ++i)
-    {
-        wchar_t colName[jet::IColumn::ColNameMaxLenInWcharsWithZero];
-        uint32_t colNameSize = _countof(colName);
-        jet::ThrowIfError(table->GetColName(i, colName, colNameSize), table);
-        colNames.emplace_back(colName);
-    }
-    for (const auto & colName : colNames)
-    {
-        jet::ThrowIfNull(cols[colName] = std::move(jet::ColumnPtr(table->GetColumn(colName.c_str()))), table);
-    }
-    uint32_t numRecords = 0;
-    jet::ThrowIfError(table->GetNumRecords(numRecords), table);
-    if (0 == numRecords)
-    {
-        return;
-    }
-    jet::ThrowIfError(table->MoveCursorToBegin(), table);
-
-    const auto & attrMgr = Attributes::GetInstance();
-    std::vector<BYTE> binary(attrMgr.GetBinaryAttrMaxLength());
-    std::vector<wchar_t> utf16Text(attrMgr.GetTextAttrMaxLength() + 1);
-    resize(numRecords);
-    for (auto i = 0u; i < numRecords; ++i)
-    {
-        AdPersonDesc personDesc;
-        jet::ColumnPtr waCol(table->GetColumn(writableAttrsColName));
-        jet::ThrowIfNull(waCol, table);
-        uint32_t buffSize = boost::numeric_cast<uint32_t>(binary.size());
-        auto hr = waCol->GetBinary(&binary[0], buffSize);
-        if (SUCCEEDED(hr))
-        {
-            std::vector<BYTE> waVec(binary.cbegin(), binary.cbegin() + buffSize);
-            AdPersonDesc::AttrIds wa;
-            std::transform(waVec.cbegin(), waVec.cend(), std::inserter(wa, wa.end()),
-                           [](const BYTE b) { return boost::numeric_cast<Attributes::AttrId>(b); });
-            personDesc.SetWritableAttributes(wa);
-        }
-        if (E_VALUE_NOT_SET != hr)
-        {
-            jet::ThrowIfError(hr, waCol);
-        }
-        
-        for (auto & col : cols)
-        {
-            if (!attrMgr.IsAttrSupported(col.first.c_str()))
+            if (!personDesc.IsAttributeSet(attrName))
             {
                 continue;
             }
-            if (attrMgr.IsString(attrMgr.GetAttrId(col.first.c_str())))
+            std::wstring paramName = std::wstring(L":") + attrName;                
+            if (attrMgr.IsString(id))
             {
-                CComBSTR bstr;
-                if (SUCCEEDED(col.second->GetUtf16String2(bstr.m_str)))
+                const wchar_t * attrValue = personDesc.GetStringAttrPtr(attrName);
+                if (attrValue)
                 {
-                    personDesc.SetStringAttr(col.first.c_str(), bstr);
+                    sqlite.BindText(paramName, attrValue);
                 }
             }
             else
             {
-                buffSize = boost::numeric_cast<uint32_t>(binary.size());
-                if (SUCCEEDED(col.second->GetBinary(&binary[0], buffSize)) && buffSize)
+                size_t attrSize = 0;
+                const BYTE * attrValue = personDesc.GetBinaryAttrPtr(attrName, attrSize);
+                if (attrValue)
                 {
-                    std::vector<BYTE> bav(binary.cbegin(), binary.cbegin() + buffSize);
-                    personDesc.SetBinaryAttr(col.first.c_str(), bav);
+                    sqlite.BindBlob(paramName, attrValue, boost::numeric_cast<int>(attrSize));                    
                 }
+            }            
+        }
+        sqlite.Step();
+        sqlite.ResetStatement();
+        sqlite.ClearBindings();
+    }
+    sqlite.FinalizeStatement();
+    sql = L"COMMIT";
+    sqlite.PrepareStatement(sql);
+    sqlite.Step();
+    sqlite.FinalizeStatement();
+    sqlite.CloseDb();
+    if (!MoveFileEx(tmpFileName.c_str(), GetFileName2().c_str(),
+        MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
+    {
+        throw HrError(HRESULT_FROM_WIN32(GetLastError()), L"MoveFile() failed.", __FUNCTIONW__);
+    }
+#pragma warning(push)
+#pragma warning(disable: 4459)
+    BOOST_SCOPE_EXIT(void)
+    {
+        SqliteSimpleWrapper::DeinitSqlite();
+    } BOOST_SCOPE_EXIT_END
+#pragma warning(pop)    
+}
+
+void AdPersonDescList::InternalLoad()
+{
+    const std::wstring fileName = GetFileName2();    
+    if (!PathFileExistsW(fileName.c_str()))
+    {
+        return;
+    }
+    const auto & attrMgr = Attributes::GetInstance();
+    SqliteSimpleWrapper::InitSqlite();
+    SqliteSimpleWrapper sqlite(fileName, SQLITE_OPEN_READONLY);
+    sqlite.PrepareStatement(L"SELECT * from contacts ORDER BY rowid ASC;");
+    const int columnCount = sqlite.GetColumnCount();
+    
+    while (sqlite.Step() == SQLITE_ROW)
+    {
+        AdPersonDesc personDesc;
+        for (int i = 0; i < columnCount; ++i)
+        {
+            const int colType = sqlite.GetColumnType(i);
+            std::wstring colName = sqlite.GetColName(i);
+            if (!attrMgr.IsAttrSupported(colName.c_str()))
+            {
+                if (colName == writableAttrsColName)
+                {
+                    if (SQLITE_BLOB == colType)
+                    {
+                        std::vector<BYTE> attrValue = sqlite.GetColumnBlob(i);
+                        AdPersonDesc::AttrIds wa;
+                        std::transform(attrValue.cbegin(), attrValue.cend(), std::inserter(wa, wa.end()),
+                            [](const BYTE b) { return boost::numeric_cast<Attributes::AttrId>(b); });
+                        personDesc.SetWritableAttributes(wa);                        
+                    }
+                    continue;
+                }
+                if (colName == L"rowid")
+                {
+                    continue;
+                }
+                HR_ERROR(E_UNEXPECTED);
+            }
+            if (SQLITE_TEXT == colType)
+            {
+                std::wstring attrValue = sqlite.GetColumnText(i);
+                personDesc.SetStringAttr(colName, attrValue);
+            }
+            else if (SQLITE_BLOB == colType)
+            {
+                std::vector<BYTE> attrValue = sqlite.GetColumnBlob(i);
+                personDesc.SetBinaryAttr(colName, attrValue);
+            }
+            else if (SQLITE_NULL == colType)
+            {
+                continue;
+            }
+            else
+            {
+                HR_ERROR(E_UNEXPECTED);
             }
         }
-        at(i) = personDesc;
-        if (i + 1 < numRecords)
-        {
-            jet::ThrowIfError(table->MoveCursor(1), table);
-        }
+        push_back(std::move(personDesc));
     }
-    jet::ThrowIfError(table->Close(), table);
-    jet::ThrowIfError(db->Close(), db);
-    jet::ThrowIfError(ses->Close(), ses);
-    jet::ThrowIfError(inst->Close(), inst);
+    sqlite.FinalizeStatement();
+
+#pragma warning(push)
+#pragma warning(disable: 4459)
+    BOOST_SCOPE_EXIT(void)
+    {
+        SqliteSimpleWrapper::DeinitSqlite();
+    } BOOST_SCOPE_EXIT_END
+#pragma warning(pop)    
 }
 
 }   // namespace adbook
+

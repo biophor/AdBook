@@ -70,7 +70,7 @@ public:
 
 protected:
     mutable wchar_t errorBuf_[512] = {};
-    char whatBuf_[64] = {};
+    char whatBuf_[128] = {};
     wchar_t whereBuf_[128] = {};
 };
 
@@ -88,6 +88,10 @@ public:
     }
     virtual std::wstring What() const;
 
+    HRESULT GetHR() const
+    {
+        return hr_;
+    }
 private:
     HRESULT hr_;
 };
@@ -96,6 +100,22 @@ private:
 
 #define INVALID_PARAM_TYPE  "Invalid parameter's type"
 
+class Sqlite3Error : public Error
+{
+public:
+    Sqlite3Error(const int err, const wchar_t * what, const wchar_t * where) : 
+        Error(what, where), errCode_(err)
+    {
+        sprintf_s(whatBuf_, "%d", err);
+    }
+    int GetErrCode()
+    {
+        return errCode_;
+    }
+    virtual std::wstring What() const;
+private:
+    int errCode_ = 0;
+};
 
 }   // namespace adbook
 

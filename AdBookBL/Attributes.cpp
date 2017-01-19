@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -34,10 +36,10 @@ struct LdapAttr
     LdapAttr(LPCWSTR n, UINT i, bool sv, size_t ml, LPCWSTR o, bool s, bool e) :
         ldapAttrName(n), uiIds(i), isSingleValued(sv), maxLen(ml), attrOid(o), isString(s), isEditable(e) {}
     const wchar_t * ldapAttrName;
-    const unsigned int uiIds;
-    const bool isSingleValued;
     const size_t maxLen;
     const wchar_t * attrOid;
+    const unsigned int uiIds;
+    const bool isSingleValued;
     const bool isString;
     const bool isEditable;
 };
@@ -58,8 +60,8 @@ std::map<Attributes::AttrId, LdapAttr> mainAttrInfo =
     { Attributes::HomePhone, LdapAttr{ L"homePhone", IDS_ATTR_HOMEPHONE, true, 64, L"0.9.2342.19200300.100.1.20", true, true } },
     { Attributes::MobilePhone, LdapAttr{ L"mobile", IDS_ATTR_MOBILE_PHONE, true, 64, L"0.9.2342.19200300.100.1.41", true, true } },
     { Attributes::Locality, LdapAttr{ L"l", IDS_ATTR_LOCALITY_CITY, true, 128, L"2.5.4.7", true, true } },
-    { Attributes::thumbnailPhoto, LdapAttr{ L"thumbnailPhoto", 0, true, 102400, L"2.16.840.1.113730.3.1.35", false, true } },
-    { Attributes::dn, LdapAttr{ L"distinguishedName", 0, true, 10240, L"2.5.4.49", true, false } }
+    { Attributes::ThumbnailPhoto, LdapAttr{ L"thumbnailPhoto", IDS_ATTR_THUMBNAIL_PHOTO, true, 102400, L"2.16.840.1.113730.3.1.35", false, true } },
+    { Attributes::Dn, LdapAttr{ L"distinguishedName", IDS_ATTR_DN, true, 10240, L"2.5.4.49", true, false } }
 };
 
 bool Attributes::IsString(const AttrId id) const
@@ -158,24 +160,14 @@ std::vector<WcharBuf> Attributes::GetWritableLdapAttrNames() const
     return attrNames;
 }
 
-std::list<std::wstring> Attributes::GetLdapAttrNames() const
+const std::list<std::wstring> & Attributes::GetLdapAttrNames() const
 {
-    std::list<std::wstring> attrNames;
-    for (const auto & i : mainAttrInfo)
-    {
-        attrNames.push_back(i.second.ldapAttrName);
-    }
-    return attrNames;
+    return ldapAttrNames_;    
 }
 
-std::vector<Attributes::AttrId> Attributes::GetAttrIds() const
+const std::vector<Attributes::AttrId> & Attributes::GetAttrIds() const
 {
-    std::vector<AttrId> attrIds;
-    for (const auto & i : mainAttrInfo)
-    {
-        attrIds.push_back(i.first);
-    }
-    return attrIds;
+    return attrIds_;
 }
 
 bool Attributes::IsAttrSupported(const AttrId attrId) const noexcept
@@ -193,13 +185,15 @@ Attributes::Attributes()
 {
     for (const auto & i : mainAttrInfo)
     {
+        ldapAttrNames_.push_back(i.second.ldapAttrName);
+        attrIds_.push_back(i.first);
         nameToIdMap.emplace(i.second.ldapAttrName, i.first);
-    }
+    }    
 }
 
 void Attributes::PreExitUnload()
 {
-    nameToIdMap.clear();
+    nameToIdMap.clear(); // prevent messages about 'memory leaks'
     mainAttrInfo.clear();
 }
 

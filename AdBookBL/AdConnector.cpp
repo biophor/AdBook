@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -67,7 +69,7 @@ void AdConnector::Connect()
             throw HrError(hr);
         }
         _variant_t defaultNamingContext;
-        hr = rootDsePtr->Get(L"defaultNamingContext", &defaultNamingContext);
+        hr = rootDsePtr->Get(CComBSTR(L"defaultNamingContext"), &defaultNamingContext);
         if (FAILED(hr))
         {
             throw HrError(hr);
@@ -252,12 +254,12 @@ BinaryAttrVal AdConnector::DownloadBinaryAttr(const std::wstring & attrName)
     case ADSTYPE_OCTET_STRING:
     {
         const auto & o = attrInfo[0].pADsValues->OctetString;
-        return BinaryAttrVal(o.lpValue, o.lpValue + o.dwLength);
+        return BinaryAttrVal(o.lpValue, o.lpValue + boost::numeric_cast<size_t>(o.dwLength));
     }
     case ADSTYPE_PROV_SPECIFIC:
     {
         const auto & o = attrInfo[0].pADsValues->ProviderSpecific;
-        return BinaryAttrVal(o.lpValue, o.lpValue + o.dwLength);
+        return BinaryAttrVal(o.lpValue, o.lpValue + boost::numeric_cast<size_t>(o.dwLength));
     }
     default:
         HR_ERROR(E_INVALIDARG);
@@ -339,11 +341,10 @@ void AdConnector::Rename(const std::wstring & newName)
         HR_ERROR(E_INVALIDARG);
     }
     IADsContainerPtr parent = GetParentObject();
-    std::wstring personLdapPath = GetLdapPath();
-    std::wstring personRdn = GetRDN();
+    std::wstring personLdapPath = GetLdapPath();    
     Disconnect();
     std::wstring newPersonRDN(L"CN=");
-    newPersonRDN += newName.c_str();
+    newPersonRDN += newName;
     MyIDispatchPtr disp;
     const HRESULT hr = parent->MoveHere(CComBSTR(personLdapPath.c_str()), 
                                         CComBSTR(newPersonRDN.c_str()), &disp);

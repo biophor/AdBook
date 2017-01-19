@@ -28,9 +28,7 @@ public:
 private:
     std::wstring dc_;    // domain controller name
     bool currentUserCred_ = true;
-    bool currentDomain_ = true;
-    //bool displayPassword_ = false;
-    bool forgetPassword_ = true;
+    bool currentDomain_ = true;        
     std::wstring login_, password_;
 };
 

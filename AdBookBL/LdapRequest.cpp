@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -41,13 +43,13 @@ void LdapRequest::AddRule(const Attributes::AttrId attrId, const MathingRule rul
 
 void LdapRequest::AddRule(const std::wstring & attrName, const MathingRule rule, const std::wstring & value)
 {
-    std::wstring lan = attrName.c_str();
+    std::wstring lan = attrName;
     boost::trim(lan);
     if (lan.empty())
     {
         throw HrError(E_INVALIDARG);
     }
-    std::wstring lv = value.c_str();
+    std::wstring lv = value;
     boost::trim(lv);
     if (!lv.empty())
     {

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Compatible with WiX Toolset v3.10-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  
+  <?define ProductName = "Active Directory Contact Book" ?>
+  <?define ProductVersion = "1.5.0" ?>
+  <?define ProductFullVersion = "1.5.0.1" ?>
+  <?define ProductAuthor = "Andrei Goncharov" ?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+
+  <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
+  <?define ProductId = "*" ?>
+  <?define ProductUpgradeCode = "cb561d1a-6073-4c1d-a92f-f6a343d149b5" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define MySource = "../x64/Release/" ?>
+
+  <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
+           Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
+  	
+    <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="x64" />
+
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="cb561d1a-6073-4c1d-a92f-f6a343d149b5">
+      <UpgradeVersion Minimum="1.0.0.0" Maximum="99.0.0.0" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade>
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts Before="InstallInitialize" />
+    </InstallExecuteSequence>
+    
+    <MediaTemplate EmbedCab="yes"/>
+		
+    <Feature Id="ProductFeature" Title="Setup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="ProductShortcuts" />
+      <ComponentGroupRef Id="Qt5" />
+      <MergeRef Id="VCRedist"/>
+      <MergeRef Id="MFCRedist"/>
+    </Feature>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="gpl.rtf" />
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      
+      <Directory Id="$(var.PlatformProgramFilesFolder)" >
+        <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)"/>
+      </Directory>
+      
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ShortcutsDir" Name="Active Directory Contact Book" />
+      </Directory>
+    </Directory>
+    
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0"/>      
+      <Merge Id="MFCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_MFC_x64.msm" DiskId="1" Language="0"/>      
+    </DirectoryRef>  
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+      <!-- <Component Id="ProductComponent"> -->
+      <!-- TODO: Insert files, registry keys, and other resources here. -->
+      <!-- </Component> -->
+      <Component Id="CMP_QtAdBookExe" Guid="D37577CD-EFF4-4EB0-A2C2-F703F2FCD71D" >        
+        <File Id="FILE_INSTALLFOLDER_QtAdBookExe"
+              Name="QtAdBook.exe"
+              Source="$(var.MySource)QtAdBook.exe"
+              KeyPath="yes" />        
+      </Component>
+      <Component Id="CMP_AdBookExe" Guid="BA5B3A53-3CAA-4DA1-962B-97BCAC532E61" >        
+        <File Id="FILE_INSTALLFOLDER_AdBookExe"
+              Name="AdBook.exe"
+              Source="$(var.MySource)AdBook.exe"
+              KeyPath="yes" />        
+      </Component>
+      <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
+        <File Id="FILE_INSTALLFOLDER_AdBookBL"
+              Name="AdBookBL.dll"
+              Source="$(var.MySource)AdBookBL.dll"
+              KeyPath="yes" />
+      </Component>      
+      <Component Id="CMP_GplLicence" Guid="224100D8-DA70-4FA5-B8DA-24E576B991FA" >
+        <File Id="FILE_INSTALLFOLDER_GplRtf"
+              Name="gpl.rtf"
+              Source="gpl.rtf"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_WfAdBookExe" Guid="7F5215BF-8A6F-4FCF-884F-3331FA5FA896" >        
+          <File Id="FILE_INSTALLFOLDER_WfAdBookExe"
+                Name="WfAdBook.exe"
+                Source="$(var.MySource)WfAdBook.exe"
+                KeyPath="yes" />        
+      </Component>
+      <Component Id="CMP_AdBookBLCLI" Guid="CD2DE8AE-28DB-49EB-B8F2-B2CF25FE0D10" >
+          <File Id="FILE_INSTALLFOLDER_AdBookBLCLI"
+                Name="AdBookBLCLI.dll"
+                Source="$(var.MySource)AdBookBLCLI.dll"
+                KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  
+    <ComponentGroup Id="ProductShortcuts" Directory="ShortcutsDir">
+      <Component Id="CMP_MainExecutableShortcutQt"
+                 Guid="E184B1FC-B151-4D65-88AF-81BC3F8669E4">
+
+        <Shortcut Id="MainExecutableShortcutMfc"
+                  Name="Active Directory Contact Book[MFC]"
+                  Description="Start 'Active Directory Contact Book[MFC UI]'"
+                  Target="[INSTALLFOLDER]AdBook.exe" />
+        <Shortcut Id="MainExecutableShortcutQt"
+                  Name="Active Directory Contact Book[Qt]"
+                  Description="Start 'Active Directory Contact Book[QT UI]'"
+                  Target="[INSTALLFOLDER]QtAdBook.exe" />
+        <Shortcut Id="MainExecutableShortcutWf"
+                  Name="Active Directory Contact Book[WinForms]"
+                  Description="Start 'Active Directory Contact Book[WinForms UI]'"
+                  Target="[INSTALLFOLDER]WfAdBook.exe" />
+        
+        <!--<Shortcut Id="UninstallShortcut"
+                  Name="Uninstall 'Active Directory Contact Book'"
+                  Description="Uninstall 'Active Directory Contact Book'"
+                  Target="[System64Folder]msiexec.exe"
+                  Arguments="/x [ProductCode]" />-->
+        
+        <RemoveFolder Id="RemoveShortcutsDir"
+                      On="uninstall" />
+        
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\AdBook"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Directory Id="dir9o4ZHaDEuPWXFKRWKBwmC.N2MUA" Name="iconengines" />
+      <Directory Id="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Name="imageformats" />
+      <Directory Id="dirqC5oN5I3i9axI6xHkcVRQ54WJ.w" Name="platforms" />
+      <Directory Id="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Name="translations" />
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="Qt5">
+      <Component Id="cmpJBrP2sWnmDj0nTB9Fiaq2aXMDjQ" Directory="INSTALLFOLDER" Guid="{21139FEA-DEDF-469A-AC6E-DB0AD76FAFD2}">
+        <File Id="filSrN1xTm6zB7DmYk0IVV_8uvh4dA" KeyPath="yes" Source="$(var.MySource)\D3Dcompiler_47.dll" />
+      </Component>
+      <Component Id="cmp7NojueHq7tpzie6dNS2sB97rjTs" Directory="INSTALLFOLDER" Guid="{A9579243-7340-42CD-BE0D-5BEB401305CA}">
+        <File Id="fil.6JkTL4Lj8hco8FV21oT_pDesHY" KeyPath="yes" Source="$(var.MySource)\libEGL.dll" />
+      </Component>
+      <Component Id="cmpRk99rcp5O2OLBMaqLmscdtfCgMg" Directory="INSTALLFOLDER" Guid="{FE1BD896-9D31-4ADB-BAA2-F3E6AF037E2A}">
+        <File Id="fil0ZUfTUC_Oi9GuU8_qNkQrw3TOTg" KeyPath="yes" Source="$(var.MySource)\libGLESV2.dll" />
+      </Component>
+      <Component Id="cmptsfUgnoSwdYtuRQ.guT76fRGomE" Directory="INSTALLFOLDER" Guid="{1362DC9A-0E12-401C-967A-67A61F4480DA}">
+        <File Id="fil2CxhBXdXbk648FnM69YkTOsaOfc" KeyPath="yes" Source="$(var.MySource)\opengl32sw.dll" />
+      </Component>
+      <Component Id="cmpmvF5GHfAS8CIa2K0fy5Ol05dyBI" Directory="INSTALLFOLDER" Guid="{0AA8E78C-6AAF-4B13-9305-75C2AEF48189}">
+        <File Id="filpSr7hr2s321_MA7xAcaodn4o7jI" KeyPath="yes" Source="$(var.MySource)\Qt5Core.dll" />
+      </Component>
+      <Component Id="cmp2JvFprrI.nAeXQpx4h6EhgLB7Is" Directory="INSTALLFOLDER" Guid="{78AD8CE9-5683-4DBD-9B0E-E667C35B50F4}">
+        <File Id="fil6rBf3XHp3oOVONjix8.CekofBLA" KeyPath="yes" Source="$(var.MySource)\Qt5Gui.dll" />
+      </Component>
+      <Component Id="cmpsQo8xc4a_jufzYNX38ugU1ibjeA" Directory="INSTALLFOLDER" Guid="{EC939A3F-F19B-4E40-BFB8-CCF903AE8513}">
+        <File Id="fildVKOXTuu39uyUVIrlS4gOFIj5xM" KeyPath="yes" Source="$(var.MySource)\Qt5Svg.dll" />
+      </Component>
+      <Component Id="cmpKtWjmcFxSV1tTwBS8AwgsToM7U4" Directory="INSTALLFOLDER" Guid="{DC91BC92-3F42-4B9B-A5C0-B30BC345EE47}">
+        <File Id="filLQ.ZVVTSkrvN1CpyS3rtFg3n6kY" KeyPath="yes" Source="$(var.MySource)\Qt5Widgets.dll" />
+      </Component>
+      <Component Id="cmpA4ztxUchF533PFXmwjdVRbgMU44" Directory="dir9o4ZHaDEuPWXFKRWKBwmC.N2MUA" Guid="{C2CC5DBD-6D24-4DEB-9539-E78CF31FA390}">
+        <File Id="filWcU9Z51lgQeF8V2dr0rieRzQm_s" KeyPath="yes" Source="$(var.MySource)\iconengines\qsvgicon.dll" />
+      </Component>
+      <Component Id="cmpcttRTsWUCu8r8F0tjhmE4DnYXcI" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{161C04AA-A5F4-4764-85A9-A4DD5213D085}">
+        <File Id="filQoK7C5FcHOWOoxCqVacjzAxiv5o" KeyPath="yes" Source="$(var.MySource)\imageformats\qdds.dll" />
+      </Component>
+      <Component Id="cmp68IbmiA9H25NNzShh3Ep6uvMCfM" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{91FAF7EB-991B-4793-9D93-BF12196A1277}">
+        <File Id="fildbWHBXvoM2o7ncPce8ewvUyc1g4" KeyPath="yes" Source="$(var.MySource)\imageformats\qgif.dll" />
+      </Component>
+      <Component Id="cmp7AE5VozrZCGO9IyVLDZUKUicfdg" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{978869FF-3C3C-4D7F-8AAB-9E2DE523BCD1}">
+        <File Id="filffWCf61SJ9AkW3qHwzVMpYfGLVU" KeyPath="yes" Source="$(var.MySource)\imageformats\qicns.dll" />
+      </Component>
+      <Component Id="cmpbX384aMU9WaYFKYA0ru6OE9O66M" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{85863BF2-648F-479A-9A8A-BC7DC5D1B3EF}">
+        <File Id="filQs2OFkFCLOxBg8lMMZv5KEKddTY" KeyPath="yes" Source="$(var.MySource)\imageformats\qico.dll" />
+      </Component>
+      <Component Id="cmpK1Oz8dd1qrkRJ3Po3_cLb8QI_hA" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{D41DE91D-0553-4B1B-8A9E-E21A8FC1521E}">
+        <File Id="filCnypN8MAqjh0notE_jRfFGa5UoI" KeyPath="yes" Source="$(var.MySource)\imageformats\qjpeg.dll" />
+      </Component>
+      <Component Id="cmpXYcpz6LJusJh.TIPAvdjCX1xcCc" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{0F0DA54D-AC8D-4951-989A-C64E6F865CAE}">
+        <File Id="filJ5wnAhg5KBWdvrEwj32JUWjyhAI" KeyPath="yes" Source="$(var.MySource)\imageformats\qsvg.dll" />
+      </Component>
+      <Component Id="cmpCVUkL.8hwwlYqqeuicG3u_3ujlM" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{092E574B-F749-4C3C-85FF-67BF0D2DC99C}">
+        <File Id="fil6dP7wEjuQQjJsyzadK9FRdev4Tw" KeyPath="yes" Source="$(var.MySource)\imageformats\qtga.dll" />
+      </Component>
+      <Component Id="cmpFr8jie6WKlG502.J0A99AICGrFQ" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{7A330C95-8AD2-4949-9704-3608ACCF1F9F}">
+        <File Id="filvscbvoPzMj3Ln9pPyn2PX87xcTM" KeyPath="yes" Source="$(var.MySource)\imageformats\qtiff.dll" />
+      </Component>
+      <Component Id="cmpID24MM.cA7OAK0zwHfd_zU4fI.E" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{8BE6F794-09E9-4803-BF0D-BA858315AB82}">
+        <File Id="filb4mX_hZcMCAlX9tBa0KHcE5ieZU" KeyPath="yes" Source="$(var.MySource)\imageformats\qwbmp.dll" />
+      </Component>
+      <Component Id="cmpvQA50Ehy1j9leebRa7YYcQDsLHA" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{6C38A122-B191-47CF-94FB-55E7A788D347}">
+        <File Id="filz2ADzzRZaAauN64y7jADBtD.AdE" KeyPath="yes" Source="$(var.MySource)\imageformats\qwebp.dll" />
+      </Component>
+      <Component Id="cmpMZnOHO9rUxGVW63l3SAH48SbTLs" Directory="dirqC5oN5I3i9axI6xHkcVRQ54WJ.w" Guid="{54900C55-23CC-48CD-ACAD-0D2EC23CE8DB}">
+        <File Id="filTMmYVl6I1AkY6l9ixvJCVkl6pC8" KeyPath="yes" Source="$(var.MySource)\platforms\qwindows.dll" />
+      </Component>
+      <Component Id="cmpMBh2uv9aqTlV_7DorfSi6xNscPU" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{0959BF86-0309-46D1-9AE8-50F0D035BB36}">
+        <File Id="filmgw2pDwTGTsG.PaT2py5bZCjFIY" KeyPath="yes" Source="$(var.MySource)\translations\qt_ca.qm" />
+      </Component>
+      <Component Id="cmpOzk9Bdrwu0ySrKG28VZrHHhNVkQ" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{8A6460F5-5E36-4617-81FA-C0398B494ADA}">
+        <File Id="filVV6osww0NAMIh3BMCrszQSFO64U" KeyPath="yes" Source="$(var.MySource)\translations\qt_cs.qm" />
+      </Component>
+      <Component Id="cmp2ePGutvT7T_lDOXTcOnjech_.7c" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{FB4CCADF-FF92-4AB3-A977-94A9BD4B1C34}">
+        <File Id="filMz5kcPq8r5JoJnMkhGgbgGYDKNo" KeyPath="yes" Source="$(var.MySource)\translations\qt_de.qm" />
+      </Component>
+      <Component Id="cmpfpfYdKB9gEod6GIoOiy8iSOYKT4" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{B26206F0-764D-4B06-96F1-3BC378A69D34}">
+        <File Id="filhutxNFZN0.c0HLyqGkXuvqk.xmE" KeyPath="yes" Source="$(var.MySource)\translations\qt_en.qm" />
+      </Component>
+      <Component Id="cmpkkryXk.f3uXS_oZqo8oPRccGgqk" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{7A9BBFC7-922C-4D34-8809-13AD6EBCA5A0}">
+        <File Id="fil2r71_porORh0rL_YMpV9Pf9SnzA" KeyPath="yes" Source="$(var.MySource)\translations\qt_fi.qm" />
+      </Component>
+      <Component Id="cmphz9Vuy8.2zf3cDdxjT4EPgO07xY" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{81D1BA4A-9D04-4AB1-B8FC-56A284828E94}">
+        <File Id="fil_11bbX98N23ZSyO7CW0_DbiCKk4" KeyPath="yes" Source="$(var.MySource)\translations\qt_fr.qm" />
+      </Component>
+      <Component Id="cmpQHXWegbBstyVK1tztjsaph8qZeU" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{FA4842AF-0661-465E-A522-4A44B8BEDA69}">
+        <File Id="filQGc3Ay2TBrxKXP5KyDPmiQcaAG8" KeyPath="yes" Source="$(var.MySource)\translations\qt_he.qm" />
+      </Component>
+      <Component Id="cmpMv803IJBDjsqemDPF1Raz33riwY" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{C52E846D-BF98-4D62-9BBF-D90A746DCD12}">
+        <File Id="fil23J8VOwjRUTs7zT5Y2_o3GI.nD0" KeyPath="yes" Source="$(var.MySource)\translations\qt_hu.qm" />
+      </Component>
+      <Component Id="cmpV1qLjew7hJeqwlR_6vBF5Kqy8oE" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{30C5191E-8F85-406C-8BD5-2B93B9871BB7}">
+        <File Id="fili8V2PiVx41z0_a0F7x__5NYzjCo" KeyPath="yes" Source="$(var.MySource)\translations\qt_it.qm" />
+      </Component>
+      <Component Id="cmp3yPpOkzfheuBQsOaRlSKbGquhxc" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{C76372F6-1936-4EB4-809E-E8C0ECD05FB9}">
+        <File Id="filuPQ9NnTK7BvSGAEKV7CfNYM4gac" KeyPath="yes" Source="$(var.MySource)\translations\qt_ja.qm" />
+      </Component>
+      <Component Id="cmpdaFEfV2JkZKtooDNQRviwb8iaYo" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{280AF55E-EB73-48AC-83B3-0943DDDB315E}">
+        <File Id="filWGIEo2QvOIVRDyybo879aJBEXIo" KeyPath="yes" Source="$(var.MySource)\translations\qt_ko.qm" />
+      </Component>
+      <Component Id="cmpXVnXcODt3mkifHlLGRpF3130aUk" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{61710B38-197B-413A-9CD0-5B22ABCECD05}">
+        <File Id="fileU2AmWXoVQ9bAJg4DWvMsiktmio" KeyPath="yes" Source="$(var.MySource)\translations\qt_lv.qm" />
+      </Component>
+      <Component Id="cmpwuyhFwcOWhkLSoR9x29_35DoMYs" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{888D2BDB-14FF-4822-B1CD-38DAF8C5CBA7}">
+        <File Id="filypz.s4CL9Pk4LDFl2YyAa6bax6w" KeyPath="yes" Source="$(var.MySource)\translations\qt_ru.qm" />
+      </Component>
+      <Component Id="cmp.IWLRWUMwJ8otOoV9L2vo3Botp8" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{0E6D9E3D-66E5-4E71-8F0A-04701338D15F}">
+        <File Id="filPrDc77LuytPVm1Ftm0NqU3btmyE" KeyPath="yes" Source="$(var.MySource)\translations\qt_sk.qm" />
+      </Component>
+      <Component Id="cmpeQ9j0LU3UL7gpExP6nUIsi_tv_Q" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{82C8DFE3-DAE5-4F52-B989-DE69D15D4DA1}">
+        <File Id="filEFRrI77MTJPU7AIzTNwRFGHohvw" KeyPath="yes" Source="$(var.MySource)\translations\qt_uk.qm" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

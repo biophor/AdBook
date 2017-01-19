@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -117,7 +119,7 @@ std::wstring GetHrErrorDesc(const HRESULT hr)
     }
     else if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
     {
-        errorDesc = GetWin32ErrorDesc(boost::numeric_cast<DWORD>(hr));
+        errorDesc = GetWin32ErrorDesc(static_cast<DWORD>(hr));
     }
     std::wstring adsiExtErr = GetAdsiExtErrorDesc();
     if (!adsiExtErr.empty())
@@ -131,6 +133,12 @@ std::wstring GetHrErrorDesc(const HRESULT hr)
 std::wstring HrError::What() const
 {
     return GetHrErrorDesc(hr_);
+}
+
+std::wstring Sqlite3Error::What() const
+{
+    std::wstring message = L"sqlite3 error: " + std::to_wstring(errCode_);
+    return message;
 }
 
 }   // namespace adbook

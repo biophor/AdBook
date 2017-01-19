@@ -22,15 +22,9 @@ You should have received a copy of the GNU General Public License along with
 class Application : public QApplication
 {
 public:
-    Application(int &argc, char **argv) : QApplication(argc, argv)
-    {
-        setApplicationName(QObject::tr("Active Directory Contact Book"));
-        setOrganizationName(QObject::tr("biophor"));
-        setOrganizationDomain("github.com/biophor");
-        ConnectionSettings::Instance().Load();
-    }
+    Application(int &argc, char **argv);
     virtual ~Application()
-    {        
+    {
     }
 private:
 };

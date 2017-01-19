@@ -27,14 +27,13 @@
 #include <comutil.h>
 #include <strsafe.h>
 #include <activeds.h>
-#include <eskimo/export.h>
 #include <boost/assert.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/algorithm/string/replace.hpp>
-
+#include "sqlite3/sqlite3.h"
 
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)

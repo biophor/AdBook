@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015-2017 Goncharov Andrei.
 
@@ -83,9 +85,9 @@ adbook::LdapRequest FilterListModel::ConstructLdapRequest(bool AllConditionsShou
                 for (const auto & ii : attrIds) {
                     if (adbook::Attributes::GetInstance().IsString(ii)) {
                         lr.AddRule(ii, condition->GetMatchingRule(), filterValue.toStdWString());
-                        lr.AddOR();
                     }
                 }
+                lr.AddOR();
             }
         }
         else if (typeItem->GetFilterType() == FilterType::LdapAttr) {

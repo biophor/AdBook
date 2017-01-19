@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -50,15 +52,15 @@ BOOL CSettingsDlg::OnInitDialog()
     defaultPasswordChar_ = password_.GetPasswordChar();
     const UINT reasonableMaxPassLen = 40;
     password_.SetLimitText(reasonableMaxPassLen);
-        
+    
     const ConnectionSettings & cs = appSettings_.GetConnectionSettings();
     SetDlgItemText(IDC_EDIT_DC, cs.GetDC().c_str());
     SetDlgItemText(IDC_EDIT_USERNAME, cs.GetLogin().c_str());
     SetDlgItemText(IDC_EDIT_PASSWORD, cs.GetPassword().c_str());
-    CheckDlgButton(IDC_CHECK_USER_DOMAIN, appSettings_.GetConnectionSettings().CurrentDomain() ? BST_CHECKED : BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_USE_CURUSERCRED, appSettings_.GetConnectionSettings().CurrentUserCredentials() ? BST_CHECKED : BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_FORGET_PASS, appSettings_.GetConnectionSettings().ForgetPassword() ? BST_CHECKED : BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_DISPLAY_PASS, appSettings_.GetConnectionSettings().DisplayPassword() ? BST_CHECKED : BST_UNCHECKED);    
+    auto connectionSettings = appSettings_.GetConnectionSettings();
+    CheckDlgButton(IDC_CHECK_USER_DOMAIN, connectionSettings.CurrentDomain() ? BST_CHECKED : BST_UNCHECKED);
+    CheckDlgButton(IDC_CHECK_USE_CURUSERCRED, connectionSettings.CurrentUserCredentials() ? BST_CHECKED : BST_UNCHECKED);
+    CheckDlgButton(IDC_CHECK_DISPLAY_PASS, connectionSettings.DisplayPassword() ? BST_CHECKED : BST_UNCHECKED);
     OnBnClickedCheckUseCurusercred();
     OnBnClickedCheckUserDomain();
     OnBnClickedCheckDisplayPassword();
@@ -121,9 +123,8 @@ void CSettingsDlg::ProcessUserInput()
             GetDlgItem(IDC_EDIT_PASSWORD)->SetFocus();
             throw adbook::HrError(E_INVALIDARG);
         }
-    }    
-    cs.DisplayPassword(IsDlgButtonChecked(IDC_CHECK_DISPLAY_PASS) == BST_CHECKED);
-    cs.ForgetPassword(IsDlgButtonChecked(IDC_CHECK_FORGET_PASS) == BST_CHECKED);
+    }
+    cs.DisplayPassword(IsDlgButtonChecked(IDC_CHECK_DISPLAY_PASS) == BST_CHECKED);    
 }
 
 void CSettingsDlg::OnBnClickedOk()
@@ -144,8 +145,7 @@ void CSettingsDlg::OnBnClickedCheckUseCurusercred()
     const bool useCurUserCred = (IsDlgButtonChecked(IDC_CHECK_USE_CURUSERCRED) == BST_CHECKED);
     GetDlgItem(IDC_EDIT_USERNAME)->EnableWindow(!useCurUserCred);
     GetDlgItem(IDC_EDIT_PASSWORD)->EnableWindow(!useCurUserCred);
-    GetDlgItem(IDC_CHECK_DISPLAY_PASSWORD)->EnableWindow(!useCurUserCred);
-    GetDlgItem(IDC_CHECK_FORGET_PASS)->EnableWindow(!useCurUserCred);
+    GetDlgItem(IDC_CHECK_DISPLAY_PASSWORD)->EnableWindow(!useCurUserCred);    
 }
 
 void CSettingsDlg::OnBnClickedCheckUserDomain()
@@ -167,17 +167,17 @@ void CSettingsDlg::OnBnClickedButtonVerify()
     {
         ProcessUserInput();
     }
-    catch (const std::exception&)
+    catch (const adbook::HrError &)
     {
         return;
     }
-        
+    
     try
     {
         adbook::AdConnector ac(appSettings_.GetConnectionSettings());
         CWaitCursor wc;
         ac.Connect();
-        AfxMessageBox(IDS_CONNECTION_SUCCEEDED);        
+        AfxMessageBox(IDS_CONNECTION_SUCCEEDED, MB_ICONINFORMATION);
     }
     catch (const adbook::Error & e)
     {

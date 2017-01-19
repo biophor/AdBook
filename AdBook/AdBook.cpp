@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -113,11 +115,9 @@ BOOL CAdBookApp::InitInstance()
         TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
     }
 
-    // Delete the shell manager created above.
-    if (pShellManager != NULL)
-    {
-        delete pShellManager;
-    }    
+    // Delete the shell manager created above.        
+    delete pShellManager;
+   
     appSet_.SaveSettings();
     adbook::Attributes::GetInstance().PreExitUnload(); // prevent false positive warnings about memory leaks
     // Since the dialog has been closed, return FALSE so that we exit the

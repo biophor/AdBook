@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015 Goncharov Andrei.
 
@@ -81,7 +83,7 @@ private:
     LRESULT OnUmStart(WPARAM, LPARAM);
     LRESULT OnUmStop(WPARAM, LPARAM);
 
-    adbook::AdSearcher adSearcher_{ theApp.GetAppSettings().GetConnectionSettings() };
+    adbook::AdSearcher adSearcher_;
     MainWndSettings & mws_{ theApp.GetAppSettings().GetMainWndSettings() };
     WindowAnchor wndAnchor_;
     CSize minSize_;        

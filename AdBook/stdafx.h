@@ -33,7 +33,7 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
-
+#include <dpapi.h>
 #include <atlconv.h>
 #include <activeds.h>
 #include <AdsHlp.h>
@@ -57,12 +57,10 @@
 #include <GdiPlus.h>
 #include <Strsafe.h>
 #include <limits.h>
-#include "eskimo/export.h"
 #include "AdBookBL/export.h"
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
-#include <boost/serialization/singleton.hpp>
 
 #ifdef _UNICODE
 #if defined _M_IX86

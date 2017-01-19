@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
 Copyright (C) 2015-2017 Goncharov Andrei.
 
@@ -35,7 +37,7 @@ You should have received a copy of the GNU General Public License along with
 
 
 QtAdBook::QtAdBook(QWidget * parent)
-    : QDialog(parent), _adSearcher{ ConnectionSettings::Instance() }
+    : QDialog(parent)
 {
     ui.setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinMaxButtonsHint);    
@@ -136,7 +138,7 @@ void QtAdBook::OnFindContacts()
             _adSearcher.Stop();
         }
         else {
-            _adSearcher.Start(ConstructLdapRequest());
+            _adSearcher.Start(ConstructLdapRequest(), ConnectionSettings::Instance());
             ui.findContacts->setEnabled(false);
             ui.addFilter->setEnabled(false);
             ui.removeFilter->setEnabled(false);
@@ -223,7 +225,7 @@ void QtAdBook::OnSelectPhoto()
     }
     QString photoFileName = dlg.selectedFiles().first();
     const auto photoMaxSizeInBytes =
-        adbook::Attributes::GetInstance().GetAttrMaxLength(adbook::Attributes::thumbnailPhoto);
+        adbook::Attributes::GetInstance().GetAttrMaxLength(adbook::Attributes::ThumbnailPhoto);
     QFile photoFile(photoFileName);    
     if (!photoFile.open(QFile::ReadOnly)) {
         QMessageBox::warning(this, QApplication::applicationName(),
@@ -253,7 +255,7 @@ void QtAdBook::OnSelectPhoto()
     auto contact = _contactListModel->GetContact(currentIndex.row());    
     const auto dn = contact.GetDn();
     const auto attrName = 
-        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::thumbnailPhoto);
+        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
     adbook::AdConnector ac{ ConnectionSettings::Instance(), dn };
     try {
         WaitCursor wc;
@@ -280,7 +282,7 @@ void QtAdBook::OnClearPhoto()
     auto contact = _contactListModel->GetContact(currentIndex.row());
     const auto dn = contact.GetDn();
     const auto attrName =
-        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::thumbnailPhoto);
+        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
     adbook::AdConnector ac{ ConnectionSettings::Instance(), dn };
     try {
         WaitCursor wc;
@@ -428,6 +430,13 @@ void QtAdBook::OnSearchStopped()
     if (numContacts > 0) {
         SaveSuccessfulFilterValue();
     }    
+    try {
+        _adSearcher.Wait();
+    }
+    catch (const adbook::Error & e) {        
+        QMessageBox::critical(this, QApplication::applicationName(), QString::fromStdWString(e.What()),
+            QMessageBox::Warning, QMessageBox::Ok);
+    }    
 }
 
 void QtAdBook::SaveSuccessfulFilterValue()
@@ -476,11 +485,11 @@ void QtAdBook::OnAnotherContactSelected(const QModelIndex &current, const QModel
 {
     if (current.isValid()) {
         auto contact = _contactListModel->GetContact(current.row());
-        bool canChangePhoto = contact.IsAttributeWritable(adbook::Attributes::thumbnailPhoto);
+        bool canChangePhoto = contact.IsAttributeWritable(adbook::Attributes::ThumbnailPhoto);
         ui.selectPhoto->setEnabled(canChangePhoto);
         ui.clearPhoto->setEnabled(canChangePhoto);
         _propertiesModel->SetContact(std::move(contact));
-        adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(adbook::Attributes::thumbnailPhoto);        
+        adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(adbook::Attributes::ThumbnailPhoto);        
         ui.photo->clear();
         ui.photo->setProperty(origUserPhotoPixmapPropertyName, QVariant());
         if (!photoBytes.empty()) {

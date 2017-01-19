@@ -2,3 +2,8 @@
 /Debug/
 /Release/
 *.aps
+*.cpp.PVS-Studio.preprocess.cmd
+*.cpp.PVS-Studio.preprocess.cmd.rsp
+*.i
+*.i-938043f4
+*.vcxproj.user
