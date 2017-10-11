@@ -32,10 +32,18 @@ public:
     }
     property String^ Dc {
         String^ get() {
-            return _dc;
+            return _address;
         }
         void set(String^ dc) {
-            _dc = dc;
+            _address = dc;
+        }
+    }
+    property String^ LdapPath {
+        String^ get() {
+            return _address;
+        }
+        void set(String^ ldapPath) {
+            _address = ldapPath;
         }
     }
     property String^ Login {
@@ -69,14 +77,14 @@ public:
         void set(bool value) {
             _useDomainYouAreLoggedIn = value;
         }
-    }    
+    }
     adbook::ConnectionParams ToUnderlyingType();
 private:
     bool _useDomainYouAreLoggedIn = true;
     bool _useCurrentUserCredentials = true;
     SecureString^ _password;
-    String ^ _dc, ^ _login;    
-    
+    String ^ _address, ^ _login;
+
 };
 
 }   // namespace adbookcli

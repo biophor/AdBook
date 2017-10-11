@@ -1,5 +1,23 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+/*
+Copyright (C) 2015-2016 Goncharov Andrei.
+
+This file is part of the 'Active Directory Contact Book'.
+'Active Directory Contact Book' is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+'Active Directory Contact Book' is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,41 +31,41 @@ using System.IO;
 namespace WfAdBook
 {
     public partial class MainForm : Form //-V3073
-    {        
+    {
         private int _sortCol = -1;
         private SortOrder _sortOrder = SortOrder.None;
         private Stopwatch _timer = new Stopwatch();
         private string[] _columnIndexToAttrName;
-        private List<ListViewItem> _personListItems = new List<ListViewItem>();        
+        private List<ListViewItem> _personListItems = new List<ListViewItem>();
         private AdSearchTask _adSearchTask = null;
         public MainForm()
         {
             InitializeComponent();
             InitFilterList();
             InitFilterNamesList();
-            InitLdapMatchingRules();            
+            InitLdapMatchingRules();
             InitPersonList();
             InitPersonDetails();
             ApplyFontSettings();
             Disposed += MainForm_Disposed;
-        }        
+        }
         private void InitFilterList()
         {
             ListCtrlHelper.EnableTooltipsForListCtrl(lviewFilters.Handle);
             RestoreFilterListColumnsSizes();
         }
         private void InitPersonDetails()
-        {            
+        {
             foreach (var attrId in AdAttributes.AttrIds) {
                 var attr = AdAttributes.Get(attrId);
                 if (attr.IsString && !attr.IsReadOnly) {
                     var listViewItem = lviewDetails.Items.Add(attr.DisplayName);
-                    listViewItem.SubItems.Add("");  // attr value                    
+                    listViewItem.SubItems.Add("");  // add a column for displaying an attribute's value
                     listViewItem.Tag = attr;
                 }
-            }            
+            }
             ListCtrlHelper.EnableTooltipsForListCtrl(lviewDetails.Handle);
-            RestorePersonDetailsColumnsSizes();            
+            RestorePersonDetailsColumnsSizes();
         }
         private void RestorePersonDetailsColumnsSizes()
         {
@@ -56,7 +74,7 @@ namespace WfAdBook
         }
         private void SavePersonDetailsColumnsSizes()
         {
-            Properties.Settings.Default.MainFormPersonDetailsColumnSizes = 
+            Properties.Settings.Default.MainFormPersonDetailsColumnSizes =
                 ListViewColumnsSizesToString(lviewDetails);
         }
         private void InitPersonList()
@@ -84,7 +102,7 @@ namespace WfAdBook
                 if (newFont == null) {
                     return;
                 }
-                lv.Font = new Font(newFont, newFont.Style);                
+                lv.Font = new Font(newFont, newFont.Style);
             };
             FontSettings fontSettings = new FontSettings();
             setupFont(lviewResult, fontSettings.ContactListFont);
@@ -92,12 +110,12 @@ namespace WfAdBook
             setupFont(lviewFilters, fontSettings.FilterListFont);
         }
         private void buttonSettings_Click(object sender, EventArgs e)
-        {            
+        {
             using (var settingsForm = new SettingsForm()) {
                 if (settingsForm.ShowDialog() == DialogResult.OK) {
                     ApplyFontSettings();
                 }
-            }            
+            }
         }
         private void buttonAbout_Click(object sender, EventArgs e)
         {
@@ -105,13 +123,13 @@ namespace WfAdBook
                 about.ShowDialog();
             }
 
-        }        
+        }
         private void _adSearcher_SearchStoppedEvent(object sender, EventArgs e)
         {
             BeginInvoke(new Action(RefreshFormUiAfterSearchIsStopped));
         }
         private void _adSearcher_SearchStartedEvent(object sender, EventArgs e)
-        {            
+        {
             BeginInvoke(new Action(RefreshFormUiAfterSearchIsStarted));
         }
 
@@ -137,7 +155,7 @@ namespace WfAdBook
             lock (_personListItems) {
                 lviewResult.VirtualListSize = _personListItems.Count;
             }
-            labelNumContacts.Text = Convert.ToString(lviewResult.VirtualListSize); 
+            labelNumContacts.Text = Convert.ToString(lviewResult.VirtualListSize);
         }
         private ListViewItem CreateListViewItem(AdPerson adp)
         {
@@ -154,7 +172,7 @@ namespace WfAdBook
             lvi.SubItems.Add("invisible column to cache a photo");
             lvi.Tag = adp;
             return lvi;
-        }        
+        }
         private void RefreshFormUiAfterSearchIsStopped()
         {
             lock (_timer) {
@@ -182,7 +200,7 @@ namespace WfAdBook
                 lviewFilters.Enabled = true;
             }
             RefreshFormUiAfterPersonFound();
-        }        
+        }
         private void RefreshFormUiAfterSearchIsStarted()
         {
             Debug.Assert(buttonFind.InvokeRequired == false);
@@ -190,7 +208,7 @@ namespace WfAdBook
             buttonRemoveFilter.Enabled = false;
             buttonSelectPhoto.Enabled = false;
             buttonCopyAttr.Enabled = false;
-            buttonClearPhoto.Enabled = false;            
+            buttonClearPhoto.Enabled = false;
             buttonFind.Text = Properties.Resources.FindButtonTextDuringSearch;
             lviewResult.VirtualListSize = 0;
             lock (_personListItems) {
@@ -199,7 +217,7 @@ namespace WfAdBook
             lock (_timer) {
                 _timer.Start();
             }
-        }        
+        }
         private void InitLdapMatchingRules()
         {
             foreach (var mr in LdapMatchingRules.Instance) {
@@ -208,7 +226,7 @@ namespace WfAdBook
             cboxConditions.SelectedIndex = 0;
         }
         private void InitFilterNamesList()
-        { 
+        {
             foreach (var cf in CompositeFilters.Instance) {
                 cboxFilterNames.Items.Add(cf);
             }
@@ -216,8 +234,8 @@ namespace WfAdBook
                 var attr = AdAttributes.Get(attrId);
                 if (attr.IsString && !attr.IsReadOnly) {
                     cboxFilterNames.Items.Add(attr);
-                }                
-            }            
+                }
+            }
             cboxFilterNames.SelectedIndex = 0;
         }
         private void CreateFilter()
@@ -244,15 +262,15 @@ namespace WfAdBook
         {
             RemoveFilter();
         }
-        private LdapRequest ConstructLdapRequest()
+        private LdapRequestBuilder ConstructLdapRequest()
         {
-            LdapRequest lr = new adbookcli.LdapRequest();
+            LdapRequestBuilder lr = new adbookcli.LdapRequestBuilder();
             foreach (ListViewItem filterItem in lviewFilters.Items) {
                 LdapMatchingRule lmr = (LdapMatchingRule)filterItem.SubItems[1].Tag;
                 string filterValue = filterItem.SubItems[2].Text;
                 AdAttribute adAttr = filterItem.Tag as AdAttribute;
                 if (adAttr != null) {
-                    lr.AddRule(adAttr.Id, lmr.Id, filterValue);                    
+                    lr.AddRule(adAttr.Id, lmr.Id, filterValue);
                     continue;
                 }
                 CompositeFilter cf = filterItem.Tag as CompositeFilter;
@@ -261,7 +279,7 @@ namespace WfAdBook
                         foreach (var attrId in AdAttributes.AttrIds) {
                             var attr = AdAttributes.Get(attrId);
                             if (attr.IsString && !attr.IsReadOnly) {
-                                lr.AddRule(attrId, lmr.Id, filterValue);                                
+                                lr.AddRule(attrId, lmr.Id, filterValue);
                             }
                         }
                         lr.AddOR();
@@ -278,7 +296,7 @@ namespace WfAdBook
                     lr.AddOR();
                 }
             }
-            lr.AddRule("objectCategory", LdapRequest.MathingRule.ExactMatch, "person");
+            lr.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
             if (lviewFilters.Items.Count > 0) {
                 lr.AddAND();
             }
@@ -292,20 +310,23 @@ namespace WfAdBook
                     return;
                 }
                 return;
-            }            
-            try {                
+            }
+            try {
                 DisposePersonItemsInAdPersonList();
-                using (var cs = new ConnectionSettings()) {
-                    using (var request = ConstructLdapRequest()) {
-                        using (_adSearchTask = new AdSearchTask(new AdSearchTask.Arguments(request, cs))) {
-                            _adSearchTask.PersonFoundEvent += _adSearcher_PersonFoundEvent;
-                            _adSearchTask.Start();
-                            RefreshFormUiAfterSearchIsStarted();
-                            await _adSearchTask;
-                        }                            
+                using (var cs = new ConnectionSettings())
+                using (var request = ConstructLdapRequest())
+                using (_adSearchTask = adbookcli.AdAccessFactory.GetInstance().CreateSearchTask(request, cs)) {
+                    _adSearchTask.PersonFoundEvent += _adSearcher_PersonFoundEvent;
+                    _adSearchTask.Start();
+                    RefreshFormUiAfterSearchIsStarted();
+                    try {
+                        await _adSearchTask;
+                    }
+                    catch (OperationCanceledException) {
+
                     }
                 }
-                
+
             }
             catch (Exception exc) {
                 MessageBox.Show(exc.Message, Properties.Resources.ErrorMsgBoxTitle,
@@ -315,25 +336,24 @@ namespace WfAdBook
             finally {
                 _adSearchTask = null;
                 RefreshFormUiAfterSearchIsStopped();
-            }            
+            }
         }
         private bool CheckConnection()
         {
-            using (var cs = new ConnectionSettings()) {
-                using (var adc = new AdConnector(cs)) {
-                    try {
-                        Cursor = Cursors.WaitCursor;
-                        adc.Connect();
-                    }
-                    catch (Exception exc) {
-                        MessageBox.Show(exc.Message, Properties.Resources.ErrorMsgBoxTitle,
-                            MessageBoxButtons.OK, MessageBoxIcon.Error
-                            );
-                        return false;
-                    }
-                    finally {
-                        Cursor = Cursors.Default;
-                    }
+            using (var cs = new ConnectionSettings())
+            using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
+                try {
+                    Cursor = Cursors.WaitCursor;
+                    adc.Connect(cs);
+                }
+                catch (Exception exc) {
+                    MessageBox.Show(exc.Message, Properties.Resources.ErrorMsgBoxTitle,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error
+                        );
+                    return false;
+                }
+                finally {
+                    Cursor = Cursors.Default;
                 }
             }
             return true;
@@ -356,7 +376,7 @@ namespace WfAdBook
             if (lviewDetails.SelectedItems.Count == 0) {
                 return;
             }
-            var attr = (AdAttribute)lviewDetails.SelectedItems[0].Tag;
+            AdAttribute attr = (AdAttribute)lviewDetails.SelectedItems[0].Tag;
             var adp = (AdPerson)lviewDetails.Tag;
             var currentValue = lviewDetails.SelectedItems[0].SubItems[1].Text;
             using (ModifyAttrForm f = new ModifyAttrForm(adp, attr, currentValue)) {
@@ -373,7 +393,7 @@ namespace WfAdBook
             ChangeSelectedAttribute();
         }
         private void buttonSelectPhoto_Click(object sender, EventArgs e)
-        {            
+        {
             if (selectPhotoDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }
@@ -411,11 +431,11 @@ namespace WfAdBook
                 }
             }
             var adp = (AdPerson)lviewDetails.Tag;
-            using (var cs = new ConnectionSettings()) {             
-                using (var adc = new AdConnector(cs, adp.Dn)) {
+            using (var cs = new ConnectionSettings()) {
+                using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
                     try {
                         Cursor = Cursors.WaitCursor;
-                        adc.Connect();
+                        adc.Connect(cs, adp.Dn);
                         string attrName = AdAttributes.Get(AttrId.ThumbnailPhoto).LdapName;
                         adc.UploadBinaryAttr(attrName, buf);
                         adp.set_BinaryAttr(attrName, buf);
@@ -439,10 +459,10 @@ namespace WfAdBook
         {
             var adp = (AdPerson)lviewDetails.Tag;
             using (var cs = new ConnectionSettings()) {
-                using (var adc = new AdConnector(cs, adp.Dn)) {
+                using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
                     try {
                         Cursor = Cursors.WaitCursor;
-                        adc.Connect();
+                        adc.Connect(cs, adp.Dn);
                         string attrName = AdAttributes.Get(AttrId.ThumbnailPhoto).LdapName;
                         var emptyBuf = new byte[0];
                         adc.UploadBinaryAttr(attrName, emptyBuf);
@@ -510,7 +530,7 @@ namespace WfAdBook
             }
         }
         private void RefreshSelectedPersonDetails()
-        {            
+        {
             if (lviewResult.SelectedIndices.Count == 0) {
                 return;
             }
@@ -530,14 +550,14 @@ namespace WfAdBook
                 }
             }
             if (redrawItem) {
-                lviewResult.RedrawItems(itemIndex, itemIndex, false);                
+                lviewResult.RedrawItems(itemIndex, itemIndex, false);
             }
             foreach (ListViewItem lvi in lviewDetails.Items) {
                 AdAttribute ada = (AdAttribute)lvi.Tag;
                 string attrValue = adp.get_StringAttr(ada.LdapName);
                 lvi.SubItems[1].Text = attrValue;
             }
-            lviewDetails.Tag = adp;         
+            lviewDetails.Tag = adp;
             int lastSubItemIndex = _personListItems[itemIndex].SubItems.Count - 1;
             lock (_personListItems) {
                 Image cachedPhoto = GetCachedPhotoForSelectedPerson();
@@ -549,7 +569,7 @@ namespace WfAdBook
                     AdAttributes.Get(adbookcli.AttrId.ThumbnailPhoto).LdapName
                         );
                 if (imageBytes.Length > 0) {
-                    personPhoto.Image = Image.FromStream(new MemoryStream(imageBytes));                    
+                    personPhoto.Image = Image.FromStream(new MemoryStream(imageBytes));
                     SetCachedPhotoForSelectedPerson(personPhoto.Image);
                 }
                 else {
@@ -558,12 +578,12 @@ namespace WfAdBook
             }
         }
         private void listResult_SelectedIndexChanged(object sender, EventArgs e)
-        {            
+        {
             RefreshSelectedPersonDetails();
             UpdatePersonDetailsButtonStates();
         }
         private void listResult_ColumnClick(object sender, ColumnClickEventArgs e)
-        {            
+        {
             if (e.Column == _sortCol) {
                 if (_sortOrder == SortOrder.Ascending || _sortOrder == SortOrder.None) {
                     _sortOrder = SortOrder.Descending;
@@ -571,7 +591,7 @@ namespace WfAdBook
                 else {
                     _sortOrder = SortOrder.Ascending;
                 }
-            }            
+            }
             var sorter = new ListViewItemComparer(e.Column, _sortOrder);
             lock (_personListItems) {
                 _personListItems.Sort(sorter);
@@ -583,28 +603,34 @@ namespace WfAdBook
         {
             buttonCopyAttr.Enabled = false;
             buttonChangeAttr.Enabled = false;
-            if (lviewDetails.SelectedIndices.Count == 0) {
-                return;
-            }
+
             if (lviewDetails.Tag == null) {
                 return;
             }
+
             AdPerson adp = (AdPerson)lviewDetails.Tag;
+            bool canChangePhoto = adp.IsAttributeWritable(AttrId.ThumbnailPhoto);
+
+            buttonClearPhoto.Enabled = canChangePhoto;
+            buttonSelectPhoto.Enabled = canChangePhoto;
+
+            if (lviewDetails.SelectedIndices.Count == 0) {
+                return;
+            }
+
             int selAttrIndex = lviewDetails.SelectedIndices[0];
             AdAttribute attr = (AdAttribute)lviewDetails.Items[selAttrIndex].Tag;
             string attrValue = lviewDetails.Items[selAttrIndex].SubItems[1].Text;
             buttonCopyAttr.Enabled = !string.IsNullOrEmpty(attrValue);
             buttonChangeAttr.Enabled = adp.IsAttributeWritable(attr.Id);
-            bool canChangePhoto = adp.IsAttributeWritable(AttrId.ThumbnailPhoto);
-            buttonClearPhoto.Enabled = canChangePhoto;
-            buttonSelectPhoto.Enabled = canChangePhoto;
+
         }
         private void lviewDetails_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdatePersonDetailsButtonStates();
-        }        
+        }
         private void SavePersonListColumnsSizes()
-        {            
+        {
             Properties.Settings.Default.MainFormPersonListColumnSizes = ListViewColumnsSizesToString(lviewResult);
         }
         private void SaveFilterListColumnsSizes()
@@ -632,12 +658,14 @@ namespace WfAdBook
             DisposePersonItemsInAdPersonList();
             _adSearchTask?.Dispose();
             _adSearchTask = null;
+            AdAccessFactory.EnsureDisposed();
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _adSearchTask?.EnsureSearchIsNotRunning();
             Properties.Settings.Default.MainFormWindowState = WindowState;
             if (WindowState == FormWindowState.Normal) {
-                Properties.Settings.Default.MainFormSize = new Size(Width, Height);                
+                Properties.Settings.Default.MainFormSize = new Size(Width, Height);
             }
             Properties.Settings.Default.MainFormSplitterDistance = splitCont.SplitterDistance;
             Properties.Settings.Default.MainFormBottomSplitterDistance =
@@ -649,17 +677,19 @@ namespace WfAdBook
             SavePersonDetailsColumnsSizes();
             SaveFilterListColumnsSizes();
             Properties.Settings.Default.Save();
-            SaveAdPersonList();            
+            SaveAdPersonList();
         }
         private void SaveAdPersonList()
         {
-            using (adbookcli.AdPersonListKeeper adplk = new adbookcli.AdPersonListKeeper()) {
+            using (var keeper = adbookcli.AdAccessFactory.GetInstance().GetPersonDescKeeper())
+            using (var cs = new ConnectionSettings()) {
+                keeper.SetNameByConnectionParams(cs);
                 lock (_personListItems) {
                     foreach (var adp in _personListItems) {
-                        adplk.Add((AdPerson)adp.Tag);
+                        keeper.Add((AdPerson)adp.Tag);
                     }
                 }
-                adplk.Save();
+                keeper.Save();
             }
         }
         private void DisposePersonItemsInAdPersonList()
@@ -669,7 +699,7 @@ namespace WfAdBook
                     (adp.Tag as AdPerson).Dispose();
                     adp.Tag = null;
                 }
-            }            
+            }
         }
         private void MainForm_Shown(object sender, EventArgs e)
         {
@@ -687,17 +717,19 @@ namespace WfAdBook
         }
         private void LoadAdBookItems()
         {
-            using (AdPersonListKeeper adplk = new AdPersonListKeeper()) {
-                adplk.Load();
+            using (var keeper = adbookcli.AdAccessFactory.GetInstance().GetPersonDescKeeper())
+            using (var cs = new ConnectionSettings()) {
+                keeper.SetNameByConnectionParams(cs);
+                keeper.Load();
                 lock (_personListItems) {
-                    foreach (var adp in adplk) {
+                    foreach (var adp in keeper) {
                         var tvi = CreateListViewItem(adp);
                         _personListItems.Add(tvi);
                     }
                     lviewResult.VirtualListSize = _personListItems.Count;
                 }
                 labelNumContacts.Text = Convert.ToString(lviewResult.VirtualListSize);
-            }                
+            }
         }
         private void RestoreFilterListColumnsSizes()
         {
@@ -706,11 +738,11 @@ namespace WfAdBook
         }
         private void RestorePersonListColumnsSizes()
         {
-            RestoreListViewColumnsSizes(lviewResult, 
+            RestoreListViewColumnsSizes(lviewResult,
                 Properties.Settings.Default.MainFormPersonListColumnSizes);
         }
         private void RestoreListViewColumnsSizes(ListView lview, string colSizesFromSettings)
-        {            
+        {
             if (!string.IsNullOrWhiteSpace(colSizesFromSettings)) {
                 var v = (colSizesFromSettings.Split(new char[] { ' ' }));
                 for (int i = 0; i < v.Length; ++i) {
@@ -731,7 +763,7 @@ namespace WfAdBook
                 var v = (s.Split(new char[] { ' ' }));
                 for (int i = 0; i < v.Length; ++i) {
                     int colDisplayIndex = 0;
-                    if (int.TryParse(v[i], out colDisplayIndex)) {                        
+                    if (int.TryParse(v[i], out colDisplayIndex)) {
                         lviewResult.Columns[i].DisplayIndex = colDisplayIndex;
                     }
                     else {
@@ -748,14 +780,14 @@ namespace WfAdBook
         }
         private void listResult_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs e)
         {
-            
+
         }
         private void lviewFilters_SizeChanged(object sender, EventArgs e)
         {
 
         }
         private void cboxFilterValues_TextUpdate(object sender, EventArgs e)
-        {            
+        {
             buttonAddFilter.Enabled = !string.IsNullOrEmpty(cboxFilterValues.Text);
         }
         private void lviewFilters_SelectedIndexChanged(object sender, EventArgs e)
@@ -795,7 +827,7 @@ namespace WfAdBook
             if (buttonChangeAttr.Enabled)
             {
                 ChangeSelectedAttribute();
-            }            
+            }
         }
-    }    
+    }
 }

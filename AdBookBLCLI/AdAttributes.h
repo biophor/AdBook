@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
 #pragma once
+#include "NativeObjectPtr.h"
 #include "AdAttribute.h"
 
 namespace adbookcli
@@ -24,12 +25,23 @@ using System::Collections::Generic::IReadOnlyDictionary;
 using System::Collections::Generic::IList;
 using System::Int32;
 
+public ref class NativeAttributesPtr : NativeObjectPtr<adbook::Attributes>
+{
+public:
+    NativeAttributesPtr(adbook::Attributes * attributes)
+        : NativeObjectPtr<adbook::Attributes>(attributes) {}
+
+protected:
+    virtual void ReleaseNativeResources() override;
+};
+
+
 public ref class AdAttributes abstract sealed
 {
 public:
     static property Int32 Count {
         Int32 get() {
-            return _attributes->Count;
+            return _attrMapById->Count;
         }
     }
     static property Int32 TextAttrMaxLength {
@@ -53,7 +65,10 @@ public:
         }
     }
     static AdAttribute^ Get(AttrId id) {
-        return _attributes[id]; //-V108
+        return _attrMapById[id]; //-V108
+    }
+    static AdAttribute^ Get(String^ ldapName) {
+        return _attrMapByName[ldapName]; //-V108
     }
     static AttrId ConvertAttrId(adbook::Attributes::AttrId id) {
         return static_cast<AttrId>(id);
@@ -64,7 +79,8 @@ public:
 private:
     static AdAttributes();
 private:
-    static initonly IReadOnlyDictionary<AttrId, AdAttribute^>^ _attributes;
+    static initonly IReadOnlyDictionary<AttrId, AdAttribute^>^ _attrMapById;     // indexed by attr id
+    static initonly IReadOnlyDictionary<String^, AdAttribute^>^ _attrMapByName;   // indexed by attr ldap name
     static initonly Int32 _textAttrMaxLength;
     static initonly Int32 _binaryAttrMaxLength;
     static initonly IList<String^>^ _ldapAttrNames;

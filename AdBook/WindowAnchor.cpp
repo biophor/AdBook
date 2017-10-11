@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -33,7 +33,7 @@ void WindowAnchor::Init(HWND wndHandle)
     {
         HR_ERROR(E_UNEXPECTED);
     }
-    initRect_ = rect_;            
+    initRect_ = rect_;
 }
 
 void WindowAnchor::Add(UINT id, UINT flags, float cxLeft, float cxRight, float cyTop, float cyBottom)
@@ -50,11 +50,11 @@ void WindowAnchor::Add(UINT id, UINT flags, float cxLeft, float cxRight, float c
         ScreenToClient(wndHandle_, &rect.BottomRight());
         WndItem wi(wndHandle, flags, &rect, cxLeft, cxRight, cyTop, cyBottom);
         wndItems_[id] = wi;
-    }    
+    }
 }
 
 BOOL WindowAnchor::OnSize()
-{    
+{
     if (wndItems_.empty())
     {
         return FALSE;
@@ -131,7 +131,7 @@ BOOL WindowAnchor::OnSize()
 
         DeferWindowPos( hdwp, item.wndHandle_, nullptr, item.rect_.left, item.rect_.top,
             item.rect_.right - item.rect_.left, item.rect_.bottom - item.rect_.top,
-            SWP_NOZORDER );        
+            SWP_NOZORDER );
     }
     rect_ = rect;
     EndDeferWindowPos(hdwp);

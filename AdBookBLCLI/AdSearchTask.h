@@ -19,9 +19,9 @@ You should have received a copy of the GNU General Public License along with
 #pragma once
 
 #include "AdPerson.h"
-#include "LdapRequest.h"
-//#include "AdSearcher.h"
+#include "LdapRequestBuilder.h"
 #include "ConnectionParams.h"
+#include "NativeObjectPtr.h"
 
 
 namespace adbookcli
@@ -44,19 +44,54 @@ using System::Collections::Generic::IEnumerable;
 using System::Threading::CancellationToken;
 using System::Threading::CancellationTokenSource;
 
+[Serializable]
+public ref class AdSearchTaskError sealed : public System::Exception
+{
+public:
+    AdSearchTaskError() : Exception()
+    {
+    }
+
+    AdSearchTaskError(String^ message) : Exception(message)
+    {
+    }
+
+    AdSearchTaskError(String^ message, Exception^ innerException) : Exception(message, innerException)
+    {
+    }
+
+protected:
+    AdSearchTaskError(System::Runtime::Serialization::SerializationInfo^ info,
+        System::Runtime::Serialization::StreamingContext context) : Exception(info, context)
+    {
+    }
+};
+
+public ref class NativeAdSearcherPtr : public NativeAbstractObjectPtr<adbook::AbstractAdSearcher>
+{
+public:
+    NativeAdSearcherPtr(adbook::AbstractAdSearcher * p)
+        : NativeAbstractObjectPtr<adbook::AbstractAdSearcher>(p) {}
+
+protected:
+    virtual void ReleaseNativeResources() override;
+};
+
+
 public ref class AdSearchTask sealed: public System::Threading::Tasks::Task
 {
 public:
+
     ref class Arguments {
     public:
-        Arguments(LdapRequest ^ ldapRequest, ConnectionParams ^ connectionParams) {
-            LdapRequest = ldapRequest;
+        Arguments(LdapRequestBuilder ^ ldapRequest, ConnectionParams ^ connectionParams) {
+            LdapRequestBuilder = ldapRequest;
             ConnectionParams = connectionParams;
         }
-        property LdapRequest ^ LdapRequest;
+        property LdapRequestBuilder ^ LdapRequestBuilder;
         property ConnectionParams ^ ConnectionParams;
     };
-    AdSearchTask(Arguments^ args);
+    AdSearchTask(adbook::AbstractAdSearcher * searcher, Arguments^ args);
     ~AdSearchTask();
     !AdSearchTask();
 
@@ -67,11 +102,12 @@ public:
     event PersonFoundDelegate^ PersonFoundEvent;
     event SearchStartedDelegate^ SearchStartedEvent;
     event SearchStoppedDelegate^ SearchStoppedEvent;
-        
+
     void Cancel();
-    
+
+    void EnsureSearchIsNotRunning();
+
 private:
-    void CleanupUnmanaged();
 
     void RaisePersonFoundEvent(adbook::AdPersonDesc && apd);
     delegate void RaisePersonFoundDelegate(adbook::AdPersonDesc &&);
@@ -82,21 +118,21 @@ private:
     void RaiseSearchStoppedEvent();
     delegate void RaiseSearchStoppedDelegate();
 
-    static adbook::AdSearcher::OnNewItem CreatePersonFoundCallback(AdSearchTask ^ searcher);
-    static adbook::AdSearcher::OnStart CreateSearchStartedCallback(AdSearchTask ^ searcher);
-    static adbook::AdSearcher::OnStop CreateSearchStoppedCallback(AdSearchTask ^ searcher);
+    static adbook::AbstractAdSearcher::OnNewItem CreatePersonFoundCallback(AdSearchTask ^ searcher);
+    static adbook::AbstractAdSearcher::OnStart CreateSearchStartedCallback(AdSearchTask ^ searcher);
+    static adbook::AbstractAdSearcher::OnStop CreateSearchStoppedCallback(AdSearchTask ^ searcher);
 
     RaisePersonFoundDelegate^ _raisePersonFoundDelegate = nullptr;
     RaiseSearchStartedDelegate^ _raiseSearchStartedDelegate = nullptr;
     RaiseSearchStoppedDelegate^ _raiseSearchStoppedDelegate = nullptr;
 
 private:
-    
+
     void TaskProc(Object^ arg);
-    
+
 private:
     CancellationTokenSource^ cancelTokenSource_ = gcnew CancellationTokenSource();
-    adbook::AdSearcher * _nativeSearcher;
+    NativeAdSearcherPtr _nativeSearcher;
 };
 
 }   // namespace adbookcli

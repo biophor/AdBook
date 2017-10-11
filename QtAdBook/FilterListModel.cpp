@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -19,6 +19,8 @@ You should have received a copy of the GNU General Public License along with
 */
 
 #include "stdafx.h"
+#include "QSettingsAutoEndGroup.h"
+#include "FilterListSettings.h"
 #include "FilterListModel.h"
 
 
@@ -28,8 +30,12 @@ QList<FilterListModel::ColumnDef> FilterListModel::_columns = {
     { ValueColId, QObject::tr("Value") }
 };
 
-
-FilterListModel::FilterListModel(QObject * parent) : QStandardItemModel(parent) {
+FilterListModel::FilterListModel(
+    AppSettings & appSettings,    
+    QObject * parent
+) 
+    : QStandardItemModel(parent), _appSettings{ appSettings }
+{
     auto colNames = GetColumnNames();
     setColumnCount(colNames.size());
     setHorizontalHeaderLabels(colNames);
@@ -62,18 +68,12 @@ int FilterListModel::AddFilter(FilterTypeItem * filterTypeItem, FilterConditionI
     }
     QList<QStandardItem*> items{ filterTypeItem, conditionItem, new QStandardItem(filterValue) };
     appendRow(items);
-    return rowCount() - 1;
-    /*insertRow(rowCount());
-    r = rowCount() - 1;
-    setItem(r, FilterNameColId, filterTypeItem);
-    setItem(r, ConditionColId, conditionItem);
-    setItem(r, ValueColId, new QStandardItem(filterValue));    
-    return r;*/
+    return rowCount() - 1;    
 }
 
-adbook::LdapRequest FilterListModel::ConstructLdapRequest(bool AllConditionsShouldBeMet)
+std::wstring FilterListModel::ConstructLdapRequest(bool AllConditionsShouldBeMet)
 {
-    adbook::LdapRequest lr;
+    adbook::LdapRequestBuilder lr;
     const int itemCount = rowCount();
     for (int i = 0; i < itemCount; ++i) {
         FilterTypeItem * typeItem = GetFilterType(i);
@@ -81,9 +81,10 @@ adbook::LdapRequest FilterListModel::ConstructLdapRequest(bool AllConditionsShou
         QString filterValue = GetFilterValue(i);
         if (typeItem->GetFilterType() == FilterType::Composite) {
             if (typeItem->GetFilterCode() == static_cast<int>(CompositeFilterId::AnyAttribute)) {
-                const auto attrIds = adbook::Attributes::GetInstance().GetAttrIds();
+                auto & attributes = adbook::Attributes::GetInstance();
+                const auto attrIds = attributes.GetAttrIds();
                 for (const auto & ii : attrIds) {
-                    if (adbook::Attributes::GetInstance().IsString(ii)) {
+                    if (attributes.IsString(ii)) {
                         lr.AddRule(ii, condition->GetMatchingRule(), filterValue.toStdWString());
                     }
                 }
@@ -106,11 +107,11 @@ adbook::LdapRequest FilterListModel::ConstructLdapRequest(bool AllConditionsShou
             lr.AddOR();
         }
     }
-    lr.AddRule(L"objectCategory", adbook::LdapRequest::ExactMatch, L"person");
+    lr.AddRule(L"objectCategory", adbook::LdapRequestBuilder::ExactMatch, L"person");
     if (itemCount != 0) {
         lr.AddAND();
     }
-    return lr;
+    return lr.Get();
 }
 
 QStringList FilterListModel::GetFilterValues()
@@ -133,73 +134,55 @@ const QString conditionParam = "Condition";
 const QString valueParam = "Value";
 }
 
-void FilterListModel::Load(int filterType, int filterCode, const QString & filterValue, int condition)
+
+void FilterListModel::SaveState()
 {
-    if (filterValue.trimmed().isEmpty()) {
-        throw adbook::HrError(E_INVALIDARG, L"filterValue", __FUNCTIONW__);
+    FilterListSettings fls;
+    for (int i = 0, count = rowCount(); i < count; ++i) {
+        FilterTypeItem * type = GetFilterType(i);
+        FilterConditionItem * cond = GetFilterCondition(i);
+        fls.AddFilter({ type->GetFilterCode2(), GetFilterValue(i), cond->GetMatchingRule() });
     }
-    FilterTypeItem * typeItem = nullptr;
-    
-    FilterType filterType_ = static_cast<FilterType>(filterType);
-    adbook::LdapRequest::MathingRule condition_ = static_cast<adbook::LdapRequest::MathingRule>(condition);
-    
-    if (FilterType::Composite == filterType_) {
-        CompositeFilterId compositeFilterId = static_cast<CompositeFilterId>(filterCode);
-        if (CompositeFilterId::AnyAttribute == compositeFilterId) {
-            typeItem = new FilterTypeItem(compositeFilterId);
+    _appSettings.SetFilterListSettings(fls);
+}
+
+void FilterListModel::LoadState
+(
+    FilterCode filterCode, 
+    const QString & filterValue, 
+    FilterCondition condition
+)
+{    
+    if (filterValue.trimmed().isEmpty()) {
+        throw adbook::HrError(E_INVALIDARG, L"filterValue is empty", __FUNCTIONW__);
+    }
+    FilterTypeItem * typeItem = nullptr;    
+    if (auto compositeFilterIdPtr = std::get_if<CompositeFilterId>(&filterCode)) {        
+        if (CompositeFilterId::AnyAttribute == *compositeFilterIdPtr) {
+            typeItem = new FilterTypeItem(CompositeFilterId::AnyAttribute);
         }
         else {
-            throw adbook::HrError(E_INVALIDARG, L"filterCode", __FUNCTIONW__);
+            throw adbook::HrError(E_INVALIDARG, L"unknown CompositeFilterId", __FUNCTIONW__);
         }
     }
-    else if (FilterType::LdapAttr == filterType_) {
-        adbook::Attributes::AttrId attrId = static_cast<adbook::Attributes::AttrId>(filterCode);        
-        typeItem = new FilterTypeItem(attrId);
+    else  if (auto attrIdPtr = std::get_if<adbook::Attributes::AttrId>(&filterCode)) {
+        typeItem = new FilterTypeItem(*attrIdPtr);
     }
     else {
-        throw adbook::HrError(E_INVALIDARG, L"filterType", __FUNCTIONW__);
+        throw adbook::HrError(E_INVALIDARG, L"unknown filterCode", __FUNCTIONW__);
     }
-    FilterConditionItem * condItem = new FilterConditionItem(condition_);
+    FilterConditionItem * condItem = new FilterConditionItem(condition);
     AddFilter(typeItem, condItem, filterValue);
+    
 }
 
-void FilterListModel::Load()
+void FilterListModel::LoadState()
 {
     removeRows(0, rowCount());
-    using namespace SearchFilterSettings;
-    QSettings settings(QApplication::organizationName(), QApplication::applicationName());
-    settings.beginGroup(sectionName);
-        int numFilters = settings.value(numFiltersParam).toInt();
-        for (int i = 0; i < numFilters; ++i) {
-            settings.beginGroup(QString::number(i));
-                int filterCode = settings.value(codeParam).toInt();
-                QString filterVal = settings.value(valueParam).toString();
-                int filterType = settings.value(typeParam).toInt();
-                int filterCond = settings.value(conditionParam).toInt();
-                Load(filterType, filterCode, filterVal, filterCond);
-            settings.endGroup();
-        }         
-    settings.endGroup();    
-}
-
-void FilterListModel::Save()
-{    
-    using namespace SearchFilterSettings;
-    QSettings settings(QApplication::organizationName(), QApplication::applicationName());
-    
-    settings.beginGroup(sectionName);        
-        settings.setValue(numFiltersParam, rowCount());
-        for (int i = 0, count = rowCount(); i < count; ++i) {
-            settings.beginGroup(QString::number(i));
-                FilterTypeItem * type = GetFilterType(i);
-                settings.setValue(typeParam, static_cast<int>(type->GetFilterType()));
-                settings.setValue(codeParam, static_cast<int>(type->GetFilterCode()));
-                FilterConditionItem * cond = GetFilterCondition(i);
-                settings.setValue(conditionParam, static_cast<int>(cond->GetMatchingRule()));
-                QString val = GetFilterValue(i);
-                settings.setValue(valueParam, val);
-            settings.endGroup();
-        }
-    settings.endGroup();
+    FilterListSettings fls = _appSettings.GetFilterListSettings();
+    for (size_t i = 0; i < fls.GetNumFilters(); ++i) {
+        auto filter = fls.GetFilter(i);
+        LoadState(filter.GetFilterCode(), filter.GetValue(), filter.GetCondition());
+    }
 }
 

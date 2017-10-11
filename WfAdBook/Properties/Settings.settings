@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="DomainOrDc" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)"></Value>
     </Setting>
     <Setting Name="Login" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)"></Value>
     </Setting>
     <Setting Name="ConnectDefaultDomain" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

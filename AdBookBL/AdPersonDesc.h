@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -24,30 +24,31 @@ You should have received a copy of the GNU General Public License along with
 namespace adbook
 {
 
-class ADBOOKBL_API AdPersonDesc
+class ADBOOKBL_API AdPersonDesc final
 {
 public:
     AdPersonDesc() = default;
     AdPersonDesc(const AdPersonDesc &) = default;
-    AdPersonDesc(AdPersonDesc &&) = default;
+    AdPersonDesc(AdPersonDesc &&) noexcept = default;
     AdPersonDesc & operator = (const AdPersonDesc &) = default;
-    AdPersonDesc & operator = (AdPersonDesc &&) = default;
+    AdPersonDesc & operator = (AdPersonDesc &&) noexcept = default;
     ~AdPersonDesc() = default;
 
     template <class StringAttrValType>
     void SetStringAttr(const LdapAttrName & an, StringAttrValType && sav);
-    
+
     const wchar_t * GetStringAttrPtr(const LdapAttrName & an) const;
     StringAttrVal GetStringAttr(const LdapAttrName & an) const;
-    StringAttrVal GetStringAttr(Attributes::AttrId id) const;    
+
+    // return true if the first range is lexicographically less than the second.
     bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const;
-    
+    bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, const std::wstring & ldapAttrName) const;
+
     template <class BinaryAttrValType>
     void SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && bav);
 
     const BYTE * GetBinaryAttrPtr(const LdapAttrName & an, size_t & attrSize) const;
     BinaryAttrVal GetBinaryAttr(const LdapAttrName & an) const;
-    BinaryAttrVal GetBinaryAttr(Attributes::AttrId id) const;
 
     using AttrIds = std::set<Attributes::AttrId>;
 
@@ -62,7 +63,7 @@ public:
     StringAttrVal GetDn() const;
 
 private:
-    AttrIds writableAttributes_;
+    AttrIds writableAttributes_; // It's based on the AD attribute 'allowedAttributesEffective'
     std::map<LdapAttrName, StringAttrVal> stringAttrs_;
     std::map<LdapAttrName, BinaryAttrVal> binaryAttrs_;
 };
@@ -84,7 +85,8 @@ void AdPersonDesc::SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && b
 template <class AttrIdsType>
 void AdPersonDesc::SetWritableAttributes(AttrIdsType && ait)
 {
-    writableAttributes_ = std::forward<AttrIds>(ait);
+    writableAttributes_ = std::forward<AttrIdsType>(ait);
 }
+
 
 }   // namespace adbook

@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -27,7 +27,7 @@ namespace adbookcli
 using System::Runtime::InteropServices::Marshal;
 using System::IntPtr;
 
-std::wstring StringToStdWstring(String ^ s) 
+std::wstring StringToStdWstring(String ^ s)
 {
     std::wstring result;
     if (!String::IsNullOrEmpty(s)) {
@@ -45,10 +45,10 @@ std::wstring StringToStdWstring(String ^ s)
     return result;
 }
 
-std::wstring SecureStringToStdWstring(SecureString ^ s) 
+std::wstring SecureStringToStdWstring(SecureString ^ s)
 {
     std::wstring result;
-    if (s->Length > 0) {
+    if ((s != nullptr) && (s->Length > 0)) {
         IntPtr sPtr = Marshal::SecureStringToBSTR(s);
         try {
             if (sPtr.ToPointer() != nullptr) {
@@ -85,7 +85,7 @@ cli::array<Byte> ^ StdVectorToCliArray(std::vector<BYTE> data)
 
 void ListCtrlHelper::EnableTooltipsForListCtrl(System::IntPtr listCtrlHandle)
 {
-    ListView_SetExtendedListViewStyleEx(static_cast<HWND>(static_cast<HANDLE>(listCtrlHandle)), 
+    ListView_SetExtendedListViewStyleEx(static_cast<HWND>(static_cast<HANDLE>(listCtrlHandle)),
         LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 }
 

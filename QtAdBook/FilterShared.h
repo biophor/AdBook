@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -20,5 +20,6 @@ You should have received a copy of the GNU General Public License along with
 enum class CompositeFilterId { AnyAttribute };
 enum class FilterType { LdapAttr, Composite };
 
-QString GetFilterUiName(CompositeFilterId id);
-QString GetFilterUiName(adbook::Attributes::AttrId attrId);
+using FilterCode = std::variant<adbook::Attributes::AttrId, CompositeFilterId>;
+using FilterCondition = adbook::LdapRequestBuilder::MatchingRule;
+

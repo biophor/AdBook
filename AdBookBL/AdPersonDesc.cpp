@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -39,7 +39,7 @@ inline T GetAttrVal(const LdapAttrName & an, const std::map<LdapAttrName, T> & m
 }
 
 const wchar_t * AdPersonDesc::GetStringAttrPtr(const LdapAttrName & an) const
-{    
+{
     auto attrIter = stringAttrs_.find(an);
     if (attrIter == stringAttrs_.cend()) {
         throw HrError(E_INVALIDARG, L"an param", __FUNCTIONW__);
@@ -67,19 +67,9 @@ StringAttrVal AdPersonDesc::GetStringAttr(const LdapAttrName & an) const
     return GetAttrVal(an, stringAttrs_);
 }
 
-StringAttrVal AdPersonDesc::GetStringAttr(Attributes::AttrId id) const
-{
-    return GetStringAttr(Attributes::GetInstance().GetLdapAttrName(id));
-}
-
 BinaryAttrVal AdPersonDesc::GetBinaryAttr(const LdapAttrName & an) const
 {
     return GetAttrVal(an, binaryAttrs_);
-}
-
-BinaryAttrVal AdPersonDesc::GetBinaryAttr(Attributes::AttrId id) const
-{
-    return GetBinaryAttr(Attributes::GetInstance().GetLdapAttrName(id));
 }
 
 bool AdPersonDesc::IsAttributeSet(const LdapAttrName & an) const
@@ -106,6 +96,11 @@ AdPersonDesc::AttrIds AdPersonDesc::GetWritableAttributes() const
 bool AdPersonDesc::LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const
 {
     const LdapAttrName ldapAttrName = Attributes::GetInstance().GetLdapAttrName(id);
+    return LexicographicalCompareStringAttrs(apd, ldapAttrName);
+}
+
+bool AdPersonDesc::LexicographicalCompareStringAttrs(const AdPersonDesc & apd, const std::wstring & ldapAttrName) const
+{
     auto li = stringAttrs_.find(ldapAttrName);
     auto ri = apd.stringAttrs_.find(ldapAttrName);
     bool lNotFound = li == stringAttrs_.cend();
@@ -119,7 +114,7 @@ bool AdPersonDesc::LexicographicalCompareStringAttrs(const AdPersonDesc & apd, A
     if (rNotFound) {
         return false;
     }
-    return std::lexicographical_compare (
+    return std::lexicographical_compare(
         li->second.cbegin(), li->second.cend(),
         ri->second.cbegin(), ri->second.cend()
     );

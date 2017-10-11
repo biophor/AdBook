@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace WfAdBook
 {
-    sealed class LdapMatchingRules: IEnumerable<LdapMatchingRule>
+    class LdapMatchingRules: IEnumerable<LdapMatchingRule>
     {
         public static LdapMatchingRules Instance { get; } = new LdapMatchingRules();
 
@@ -44,20 +44,20 @@ namespace WfAdBook
 
         private LdapMatchingRule[] _rules = new LdapMatchingRule[] {
             new LdapMatchingRule(
-                Properties.Resources.LdapMatchingRuleContainsDisplayName, 
-                adbookcli.LdapRequest.MathingRule.Contains
+                Properties.Resources.LdapMatchingRuleContainsDisplayName,
+                adbookcli.LdapRequestBuilder.MatchingRule.Contains
                 ),
             new LdapMatchingRule(
                 Properties.Resources.LdapMatchingRuleBeginsWithDisplayName,
-                adbookcli.LdapRequest.MathingRule.BeginWith
+                adbookcli.LdapRequestBuilder.MatchingRule.BeginWith
                 ),
             new LdapMatchingRule(
                 Properties.Resources.LdapMatchingRuleEndsWithDisplayName,
-                adbookcli.LdapRequest.MathingRule.EndWith
+                adbookcli.LdapRequestBuilder.MatchingRule.EndWith
                 ),
             new LdapMatchingRule(
                 Properties.Resources.LdapMatchingRuleExactMatchDisplayName,
-                adbookcli.LdapRequest.MathingRule.ExactMatch
+                adbookcli.LdapRequestBuilder.MatchingRule.ExactMatch
                 )
         };
     }

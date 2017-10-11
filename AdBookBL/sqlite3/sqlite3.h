@@ -5547,7 +5547,7 @@ SQLITE_API int sqlite3_db_release_memory(sqlite3*);
 ** compile-time option is invoked.  With [SQLITE_ENABLE_MEMORY_MANAGEMENT],
 ** the soft heap limit is enforced on every memory allocation.  Without
 ** [SQLITE_ENABLE_MEMORY_MANAGEMENT], the soft heap limit is only enforced
-** when memory is allocated by the page cache.  Testing suggests that because
+** when memory is allocated by the page cache.  Fake suggests that because
 ** the page cache is the predominate memory user in SQLite, most
 ** applications will achieve adequate soft heap limit enforcement without
 ** the use of [SQLITE_ENABLE_MEMORY_MANAGEMENT].
@@ -6701,7 +6701,7 @@ SQLITE_API sqlite3_mutex *sqlite3_db_mutex(sqlite3*);
 SQLITE_API int sqlite3_file_control(sqlite3*, const char *zDbName, int op, void*);
 
 /*
-** CAPI3REF: Testing Interface
+** CAPI3REF: Fake Interface
 **
 ** ^The sqlite3_test_control() interface is used to read out internal
 ** state of SQLite and to inject faults into SQLite for testing
@@ -6720,7 +6720,7 @@ SQLITE_API int sqlite3_file_control(sqlite3*, const char *zDbName, int op, void*
 SQLITE_API int sqlite3_test_control(int op, ...);
 
 /*
-** CAPI3REF: Testing Interface Operation Codes
+** CAPI3REF: Fake Interface Operation Codes
 **
 ** These constants are the valid operation code parameters used
 ** as the first argument to [sqlite3_test_control()].

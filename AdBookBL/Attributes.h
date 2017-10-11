@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #pragma once
 
 #include "AdBookBLExport.h"
@@ -27,17 +28,18 @@ namespace adbook
 class ADBOOKBL_API Attributes
 {
 public:
-    enum AttrId {
+    enum AttrId : uint8_t {
         CommonName, Email, Company, Title, Department, State, EmpId,
-        SurName, GivenName, DisplayName, WorkPhone, HomePhone, MobilePhone, 
+        SurName, GivenName, DisplayName, WorkPhone, HomePhone, MobilePhone,
         Locality, ThumbnailPhoto, Dn, AttrIdEnd
     };
 
-    static Attributes & GetInstance()
+
+    static Attributes & GetInstance()   // we need only one instance
     {
         static Attributes instance;
         return instance;
-    }    
+    }
     bool IsEditable(const AttrId id) const;
     bool IsString(const AttrId id) const;
     bool IsEditableString(const AttrId id) const;
@@ -50,22 +52,46 @@ public:
     size_t GetTextAttrMaxLength() const;
     size_t GetBinaryAttrMaxLength() const;
     AttrId GetAttrId(const wchar_t * attrName) const;
-    std::vector<WcharBuf> GetWritableLdapAttrNames() const;
+    std::vector<WcharBuf> GetAdsiComplientAttrNames() const;
     const std::list<std::wstring> & GetLdapAttrNames() const;
-    const std::vector<AttrId> & GetAttrIds() const;    
+    const std::vector<AttrId> & GetAttrIds() const;
     bool IsAttrSupported(const AttrId attrId) const noexcept;
     bool IsAttrSupported(const wchar_t * ldapAttrName) const;
-    void PreExitUnload();
-public:
-    Attributes(const Attributes &) = delete;
-    Attributes(Attributes &&) = delete;
-    void operator = (const Attributes &) = delete;
-    void operator = (Attributes &&) = delete;
+    static void PreExitUnload();    // to prevent false memory leaks warnings
 private:
     Attributes();
+    Attributes(const Attributes &) = delete;
+    Attributes(Attributes &&) = delete;
+    Attributes & operator = (const Attributes &) = delete;
+    Attributes & operator = (Attributes &&) = delete;
 private:
-    std::vector<AttrId> attrIds_;
-    std::list<std::wstring> ldapAttrNames_;
+    static void PopulateTables();
+private:
+    struct LdapAttr
+    {
+        LdapAttr(LPCWSTR attrName, UINT attrGuiId, bool attrHasSingleValue, size_t attrMaxLen,
+                LPCWSTR attrObjectId, bool attrIsString, bool attrIsEditable) :
+            ldapAttrName(attrName),
+            uiIds(attrGuiId),
+            isSingleValued(attrHasSingleValue),
+            maxLen(attrMaxLen),
+            attrOid(attrObjectId),
+            isString(attrIsString),
+            isEditable(attrIsEditable) {}
+        const wchar_t * ldapAttrName;
+        const size_t maxLen;
+        const wchar_t * attrOid;
+        const unsigned int uiIds;
+        const bool isSingleValued;
+        const bool isString;
+        const bool isEditable;
+    };
+
+private:
+    static std::map<Attributes::AttrId, LdapAttr> mainAttrInfo_;
+    static std::vector<AttrId> attrIds_;
+    static std::list<std::wstring> ldapAttrNames_;
+    static std::map<const std::wstring, Attributes::AttrId> nameToIdMap_;
 };
 
 }

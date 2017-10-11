@@ -28,12 +28,12 @@ namespace WfAdBook
 {
     sealed class LdapMatchingRule: IEquatable<LdapMatchingRule>
     {
-        public LdapMatchingRule(string displayName, LdapRequest.MathingRule id)
+        public LdapMatchingRule(string displayName, LdapRequestBuilder.MatchingRule id)
         {
             Id = id;
             DisplayName = displayName;
         }
-        public LdapRequest.MathingRule Id { get; private set; }
+        public LdapRequestBuilder.MatchingRule Id { get; private set; }
         public string DisplayName { get; private set; }
 
         public override bool Equals(object obj)

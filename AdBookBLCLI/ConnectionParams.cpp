@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -28,11 +28,11 @@ namespace adbookcli
 adbook::ConnectionParams ConnectionParams::ToUnderlyingType()
 {
     adbook::ConnectionParams cp;
-    cp.CurrentDomain(_useDomainYouAreLoggedIn);
-    cp.CurrentUserCredentials(_useCurrentUserCredentials);
-    cp.SetDC(StringToStdWstring(_dc));
+    cp.ConnectDomainYouAreLoggedIn(_useDomainYouAreLoggedIn);
+    cp.UseCurrentUserCredentials(_useCurrentUserCredentials);
+    cp.SetDomainController(StringToStdWstring(_address));
     cp.SetLogin(StringToStdWstring(_login));
-    cp.SetPassword(SecureStringToStdWstring(_password));    
+    cp.SetPassword(SecureStringToStdWstring(_password));
     return cp;
 }
 

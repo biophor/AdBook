@@ -33,16 +33,10 @@
     <ClCompile Include="Attributes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LdapRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AdPersonDesc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AdPersonDescList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AdConnector.cpp">
@@ -62,6 +56,33 @@
     </ClCompile>
     <ClCompile Include="sqlite3\sqlite3.c">
       <Filter>sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractAdConnector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractAdSearcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractAdAccessFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FakeConnector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FakeSearcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FakeDataSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractAdPersonDescKeeper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AdPersonDescSqliteKeeper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LdapRequestBuilder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,16 +107,10 @@
     <ClInclude Include="AdBookBLExport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LdapRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdPersonDesc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AdPersonDescList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdConnector.h">
@@ -118,6 +133,33 @@
     </ClInclude>
     <ClInclude Include="sqlite3\sqlite3.h">
       <Filter>sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractAdConnector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractAdSearcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractAdAccessFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FakeConnector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FakeSearcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FakeDataSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractAdPersonDescKeeper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AdPersonDescSqliteKeeper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LdapRequestBuilder.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

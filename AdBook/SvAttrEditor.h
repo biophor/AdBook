@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -21,36 +21,40 @@ You should have received a copy of the GNU General Public License along with
 
 // SvAttrEditor dialog
 
+// Dialog for editing single-valued string attributes
 class SvAttrEditor : public CDialogEx
 {
-	DECLARE_DYNAMIC(SvAttrEditor)
+    DECLARE_DYNAMIC(SvAttrEditor)
 
 public:
-	SvAttrEditor(adbook::AdPersonDesc & person, const adbook::Attributes::AttrId attrToChange, CWnd* pParent = NULL);   // standard constructor
-	virtual ~SvAttrEditor();
+    SvAttrEditor(
+        adbook::AdPersonDesc & person,
+        const adbook::Attributes::AttrId attrToChange,
+        CWnd* pParent = NULL
+    );   // standard constructor
+    virtual ~SvAttrEditor();
 
 // Dialog Data
-	enum { IDD = IDD_CHANGE_SV_ATTR };
+    enum { IDD = IDD_CHANGE_SV_ATTR };
 
     CString GetNewValue() const;
 private:
-    WindowAnchor wndAnchor_;
-    CSize minSize_;
-    const adbook::AdPersonDesc & person_;
-    const adbook::Attributes::AttrId attrToChange_;
-
-    HICON icon_;
+    WindowAnchor _wndAnchor;
+    CSize _minSize;
+    const adbook::AdPersonDesc & _person;
+    const adbook::Attributes::AttrId _attrToChange;
+    HICON _icon;
 protected:
     virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnSize(UINT nType, int cx, int cy);
     afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
     afx_msg void OnBnClickedOk();
 private:
-    CString newValue_;
+    CString _newValue;
 public:
     afx_msg void OnDestroy();
 };

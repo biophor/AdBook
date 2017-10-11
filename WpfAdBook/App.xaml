@@ -1,0 +1,33 @@
+﻿<Application
+  x:Class="WpfAdBook.App"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converter="clr-namespace:WpfAdBook.Converters"
+  xmlns:local="clr-namespace:WpfAdBook"
+  xmlns:viewModels="clr-namespace:WpfAdBook.ViewModels">
+  <Application.Resources>
+    <local:ViewModelLocator x:Key="globalViewModelLocator" />
+    <viewModels:AdAttributesVM x:Key="globalAdAttributesVM" />
+    <converter:CheckBoxValueInverter x:Key="checkBoxValueInverter" />
+    <converter:DoNothingConverter x:Key="doNothingConverter" />
+    <converter:NullImageConverter x:Key="nullImageConverter" />
+    <converter:TrimmedTextBlockVisibilityConverter x:Key="trimmedTextBlockVisibilityConverter" />
+
+    <Style TargetType="Button">
+      <Setter Property="Margin" Value="5" />
+      <Setter Property="MinWidth" Value="70" />
+      <Setter Property="MinHeight" Value="20" />
+      <Setter Property="MaxWidth" Value="150" />
+      <Setter Property="Padding" Value="10,5,10,5" />
+    </Style>
+
+    <Style TargetType="TextBox">
+      <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style TargetType="DataGridCell">
+      <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}" />
+    </Style>
+
+  </Application.Resources>
+</Application>

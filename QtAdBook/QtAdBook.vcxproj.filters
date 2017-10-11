@@ -71,9 +71,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ChangeSvAttrDlg.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="ConnectionSettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -140,6 +137,21 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AboutDlg.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="AbstractAppSettingsKeeper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWndSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FilterListSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSettingsQtFacilityKeeper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -153,9 +165,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ChangeSvAttrDlg.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConnectionSettings.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="application.h">
       <Filter>Header Files</Filter>
@@ -171,6 +180,24 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AboutDlg.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractAppSettingsKeeper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QSettingsAutoEndGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainWndSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FilterListSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSettingsQtFacilityKeeper.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

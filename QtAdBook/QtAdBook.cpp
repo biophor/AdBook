@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -17,38 +17,44 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include "stdafx.h"
 #include "AboutDlg.h"
 #include "QtAdBook.h"
 #include "WaitCursor.h"
 #include "SettingsDlg.h"
+#include "AppSettings.h"
 #include "FilterTypeItem.h"
 #include "FilterListModel.h"
 #include "ChangeSvAttrDlg.h"
 #include "PropertiesModel.h"
+#include "MainWndSettings.h"
 #include "TableViewTooltip.h"
 #include "ContactListModel.h"
 #include "FilterNamesModel.h"
-#include "ConnectionSettings.h"
-#include "ConnectionSettings.h"
 #include "AutoToolTipDelegate.h"
 #include "FilterConditionItem.h"
 #include "FilterConditionModel.h"
+#include "QSettingsAutoEndGroup.h"
 
-
-QtAdBook::QtAdBook(QWidget * parent)
-    : QDialog(parent)
+QtAdBook::QtAdBook(
+    std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,
+    AppSettings & appSettings,
+    QWidget * parent
+)
+    : QDialog{ parent }, _adFactory{ adFactory }, _appSettings{ appSettings }
 {
+    _adSearcher = _adFactory->CreateSearcher();
     ui.setupUi(this);
-    setWindowFlags(windowFlags() | Qt::WindowMinMaxButtonsHint);    
+    setWindowFlags(windowFlags() | Qt::WindowMinMaxButtonsHint);
     InitFilterListNames();
     InitFilterList();
-    InitConditionList();    
-    InitAdSearcher();    
+    InitConditionList();
+    InitAdSearcher();
     InitPropertyList();
     InitSearchResultList();
     InitSignalConnections();
-    RestoreState();        
+    RestoreState();
 }
 
 void QtAdBook::InitSignalConnections()
@@ -72,7 +78,7 @@ void QtAdBook::InitSignalConnections()
     b = connect(ui.showSettings, SIGNAL(clicked(bool)), SLOT(OnShowSettings()));
     Q_ASSERT(b);
     b = connect(ui.filters->selectionModel(),
-        SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), 
+        SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
         SLOT(OnFilterSelectionChanged())
     );
     Q_ASSERT(b);
@@ -86,7 +92,7 @@ void QtAdBook::InitSignalConnections()
     Q_ASSERT(b);
     b = connect(this, SIGNAL(OneOrMoreContactsFoundSignal()), SLOT(OnOneOrMoreContactsFound()));
     Q_ASSERT(b);
-    b = connect(ui.contacts->horizontalHeader(), SIGNAL(sectionPressed(int)), 
+    b = connect(ui.contacts->horizontalHeader(), SIGNAL(sectionPressed(int)),
         SLOT(OnHeaderSectionPressed(int))
     );
     Q_ASSERT(b);
@@ -112,17 +118,14 @@ void QtAdBook::InitSignalConnections()
 
 void QtAdBook::InitAdSearcher()
 {
-    _adSearcher.SetCallbacks(
+    _adSearcher->SetCallbacks(
         [this](adbook::AdPersonDesc && arg) { ContactFoundCallback(std::move(arg)); },
         [this]() { SearchStartedCallback(); },
         [this]() { SearchStoppedCallback(); }
     );
 }
 
-QtAdBook::~QtAdBook()
-{
-
-}
+QtAdBook::~QtAdBook() = default;
 
 void QtAdBook::OnClose()
 {
@@ -134,11 +137,15 @@ void QtAdBook::OnFindContacts()
     try
     {
         WaitCursor wc;
-        if (_adSearcher.IsStarted()) {
-            _adSearcher.Stop();
+        {
+            auto connector = _adFactory->CreateConnector();
+            connector->Connect(_appSettings.GetConnectionParams());
+        }
+        if (_adSearcher->IsStarted()) {
+            _adSearcher->Stop();
         }
         else {
-            _adSearcher.Start(ConstructLdapRequest(), ConnectionSettings::Instance());
+            _adSearcher->Start(ConstructLdapRequest(), _appSettings.GetConnectionParams());
             ui.findContacts->setEnabled(false);
             ui.addFilter->setEnabled(false);
             ui.removeFilter->setEnabled(false);
@@ -151,7 +158,7 @@ void QtAdBook::OnFindContacts()
     }
     catch (const adbook::Error & e)
     {
-        QMessageBox::critical(this, QApplication::applicationName(), QString::fromStdWString(e.What()), 
+        QMessageBox::critical(this, QApplication::applicationName(), QString::fromStdWString(e.What()),
             QMessageBox::Warning, QMessageBox::Ok);
     }
     catch (const std::exception & e)
@@ -173,7 +180,7 @@ void QtAdBook::OnCopyAttribute()
 
 void QtAdBook::OnChangeAttribute()
 {
-    auto currentAttrIndex = ui.properties->currentIndex();    
+    auto currentAttrIndex = ui.properties->currentIndex();
     if (!currentAttrIndex.isValid()) {
         return;
     }
@@ -184,7 +191,8 @@ void QtAdBook::OnChangeAttribute()
     auto attrId = _propertiesModel->GetAttr(currentAttrIndex.row());
     auto contact = _contactListModel->GetContact(currentContactIndex.row());
     auto dn = QString::fromStdWString(contact.GetDn());
-    auto currentValue = QString::fromStdWString(contact.GetStringAttr(attrId));
+    auto & attributes = adbook::Attributes::GetInstance();
+    auto currentValue = QString::fromStdWString(contact.GetStringAttr(attributes.GetLdapAttrName(attrId)));
     ChangeSvAttrDlg dlg(dn, currentValue, attrId, this);
     int res = dlg.exec();
     if (res != QDialog::Accepted) {
@@ -194,13 +202,12 @@ void QtAdBook::OnChangeAttribute()
     if (newValue == currentValue) {
         return;
     }
-    const auto attrName =
-        adbook::Attributes::GetInstance().GetLdapAttrName(attrId);
+    const auto attrName = attributes.GetLdapAttrName(attrId);
     try {
-        adbook::AdConnector ac{ ConnectionSettings::Instance(), contact.GetDn() };
+        auto connector = _adFactory->CreateConnector();
         WaitCursor wc;
-        ac.Connect();
-        ac.UploadStringAttr(attrName, newValue.toStdWString());
+        connector->Connect(_appSettings.GetConnectionParams(), contact.GetDn());
+        connector->UploadStringAttr(attrName, newValue.toStdWString());
         contact.SetStringAttr(attrName, newValue.toStdWString());
         _contactListModel->SetContact(currentContactIndex.row(), contact);
         OnAnotherContactSelected(currentContactIndex, currentContactIndex);
@@ -216,7 +223,7 @@ void QtAdBook::OnChangeAttribute()
 void QtAdBook::OnSelectPhoto()
 {
     QFileDialog dlg(this);
-    dlg.setWindowTitle(tr("Select a photo(size <= 100kb)"));
+    dlg.setWindowTitle(tr("Select a photo(the size must be less than 100kb)"));
     dlg.setFileMode(QFileDialog::ExistingFile);
     dlg.setNameFilter(tr("JPEG Images (*.jpeg *.jpg)"));
     dlg.setAcceptMode(QFileDialog::AcceptOpen);
@@ -224,9 +231,10 @@ void QtAdBook::OnSelectPhoto()
         return;
     }
     QString photoFileName = dlg.selectedFiles().first();
+    auto & attributes = adbook::Attributes::GetInstance();
     const auto photoMaxSizeInBytes =
-        adbook::Attributes::GetInstance().GetAttrMaxLength(adbook::Attributes::ThumbnailPhoto);
-    QFile photoFile(photoFileName);    
+        attributes.GetAttrMaxLength(adbook::Attributes::ThumbnailPhoto);
+    QFile photoFile(photoFileName);
     if (!photoFile.open(QFile::ReadOnly)) {
         QMessageBox::warning(this, QApplication::applicationName(),
             tr("Failed to open a file."));
@@ -243,29 +251,30 @@ void QtAdBook::OnSelectPhoto()
             tr("File size should be less than 100kb"));
         return;
     }
-    QByteArray ba = photoFile.readAll();    
+    QByteArray ba = photoFile.readAll();
     adbook::BinaryAttrVal photoFileData(photoFileSize);
-    std::transform(ba.begin(), ba.end(), 
+    std::transform(ba.begin(), ba.end(),
         photoFileData.begin(), [](char ch) { return static_cast<BYTE>(ch); });
-    
+
     QModelIndex currentIndex = ui.contacts->currentIndex();
     if (!currentIndex.isValid()) {
         return;
     }
-    auto contact = _contactListModel->GetContact(currentIndex.row());    
+    auto contact = _contactListModel->GetContact(currentIndex.row());
     const auto dn = contact.GetDn();
-    const auto attrName = 
-        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
-    adbook::AdConnector ac{ ConnectionSettings::Instance(), dn };
+    const auto attrName =
+        attributes.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
+
     try {
+        auto connector = _adFactory->CreateConnector();
         WaitCursor wc;
-        ac.Connect();
-        ac.UploadBinaryAttr(attrName, photoFileData);
+        connector->Connect(_appSettings.GetConnectionParams(), dn);
+        connector->UploadBinaryAttr(attrName, photoFileData);
         contact.SetBinaryAttr(attrName, photoFileData);
         _contactListModel->SetContact(currentIndex.row(), contact);
         OnAnotherContactSelected(currentIndex, currentIndex);
     }
-    catch (const adbook::Error & e) {        
+    catch (const adbook::Error & e) {
         QMessageBox::warning(this, QApplication::applicationName(), QString::fromStdWString(e.What()));
     }
     catch (const std::exception & e) {
@@ -281,13 +290,15 @@ void QtAdBook::OnClearPhoto()
     }
     auto contact = _contactListModel->GetContact(currentIndex.row());
     const auto dn = contact.GetDn();
+    auto & attributes = adbook::Attributes::GetInstance();
     const auto attrName =
-        adbook::Attributes::GetInstance().GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
-    adbook::AdConnector ac{ ConnectionSettings::Instance(), dn };
+        attributes.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
+
     try {
+        auto connector = _adFactory->CreateConnector();
         WaitCursor wc;
-        ac.Connect();
-        ac.UploadBinaryAttr(attrName, adbook::BinaryAttrVal());
+        connector->Connect(_appSettings.GetConnectionParams(), dn);
+        connector->UploadBinaryAttr(attrName, adbook::BinaryAttrVal());
         contact.SetBinaryAttr(attrName, adbook::BinaryAttrVal());
         _contactListModel->SetContact(currentIndex.row(), contact);
         OnAnotherContactSelected(currentIndex, currentIndex);
@@ -302,33 +313,33 @@ void QtAdBook::OnClearPhoto()
 
 void QtAdBook::OnShowSettings()
 {
-    SettingsDlg dlg(this);
-    dlg.exec();    
+    SettingsDlg dlg(_adFactory, _appSettings, this);
+    dlg.exec();
 }
 
 void QtAdBook::InitFilterListNames()
 {
-    _filterNamesModel = new FilterNamesModel(ui.filterNames);    
+    _filterNamesModel = new FilterNamesModel(ui.filterNames);
     ui.filterNames->setModel(_filterNamesModel);
 }
 
 void QtAdBook::InitFilterList()
 {
-    _filterListModel = new FilterListModel(ui.filterNames);        
-    ui.filters->setModel(_filterListModel);    
+    _filterListModel = new FilterListModel(_appSettings, ui.filterNames);
+    ui.filters->setModel(_filterListModel);
     ui.filters->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.filters->setSelectionMode(QAbstractItemView::SingleSelection);
     ui.filters->setItemDelegate(new AutoToolTipDelegate(ui.filters));
 }
 
 void QtAdBook::OnAddFilter()
-{    
+{
     int row = _filterListModel->AddFilter (
         _filterNamesModel->item(ui.filterNames->currentIndex())->clone(),
         _filterConditionModel->item(ui.conditions->currentIndex())->clone(),
         ui.filterValue->currentText().trimmed()
-    );        
-    ui.filters->resizeRowToContents(row);         
+    );
+    ui.filters->resizeRowToContents(row);
 }
 
 void QtAdBook::OnRemoveFilter()
@@ -349,7 +360,7 @@ void QtAdBook::InitConditionList()
 void QtAdBook::closeEvent(QCloseEvent * /*event*/ )
 {
     /*
-    int answer = QMessageBox::information(this, QApplication::applicationName(), 
+    int answer = QMessageBox::information(this, QApplication::applicationName(),
         tr("Do you realy want to exit?"), QMessageBox::Ok | QMessageBox::Cancel);
     if (answer == QMessageBox::Cancel) {
         event->ignore();
@@ -360,16 +371,16 @@ void QtAdBook::closeEvent(QCloseEvent * /*event*/ )
     */
     WaitCursor wc;
 
-    if (_adSearcher.IsStarted()) {
-        _adSearcher.Stop();
+    if (_adSearcher->IsStarted()) {
+        _adSearcher->Stop();
         try {
-            _adSearcher.Wait();
+            _adSearcher->Wait();
         }
         catch (const std::exception&) { //-V565
           // user wants to exit. An error message should not be displayed.
         }
-    }    
-    SaveState();    
+    }
+    SaveState();
 }
 
 void QtAdBook::OnFilterSelectionChanged() {
@@ -385,7 +396,7 @@ void QtAdBook::OnHeaderSectionPressed(int /*logicalIndex*/)
     ui.contacts->horizontalHeader()->setSortIndicatorShown(true);
 }
 
-void QtAdBook::ContactFoundCallback(adbook::AdPersonDesc && item) 
+void QtAdBook::ContactFoundCallback(adbook::AdPersonDesc && item)
 {
     QMutexLocker locker(&_contactsMutex);
     _contacts.push_back(std::move(item));
@@ -394,10 +405,10 @@ void QtAdBook::ContactFoundCallback(adbook::AdPersonDesc && item)
     if (_prevProcessingTime.secsTo(currentTime) > 1) {  // handle next portion each second
         emit OneOrMoreContactsFoundSignal();
         _prevProcessingTime = currentTime;
-    }    
+    }
 }
 
-void QtAdBook::SearchStartedCallback() {    
+void QtAdBook::SearchStartedCallback() {
     emit SearchStartedSignal();
 }
 
@@ -407,13 +418,13 @@ void QtAdBook::SearchStoppedCallback() {
 
 void QtAdBook::OnSearchStarted()
 {
-    _contactListModel->Clear();    
+    _contactListModel->Clear();
     _propertiesModel->Clear();
     ui.contacts->horizontalHeader()->setSortIndicatorShown(false);
     ui.groupBoxContacts->setTitle("Contacts:");
     _prevProcessingTime = QTime::currentTime();
     ui.findContacts->setEnabled(true);
-    ui.findContacts->setText(tr("Stop"));        
+    ui.findContacts->setText(tr("Stop"));
 }
 
 void QtAdBook::OnSearchStopped()
@@ -422,21 +433,21 @@ void QtAdBook::OnSearchStopped()
     ui.addFilter->setEnabled(true);
     ui.removeFilter->setEnabled(ui.filters->selectionModel()->hasSelection());
     ui.filterValue->setEnabled(true);
-    
+
     if (!_contacts.empty()) {
         emit OneOrMoreContactsFoundSignal();
     }
     int numContacts = _contactListModel->rowCount();
     if (numContacts > 0) {
         SaveSuccessfulFilterValue();
-    }    
-    try {
-        _adSearcher.Wait();
     }
-    catch (const adbook::Error & e) {        
+    try {
+        _adSearcher->Wait();
+    }
+    catch (const adbook::Error & e) {
         QMessageBox::critical(this, QApplication::applicationName(), QString::fromStdWString(e.What()),
             QMessageBox::Warning, QMessageBox::Ok);
-    }    
+    }
 }
 
 void QtAdBook::SaveSuccessfulFilterValue()
@@ -465,16 +476,16 @@ void QtAdBook::RefreshNumFoundContacts()
     ui.groupBoxContacts->setTitle(QString("Contacts(%1):").arg(numContacts));
 }
 
-adbook::LdapRequest QtAdBook::ConstructLdapRequest() {
+std::wstring QtAdBook::ConstructLdapRequest() {
     return _filterListModel->ConstructLdapRequest(ui.allFilters->isChecked());
 }
 
 void QtAdBook::InitSearchResultList()
 {
-    _contactListModel = new ContactListModel(ui.contacts);    
-    ui.contacts->setModel(_contactListModel);    
+    _contactListModel = new ContactListModel(_adFactory->GetAdPersonDescKeeper(), ui.contacts);
+    ui.contacts->setModel(_contactListModel);
     ui.contacts->setItemDelegate(new AutoToolTipDelegate(ui.contacts));
-    ui.contacts->horizontalHeader()->setSectionsMovable(true);    
+    ui.contacts->horizontalHeader()->setSectionsMovable(true);
 }
 
 namespace {
@@ -489,7 +500,8 @@ void QtAdBook::OnAnotherContactSelected(const QModelIndex &current, const QModel
         ui.selectPhoto->setEnabled(canChangePhoto);
         ui.clearPhoto->setEnabled(canChangePhoto);
         _propertiesModel->SetContact(std::move(contact));
-        adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(adbook::Attributes::ThumbnailPhoto);        
+        auto & attributes = adbook::Attributes::GetInstance();
+        adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(attributes.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto));
         ui.photo->clear();
         ui.photo->setProperty(origUserPhotoPixmapPropertyName, QVariant());
         if (!photoBytes.empty()) {
@@ -505,8 +517,8 @@ void QtAdBook::OnAnotherContactSelected(const QModelIndex &current, const QModel
 void QtAdBook::OnAnotherAttributeSelected(const QModelIndex &current, const QModelIndex &/*previous*/)
 {
     if (current.isValid()) {
-        ui.changeProperty->setEnabled(_propertiesModel->IsAttrWritable(current.row()));        
-        
+        ui.changeProperty->setEnabled(_propertiesModel->IsAttrWritable(current.row()));
+
         ui.copyProperty->setEnabled(!_propertiesModel->item(
             current.row(), PropertiesModel::AttrValueColId)->text().isEmpty());
     }
@@ -524,7 +536,7 @@ void QtAdBook::UpdatePhotoSizeAfterResizing()
         return;
     }
     QPixmap origPixmap = qvariant_cast<QPixmap>(varOrigPixmap);
-    SetPhoto(origPixmap);    
+    SetPhoto(origPixmap);
 }
 
 void QtAdBook::SetPhoto(const QPixmap & photo)
@@ -538,111 +550,71 @@ void QtAdBook::SetPhoto(const QPixmap & photo)
 
 void QtAdBook::InitPropertyList()
 {
-    _propertiesModel = new PropertiesModel(ui.properties);    
+    _propertiesModel = new PropertiesModel(ui.properties);
     ui.properties->setItemDelegate(new AutoToolTipDelegate(ui.properties));
     ui.properties->setModel(_propertiesModel);
     ui.properties->resizeRowsToContents();
 }
 
-namespace MainWndSettings
-{
-const QString sectionName = "MainWindow";
-const QString wndPosParam = "MainWindowPosition";
-const QString contactSplitterParam = "ContactSplitter";
-const QString mainSplitterParam = "MainSplitter";
-const QString prevSearchAttrValuesParam = "PrevSearchAttrValues";
-const QString wndMaximizedParam = "maximixed";
-const QString filterTopLevelRuleParam = "AllTheConditionsShouldBeMet";
-const QString contactsHeaderStateParam = "ContactsHeaderState";
-const QString filtersHeaderStateParam = "FiltersHeaderState";
-const QString propertiesHeaderStateParam = "PropertiesHeaderState";
-}
-
 void QtAdBook::SaveState()
 {
-    using namespace MainWndSettings;
-    QSettings settings(QApplication::organizationName(), QApplication::applicationName());
-    settings.beginGroup(sectionName);
-        settings.setValue(filterTopLevelRuleParam, ui.allFilters->isChecked());
-        settings.setValue(wndMaximizedParam, isMaximized());
-        settings.setValue(wndPosParam, geometry());
-        auto IntListToVarList = [](QList<int> il) {
-            QVariantList r; for (int sz : il) { r.append(sz); } return r; 
-        };
-        settings.setValue(contactSplitterParam, IntListToVarList(ui.contactSplitter->sizes()));
-        settings.setValue(mainSplitterParam, IntListToVarList(ui.mainSplitter->sizes()));
-        QStringList filterValueItems;
-        for (int i = 0, m = ui.filterValue->count(); i < m; ++i) {
-            filterValueItems.append(ui.filterValue->itemText(i));
-        }
-        settings.setValue(prevSearchAttrValuesParam, filterValueItems);
-        settings.setValue(contactsHeaderStateParam, ui.contacts->horizontalHeader()->saveState());
-        settings.setValue(filtersHeaderStateParam, ui.filters->horizontalHeader()->saveState());
-        settings.setValue(propertiesHeaderStateParam, ui.properties->horizontalHeader()->saveState());        
-    settings.endGroup();
-    _filterListModel->Save();
-    _contactListModel->Save();
+    MainWndSettings mws;
+    mws.SetGeometry(geometry());
+    mws.SetContactsListHeaderState(ui.contacts->horizontalHeader()->saveState());
+    mws.SetContactsSplitterState(ui.contactSplitter->sizes());
+    mws.SetFiltersListHeaderState(ui.filters->horizontalHeader()->saveState());
+    mws.SetFlagAllConditionsShouldBeMet(ui.allFilters->isChecked());
+    mws.SetFlagMaximized(isMaximized());
+    mws.SetGeometry(geometry());
+    mws.SetMainWndSplitterState(ui.mainSplitter->sizes());
+
+    QStringList filterValueItems;
+    for (int i = 0, m = ui.filterValue->count(); i < m; ++i) {
+        filterValueItems.append(ui.filterValue->itemText(i));
+    }
+    mws.SetPreviousSearches(filterValueItems);
+    mws.SetPropertiesListHeaderState(ui.properties->horizontalHeader()->saveState());
+
+    _appSettings.SetMainWndSettings(mws);
+
+    _filterListModel->SaveState();
+    _contactListModel->Save(_appSettings.GetConnectionParams());
 }
 
 void QtAdBook::RestoreState()
 {
-    using namespace MainWndSettings;
-    QSettings settings(QApplication::organizationName(), QApplication::applicationName());    
-    settings.beginGroup(sectionName);
-        if (settings.contains(filterTopLevelRuleParam)) {
-            if (settings.value(filterTopLevelRuleParam).toBool() == true) {
-                ui.allFilters->setChecked(true);
-            }
-            else {
-                ui.oneFilter->setChecked(true);
-            }
-        }
-        if (settings.value(wndMaximizedParam).toBool() == true) {
-            showMaximized();
-        }
-        else if (settings.contains(wndPosParam)) {
-            setGeometry(settings.value(wndPosParam, geometry()).toRect());
-        }
-        auto VarListToIntList = [](QVariantList vl) {
-            QList<int> r; for (auto v : vl) r.push_back(v.toInt()); return r;
-        };
-        if (settings.contains(contactSplitterParam)) {
-            QVariantList vl = settings.value(contactSplitterParam).toList();
-            ui.contactSplitter->setSizes(VarListToIntList(vl));
-        }
-        if (settings.contains(mainSplitterParam)) {
-            QVariantList vl = settings.value(mainSplitterParam).toList();
-            ui.mainSplitter->setSizes(VarListToIntList(vl));
-        }
-        if (settings.contains(prevSearchAttrValuesParam)) {
-            ui.filterValue->clear();
-            ui.filterValue->addItems(settings.value(prevSearchAttrValuesParam).toStringList());
-            ui.filterValue->setCurrentText("");
-        }
-        if (settings.contains(contactsHeaderStateParam)) {
-            ui.contacts->horizontalHeader()->restoreState(settings.value(contactsHeaderStateParam).toByteArray());
-        }
-        if (settings.contains(filtersHeaderStateParam)) {
-            ui.filters->horizontalHeader()->restoreState(settings.value(filtersHeaderStateParam).toByteArray());
-        }
-        if (settings.contains(propertiesHeaderStateParam)) {
-            ui.properties->horizontalHeader()->restoreState(settings.value(propertiesHeaderStateParam).toByteArray());
-        }        
-    settings.endGroup();
+    auto mws = _appSettings.GetMainWndSettings();
+    ui.oneFilter->setChecked(!mws.GetFlagAllConditionsShouldBeMet());
+    ui.allFilters->setChecked(mws.GetFlagAllConditionsShouldBeMet());
+    if (mws.GetFlagMaximized()) {
+        showMaximized();
+    }
+    QRect geom = mws.GetGeometry();
+    if (geom.isValid()) {
+        setGeometry(geom);
+    }
+    ui.contactSplitter->setSizes(mws.GetContactsSplitterState());
+    ui.mainSplitter->setSizes(mws.GetMainWndSplitterState());
+    ui.filterValue->clear();
+    ui.filterValue->addItems(mws.GetPrevSearches());
+    ui.filterValue->setCurrentText("");
+    ui.contacts->horizontalHeader()->restoreState(mws.GetContactsListHeaderState());
+    ui.filters->horizontalHeader()->restoreState(mws.GetFiltersListHeaderState());
+    ui.properties->horizontalHeader()->restoreState(mws.GetPropertiesListHeaderState());
+
     try {
-        _contactListModel->Load();
-        _contactListModel->rowCount();
+        _contactListModel->Load(_appSettings.GetConnectionParams());
         RefreshNumFoundContacts();
     }
     catch (const std::exception &) {
         QMessageBox::warning(this, QApplication::applicationName(), tr("Failed to load contacts."));
-    }    
-    _filterListModel->Load();
-    ui.filters->resizeRowsToContents();    
+    }
+    _filterListModel->LoadState();
+    ui.filters->resizeRowsToContents();
 }
 
 void QtAdBook::OnAbout()
-{    
+{
     AboutDlg dlg(this);
     dlg.exec();
 }

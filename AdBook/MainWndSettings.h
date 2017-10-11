@@ -1,7 +1,5 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -19,32 +17,29 @@ You should have received a copy of the GNU General Public License along with
 */
 
 #pragma once
-#include "SearchFilters.h"
+#include "shared.h"
 
 class MainWndSettings
 {
-public:    
-    void Save();
-    void Load();
-
+public:
     void SetRect(const CRect & rect) noexcept;
     const CRect & GetRect() const noexcept;
 
     using IntVector = std::vector<int>;
-    
+
     template <class IntVectorType>
     void SetFilterColWidth(IntVectorType && fcw);
-    
+
     template <class IntVectorType>
     void SetResultColWidth(IntVectorType && rcw);
 
-    template <class IntVectorType>    
+    template <class IntVectorType>
     void SetResultColOrder(IntVectorType && rci);
 
     const IntVector & GetFilterColWidth() const noexcept;
     const IntVector & GetResultColWidth() const noexcept;
     const IntVector & GetResultColOrder() const noexcept;
-    
+
     using SearchFilterStrings = std::list<CString>;
 
     template <class SearchFilterStringsType>
@@ -61,15 +56,15 @@ public:
     ConditionsCombineOperation GetCondCombineOp() const {
         return combineOperation_;
     }
-    const SearchFilters & GetSearchFilters() const {
-        return searchFilters_;
+    const std::list<SearchFilter> & GetSearchFilters() const {
+        return _searchFilters;
     }
 
-    void SetSearchFilters(const SearchFilters & sf) {
-        searchFilters_ = sf;
+    void SetSearchFilters(const std::list<SearchFilter> & sf) {
+        _searchFilters = sf;
     }
 private:
-    SearchFilters searchFilters_;
+    std::list<SearchFilter> _searchFilters;
     ConditionsCombineOperation combineOperation_ = ConditionsCombineOperation::And;
     CRect rect_;
     IntVector filterColWidth_;
@@ -82,21 +77,21 @@ template <class IntVectorType>
 void MainWndSettings::SetFilterColWidth(IntVectorType && fcw)
 {
     static_assert(std::is_assignable<decltype(filterColWidth_), IntVectorType>::value, INVALID_PARAM_TYPE": fcw");
-    filterColWidth_ = std::forward<IntVector>(fcw);
+    filterColWidth_ = std::forward<IntVectorType>(fcw);
 }
 
 template <class IntVectorType>
 void MainWndSettings::SetResultColWidth(IntVectorType && rcw)
 {
     static_assert(std::is_assignable<decltype(resultColWidth_), IntVectorType>::value, INVALID_PARAM_TYPE": rcw");
-    resultColWidth_ = std::forward<IntVector>(rcw);
+    resultColWidth_ = std::forward<IntVectorType>(rcw);
 }
 
 template <class IntVectorType>
 void MainWndSettings::SetResultColOrder(IntVectorType && rci)
 {
     static_assert(std::is_assignable<decltype(resultColOrder_), IntVectorType>::value, INVALID_PARAM_TYPE": rci");
-    resultColOrder_ = std::forward<IntVector>(rci);
+    resultColOrder_ = std::forward<IntVectorType>(rci);
 }
 
 template <class SearchFilterStringsType>

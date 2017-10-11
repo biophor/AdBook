@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License along with
 
 ChangeSvAttrDlg::ChangeSvAttrDlg(
     const QString & objectDn,
-    const QString & currentValue, 
+    const QString & currentValue,
     const adbook::Attributes::AttrId attrToChange,
     QWidget * parent
 )
@@ -32,9 +32,9 @@ ChangeSvAttrDlg::ChangeSvAttrDlg(
     ui.setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedHeight(size().height());
-    
+
     QColor mainWindowBgColor = palette().color(QPalette::Window);
-    QPalette readOnlyPalette = ui.objectPath->palette();    
+    QPalette readOnlyPalette = ui.objectPath->palette();
     readOnlyPalette.setColor(QPalette::Base, mainWindowBgColor);
     ui.objectPath->setPalette(readOnlyPalette);
     ui.attrNames->setPalette(readOnlyPalette);
@@ -46,12 +46,11 @@ ChangeSvAttrDlg::ChangeSvAttrDlg(
 
     connect(ui.OK, &QPushButton::clicked, this, &ChangeSvAttrDlg::OnOk);
     connect(ui.Cancel, &QPushButton::clicked, this, &ChangeSvAttrDlg::OnCancel);
-
-    auto & a = adbook::Attributes::GetInstance();
-    const QString uiAttrName = QString::fromStdWString(a.GetUiAttrName(attrToChange));
-    const QString ldapAttrName = QString::fromStdWString(a.GetLdapAttrName(attrToChange));
-    const QString attrOid = QString::fromStdWString(a.GetAttrOid(attrToChange));
-    ui.attrNames->setText(uiAttrName + " / " + ldapAttrName + " / " + attrOid);    
+    auto & attributes = adbook::Attributes::GetInstance();
+    const QString uiAttrName = QString::fromStdWString(attributes.GetUiAttrName(attrToChange));
+    const QString ldapAttrName = QString::fromStdWString(attributes.GetLdapAttrName(attrToChange));
+    const QString attrOid = QString::fromStdWString(attributes.GetAttrOid(attrToChange));
+    ui.attrNames->setText(uiAttrName + " / " + ldapAttrName + " / " + attrOid);
 }
 
 ChangeSvAttrDlg::~ChangeSvAttrDlg()

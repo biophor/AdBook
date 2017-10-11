@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -67,84 +67,4 @@ const MainWndSettings::SearchFilterStrings & MainWndSettings::GetSearchFilterStr
     return searchFilterStrings_;
 }
 
-void MainWndSettings::Save()
-{
-    CWinApp * app = AfxGetApp();        
-    //main windows settings
-    VERIFY(app->WriteProfileInt(mainWndSection, leftParam, GetRect().left));
-    VERIFY(app->WriteProfileInt(mainWndSection, topParam, GetRect().top));
-    VERIFY(app->WriteProfileInt(mainWndSection, rightParam, GetRect().right));
-    VERIFY(app->WriteProfileInt(mainWndSection, bottomParam, GetRect().bottom));
-    VERIFY(app->WriteProfileInt(mainWndSection, allConditionsShouldBeMetParam,
-                                GetCondCombineOp() == ConditionsCombineOperation::And));
 
-    // vector {23,32,34,193} -> string "23 32 34 193"
-    auto v2s = [](const auto & v) {
-        CString s;
-        std::wstringstream ss;
-        std::for_each(v.begin(), v.end(), [&ss](int d) {ss << d << L" ";});
-        s = ss.str().c_str();
-        return s;
-    };
-    VERIFY(app->WriteProfileStringW(mainWndSection, searchFilterColWidthParam, v2s(GetFilterColWidth())));
-    VERIFY(app->WriteProfileStringW(mainWndSection, searchResultColWidthParam, v2s(GetResultColWidth())));
-    VERIFY(app->WriteProfileStringW(mainWndSection, searchResultColOrderParam, v2s(GetResultColOrder())));
-    
-    auto ls2s = [](const auto & ls) {
-        CString s;
-        std::wstringstream ss;
-        std::for_each(ls.begin(), ls.end(), [&ss](const CString & s) {ss << static_cast<const wchar_t *>(s) << L"\n"; });
-        s = ss.str().c_str();
-        return s;
-    };
-    VERIFY(app->WriteProfileStringW(mainWndSection, searchFilterStringsParam, ls2s(GetSearchFilterStrings())));
-    // search filters
-    searchFilters_.Save();
-}
-
-void MainWndSettings::Load()
-{
-    CWinApp * app = AfxGetApp();
-    VERIFY(app);
-    auto getws = [app](const wchar_t* section, const wchar_t * param) -> std::wstring {
-        return static_cast<const wchar_t *>(app->GetProfileString(section, param));
-    };
-    auto getint = [app](const wchar_t* section, const wchar_t * param, int def) {
-        return (app->GetProfileInt(section, param, def));
-    };
-    
-    // main windows settings
-    SetRect(CRect(getint(mainWndSection, leftParam, 0), getint(mainWndSection, topParam, 0),
-                  getint(mainWndSection, rightParam, 0), getint(mainWndSection, bottomParam, 0)));
-
-    SetCondCombineOp(getint(mainWndSection, allConditionsShouldBeMetParam, 1) ?
-                          ConditionsCombineOperation::And :
-                          ConditionsCombineOperation::Or);
-
-    // string "23 32 34 193" -> vector {23,32,34,193}
-    auto s2v = [](const std::wstring & s) {
-        IntVector v;
-        std::wstringstream ss(s);
-        std::istream_iterator<int, wchar_t> iter(ss);
-        std::istream_iterator<int, wchar_t> end;
-        std::for_each(iter, end, [&v](int d) { v.push_back(d); });
-        return v;
-    };
-    SetFilterColWidth(s2v(getws(mainWndSection, searchFilterColWidthParam)));
-    SetResultColWidth(s2v(getws(mainWndSection, searchResultColWidthParam)));
-    SetResultColOrder(s2v(getws(mainWndSection, searchResultColOrderParam)));
-
-    auto s2ls = [](const std::wstring & s) {
-        SearchFilterStrings v;
-        std::wstringstream ss(s);
-        std::wstring w;
-        while (std::getline(ss, w, L'\n'))
-        {
-            v.push_back(w.c_str());
-        }
-        return v;
-    };
-    SetSearchFilterStrings(s2ls(getws(mainWndSection, searchFilterStringsParam)));    
-    // search filters
-    searchFilters_.Load();
-}

@@ -282,7 +282,7 @@
             this.personPhoto.Location = new System.Drawing.Point(4, 16);
             this.personPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.personPhoto.Name = "personPhoto";
-            this.personPhoto.Size = new System.Drawing.Size(326, 179);
+            this.personPhoto.Size = new System.Drawing.Size(326, 190);
             this.personPhoto.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.personPhoto.TabIndex = 1;
             this.personPhoto.TabStop = false;
@@ -328,9 +328,9 @@
             this.label1.Location = new System.Drawing.Point(9, 7);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(197, 13);
+            this.label1.Size = new System.Drawing.Size(200, 13);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Find contacts matches these conditions:";
+            this.label1.Text = "Find contacts matching these conditions:";
             // 
             // cboxFilterNames
             // 
@@ -476,9 +476,9 @@
             this.rbuttonAnyFilter.Location = new System.Drawing.Point(203, 113);
             this.rbuttonAnyFilter.Margin = new System.Windows.Forms.Padding(2);
             this.rbuttonAnyFilter.Name = "rbuttonAnyFilter";
-            this.rbuttonAnyFilter.Size = new System.Drawing.Size(195, 17);
+            this.rbuttonAnyFilter.Size = new System.Drawing.Size(231, 17);
             this.rbuttonAnyFilter.TabIndex = 13;
-            this.rbuttonAnyFilter.Text = "One of the conditions should be met";
+            this.rbuttonAnyFilter.Text = "At least one of the conditions should be met";
             this.rbuttonAnyFilter.UseVisualStyleBackColor = true;
             // 
             // rbuttonAllFilters

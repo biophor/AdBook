@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -30,37 +30,38 @@ You should have received a copy of the GNU General Public License along with
 
 IMPLEMENT_DYNAMIC(CSettingsDlg, CDialogEx)
 
-CSettingsDlg::CSettingsDlg(AppSettings & appSettings, CWnd* pParent /*=NULL*/)
-    : CDialogEx(CSettingsDlg::IDD, pParent), appSettings_(appSettings)
+CSettingsDlg::CSettingsDlg(
+    std::shared_ptr<adbook::AbstractAdAccessFactory> adAccessFactory,
+    const adbook::ConnectionParams & connectionParams,
+    CWnd* pParent /*=NULL*/
+)
+    : CDialogEx(CSettingsDlg::IDD, pParent),
+    _adAccessFactory{ adAccessFactory },
+    _connectionParams{ connectionParams }
 {
 
 }
 
-CSettingsDlg::~CSettingsDlg()
-{
-}
+CSettingsDlg::~CSettingsDlg() = default;
 
-const AppSettings & CSettingsDlg::GetAppSettings() const
+adbook::ConnectionParams CSettingsDlg::GetConnectionParams() const
 {
-    return appSettings_;
+    return _connectionParams;
 }
 
 BOOL CSettingsDlg::OnInitDialog()
 {
     CDialog::OnInitDialog();
-    
-    defaultPasswordChar_ = password_.GetPasswordChar();
+
+    _defaultPasswordChar = _password.GetPasswordChar();
     const UINT reasonableMaxPassLen = 40;
-    password_.SetLimitText(reasonableMaxPassLen);
-    
-    const ConnectionSettings & cs = appSettings_.GetConnectionSettings();
-    SetDlgItemText(IDC_EDIT_DC, cs.GetDC().c_str());
-    SetDlgItemText(IDC_EDIT_USERNAME, cs.GetLogin().c_str());
-    SetDlgItemText(IDC_EDIT_PASSWORD, cs.GetPassword().c_str());
-    auto connectionSettings = appSettings_.GetConnectionSettings();
-    CheckDlgButton(IDC_CHECK_USER_DOMAIN, connectionSettings.CurrentDomain() ? BST_CHECKED : BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_USE_CURUSERCRED, connectionSettings.CurrentUserCredentials() ? BST_CHECKED : BST_UNCHECKED);
-    CheckDlgButton(IDC_CHECK_DISPLAY_PASS, connectionSettings.DisplayPassword() ? BST_CHECKED : BST_UNCHECKED);
+    _password.SetLimitText(reasonableMaxPassLen);
+
+    SetDlgItemText(IDC_EDIT_DC, _connectionParams.GetDomainController().c_str());
+    SetDlgItemText(IDC_EDIT_USERNAME, _connectionParams.GetLogin().c_str());
+    SetDlgItemText(IDC_EDIT_PASSWORD, _connectionParams.GetPassword().c_str());
+    CheckDlgButton(IDC_CHECK_USER_DOMAIN, _connectionParams.CurrentDomain() ? BST_CHECKED : BST_UNCHECKED);
+    CheckDlgButton(IDC_CHECK_USE_CURUSERCRED, _connectionParams.IsCurrentUserCredentialsUsed() ? BST_CHECKED : BST_UNCHECKED);
     OnBnClickedCheckUseCurusercred();
     OnBnClickedCheckUserDomain();
     OnBnClickedCheckDisplayPassword();
@@ -70,12 +71,11 @@ BOOL CSettingsDlg::OnInitDialog()
 void CSettingsDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_EDIT_PASSWORD, password_);
+    DDX_Control(pDX, IDC_EDIT_PASSWORD, _password);
 }
 
-
 BEGIN_MESSAGE_MAP(CSettingsDlg, CDialogEx)
-    ON_BN_CLICKED(IDOK, &CSettingsDlg::OnBnClickedOk)    
+    ON_BN_CLICKED(IDOK, &CSettingsDlg::OnBnClickedOk)
     ON_BN_CLICKED(IDC_CHECK_USE_CURUSERCRED, &CSettingsDlg::OnBnClickedCheckUseCurusercred)
     ON_BN_CLICKED(IDC_CHECK_USER_DOMAIN, &CSettingsDlg::OnBnClickedCheckUserDomain)
     ON_BN_CLICKED(IDC_CHECK_DISPLAY_PASSWORD, &CSettingsDlg::OnBnClickedCheckDisplayPassword)
@@ -84,60 +84,54 @@ END_MESSAGE_MAP()
 
 // CSettingsDlg message handlers
 
-void CSettingsDlg::ProcessUserInput()
-{    
-    CString dc;
-    ConnectionSettings & cs = appSettings_.GetConnectionSettings();
-    cs.CurrentDomain(IsDlgButtonChecked(IDC_CHECK_USER_DOMAIN) == BST_CHECKED);
-    GetDlgItemText(IDC_EDIT_DC, dc);
-    dc.Trim();
-    if (!cs.CurrentDomain() && dc.IsEmpty())
+bool CSettingsDlg::ProcessUserInput()
+{
+    CString domainController;
+    _connectionParams.ConnectDomainYouAreLoggedIn(IsDlgButtonChecked(IDC_CHECK_USER_DOMAIN) == BST_CHECKED);
+    GetDlgItemText(IDC_EDIT_DC, domainController);
+    domainController.Trim();
+    if (!_connectionParams.CurrentDomain() && domainController.IsEmpty())
     {
         AfxMessageBox(IDS_ENTER_DC_NAME, MB_ICONEXCLAMATION);
         GetDlgItem(IDC_EDIT_DC)->SetFocus();
-        throw adbook::HrError(E_INVALIDARG);
+        return false;
     }
-    cs.SetDC(dc);
+    _connectionParams.SetDomainController(domainController);
 
-    cs.CurrentUserCredentials(IsDlgButtonChecked(IDC_CHECK_USE_CURUSERCRED) == BST_CHECKED);
+    _connectionParams.UseCurrentUserCredentials(IsDlgButtonChecked(IDC_CHECK_USE_CURUSERCRED) == BST_CHECKED);
     CString login;
     GetDlgItemText(IDC_EDIT_USERNAME, login);
     login.Trim();
-    cs.SetLogin(login);    
+    _connectionParams.SetLogin(login);
     CString password;
     GetDlgItemText(IDC_EDIT_PASSWORD, password);
     password.Trim();
-    cs.SetPassword(password);
+    _connectionParams.SetPassword(password);
 
-    if (!cs.CurrentUserCredentials())
+    if (!_connectionParams.IsCurrentUserCredentialsUsed())
     {
         if (login.IsEmpty())
         {
             AfxMessageBox(IDS_ENTER_LOGIN, MB_ICONEXCLAMATION);
             GetDlgItem(IDC_EDIT_USERNAME)->SetFocus();
-            throw adbook::HrError(E_INVALIDARG);
+            return false;
         }
         if (password.IsEmpty())
         {
             AfxMessageBox(IDS_ENTER_PASSWORD, MB_ICONEXCLAMATION);
             GetDlgItem(IDC_EDIT_PASSWORD)->SetFocus();
-            throw adbook::HrError(E_INVALIDARG);
+            return false;
         }
     }
-    cs.DisplayPassword(IsDlgButtonChecked(IDC_CHECK_DISPLAY_PASS) == BST_CHECKED);    
+    return true;
 }
 
 void CSettingsDlg::OnBnClickedOk()
 {
-    try
-    {
-        ProcessUserInput();
-        CDialogEx::OnOK();
+    if (!ProcessUserInput()) {
+        return;
     }
-    catch (const adbook::HrError & )
-    {
-        
-    }    
+    CDialogEx::OnOK();
 }
 
 void CSettingsDlg::OnBnClickedCheckUseCurusercred()
@@ -145,7 +139,7 @@ void CSettingsDlg::OnBnClickedCheckUseCurusercred()
     const bool useCurUserCred = (IsDlgButtonChecked(IDC_CHECK_USE_CURUSERCRED) == BST_CHECKED);
     GetDlgItem(IDC_EDIT_USERNAME)->EnableWindow(!useCurUserCred);
     GetDlgItem(IDC_EDIT_PASSWORD)->EnableWindow(!useCurUserCred);
-    GetDlgItem(IDC_CHECK_DISPLAY_PASSWORD)->EnableWindow(!useCurUserCred);    
+    GetDlgItem(IDC_CHECK_DISPLAY_PASSWORD)->EnableWindow(!useCurUserCred);
 }
 
 void CSettingsDlg::OnBnClickedCheckUserDomain()
@@ -157,26 +151,20 @@ void CSettingsDlg::OnBnClickedCheckUserDomain()
 void CSettingsDlg::OnBnClickedCheckDisplayPassword()
 {
     const bool display = (IsDlgButtonChecked(IDC_CHECK_DISPLAY_PASSWORD) == BST_CHECKED);
-    password_.SetPasswordChar(display ? 0 : defaultPasswordChar_);
-    password_.Invalidate();
+    _password.SetPasswordChar(display ? 0 : _defaultPasswordChar);
+    _password.Invalidate();
 }
 
 void CSettingsDlg::OnBnClickedButtonVerify()
 {
-    try
-    {
-        ProcessUserInput();
-    }
-    catch (const adbook::HrError &)
-    {
+    if (!ProcessUserInput()) {
         return;
     }
-    
     try
     {
-        adbook::AdConnector ac(appSettings_.GetConnectionSettings());
+        auto connector = _adAccessFactory->CreateConnector();
         CWaitCursor wc;
-        ac.Connect();
+        connector->Connect(_connectionParams);
         AfxMessageBox(IDS_CONNECTION_SUCCEEDED, MB_ICONINFORMATION);
     }
     catch (const adbook::Error & e)
@@ -190,5 +178,5 @@ void CSettingsDlg::OnBnClickedButtonVerify()
     catch (const std::exception & )
     {
         AfxMessageBox(IDS_FAILED_TO_CONNECT, MB_ICONERROR);
-    }    
+    }
 }

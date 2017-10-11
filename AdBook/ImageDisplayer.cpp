@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with
 #include "stdafx.h"
 #include "ImageDisplayer.h"
 
-namespace 
+namespace
 {
     CComQIPtr<IStream> CreateAutoReleasedStream()
     {
@@ -42,9 +42,9 @@ void ImageDisplayer::Load(const std::vector<BYTE> & image)
         HR_ERROR(E_INVALIDARG);
     }
     Unload();
-    streamPtr_ = CreateAutoReleasedStream();
+    _streamPtr = CreateAutoReleasedStream();
     ULONG numWritten = 0;
-    const HRESULT hr = streamPtr_->Write(&image.at(0), static_cast<ULONG>(image.size()), &numWritten);
+    const HRESULT hr = _streamPtr->Write(&image.at(0), static_cast<ULONG>(image.size()), &numWritten);
     if(hr != S_OK)
     {
         HR_ERROR(hr);
@@ -58,8 +58,8 @@ void ImageDisplayer::Load(const std::vector<BYTE> & image)
 }
 
 void ImageDisplayer::Unload()
-{	
-    streamPtr_.Release();
+{
+    _streamPtr.Release();
 }
 
 void ImageDisplayer::PreSubclassWindow()
@@ -104,9 +104,9 @@ void ImageDisplayer::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
     CRect rc;
     GetClientRect(&rc);
     Gdiplus::Graphics graphics(lpDrawItemStruct->hDC);
-    if(streamPtr_ != nullptr)
+    if(_streamPtr != nullptr)
     {
-        Gdiplus::Image image(streamPtr_);
+        Gdiplus::Image image(_streamPtr);
         CRect imageRect;
         if (ScaleImageToRect(image.GetWidth(), image.GetHeight(), rc, imageRect))
         {

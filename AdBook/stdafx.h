@@ -9,6 +9,8 @@
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
 #endif
 
+#define _CRTDBG_MAP_ALLOC
+
 #include "targetver.h"
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
@@ -33,6 +35,8 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
+#include <stdlib.h>
+#include <crtdbg.h>
 #include <dpapi.h>
 #include <atlconv.h>
 #include <activeds.h>

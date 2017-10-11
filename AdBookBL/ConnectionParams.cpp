@@ -1,34 +1,57 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+/*
+Copyright (C) 2015-2020 Goncharov Andrei.
+
+This file is part of the 'Active Directory Contact Book'.
+'Active Directory Contact Book' is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+'Active Directory Contact Book' is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "stdafx.h"
 #include "ConnectionParams.h"
 
 namespace adbook
 {
 
-std::wstring ConnectionParams::GetDC() const
+std::wstring ConnectionParams::GetDomainController() const
 {
-    return dc_;
+    return address_;
 }
 
-void ConnectionParams::CurrentUserCredentials(bool use) noexcept
+std::wstring ConnectionParams::GetLdapPath() const
 {
-    currentUserCred_ = use;
+    return address_;
 }
 
-bool ConnectionParams::CurrentUserCredentials() const noexcept
+void ConnectionParams::UseCurrentUserCredentials(bool use) noexcept
 {
-    return currentUserCred_;
+    useCurrentUserCred_ = use;
 }
 
-void ConnectionParams::CurrentDomain(const bool currentDomain) noexcept
+bool ConnectionParams::IsCurrentUserCredentialsUsed() const noexcept
 {
-    currentDomain_ = currentDomain;
+    return useCurrentUserCred_;
+}
+
+void ConnectionParams::ConnectDomainYouAreLoggedIn(const bool currentDomain) noexcept
+{
+    connectCurrentDomain_ = currentDomain;
 }
 
 bool ConnectionParams::CurrentDomain() const noexcept
 {
-    return currentDomain_;
+    return connectCurrentDomain_;
 }
 
 std::wstring ConnectionParams::GetLogin() const
@@ -38,7 +61,7 @@ std::wstring ConnectionParams::GetLogin() const
 
 std::wstring ConnectionParams::GetPassword() const
 {
-    return password_;
+    return _password;
 }
 
 } // namespace adbook

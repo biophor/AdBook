@@ -1,19 +1,21 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
 /*
-Copyright(C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
-'Active Directory Contact Book' is free software : you can redistribute it
-and / or modify it under the terms of the GNU General Public License as published
+'Active Directory Contact Book' is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 'Active Directory Contact Book' is distributed in the hope that it will be
 useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the GNU General
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -25,24 +27,7 @@ Public License for more details.
 
 namespace adbook
 {
-
-std::wstring ExtractDirFromFilePath(const std::wstring & filePath)
-{
-    if (filePath.empty())
-    {
-        throw HrError(E_INVALIDARG, __FUNCTIONW__);
-    }
-    std::vector<wchar_t> buf(filePath.cbegin(), filePath.cend());
-    buf.push_back(L'\0');
-    LPWSTR namePtr = PathFindFileName(&buf[0]);
-    if (namePtr == &buf[0] || !namePtr)
-    {
-        return std::wstring();
-    }
-    *namePtr = L'\0';
-    return std::wstring(&buf[0]);
-}
-
+    
 namespace
 {
 const wchar_t personsTableName[] = L"persons";
@@ -73,23 +58,24 @@ private:
 
 }   // anon namespace
 
-std::wstring GetFileName2()
-{
-    std::wstring appName = LoadString(IDS_APP_TITLE);
-    wchar_t fullPath[MAX_PATH];
-    const HRESULT hr = SHGetFolderPathAndSubDirW(nullptr, CSIDL_FLAG_CREATE | CSIDL_APPDATA,
-        nullptr, SHGFP_TYPE_CURRENT, appName.c_str(), fullPath);
-    if (FAILED(hr))
+namespace {
+    std::wstring GetSqliteDbFileName()
     {
-        HR_ERROR(hr);
+        std::wstring appName = LoadString(IDS_APP_TITLE);
+        wchar_t fullPath[MAX_PATH];
+        const HRESULT hr = SHGetFolderPathAndSubDirW(nullptr, CSIDL_FLAG_CREATE | CSIDL_APPDATA,
+            nullptr, SHGFP_TYPE_CURRENT, appName.c_str(), fullPath);
+        if (FAILED(hr))
+        {
+            HR_ERROR(hr);
+        }
+        if (!PathAppendW(fullPath, L"SearchResult.sqlite3"))
+        {
+            HR_ERROR(E_UNEXPECTED);
+        }
+        return fullPath;
     }
-    if (!PathAppendW(fullPath, L"SearchResult.sqlite3"))
-    {
-        HR_ERROR(E_UNEXPECTED);
-    }
-    return fullPath;
 }
-
 void AdPersonDescList::Load()
 {
     try
@@ -300,7 +286,7 @@ private:
 
 void AdPersonDescList::InternalSave()
 {
-    const std::wstring tmpFileName = GetFileName2() + L".tmp";
+    const std::wstring tmpFileName = GetSqliteDbFileName() + L".tmp";
     SqliteSimpleWrapper::InitSqlite();
     if (PathFileExistsW(tmpFileName.c_str()))
     {
@@ -361,8 +347,11 @@ void AdPersonDescList::InternalSave()
     for (auto iter = cbegin(), end = cend(); iter != end; ++iter)
     {
         const auto & personDesc = *iter;
-        auto wa = personDesc.GetWritableAttributes();
-        std::vector<BYTE> waVec(wa.cbegin(), wa.cend());
+        std::set<adbook::Attributes::AttrId> wa = personDesc.GetWritableAttributes(); 
+        std::vector<BYTE> waVec;
+        std::transform(wa.cbegin(), wa.cend(), std::back_inserter(waVec),
+            [](adbook::Attributes::AttrId attrId) { return static_cast<BYTE>(attrId); }
+        );
         if (!waVec.empty())
         {
             std::wstring paramName = std::wstring(L":") + writableAttrsColName;
@@ -404,7 +393,7 @@ void AdPersonDescList::InternalSave()
     sqlite.Step();
     sqlite.FinalizeStatement();
     sqlite.CloseDb();
-    if (!MoveFileEx(tmpFileName.c_str(), GetFileName2().c_str(),
+    if (!MoveFileEx(tmpFileName.c_str(), GetSqliteDbFileName().c_str(),
         MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
     {
         throw HrError(HRESULT_FROM_WIN32(GetLastError()), L"MoveFile() failed.", __FUNCTIONW__);
@@ -420,7 +409,7 @@ void AdPersonDescList::InternalSave()
 
 void AdPersonDescList::InternalLoad()
 {
-    const std::wstring fileName = GetFileName2();    
+    const std::wstring fileName = GetSqliteDbFileName();    
     if (!PathFileExistsW(fileName.c_str()))
     {
         return;

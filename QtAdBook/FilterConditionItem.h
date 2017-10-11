@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -21,19 +21,19 @@ You should have received a copy of the GNU General Public License along with
 class FilterConditionItem : public QStandardItem
 {
 public:
-    FilterConditionItem(adbook::LdapRequest::MathingRule ruleId)
+    FilterConditionItem(adbook::LdapRequestBuilder::MatchingRule ruleId)
         : QStandardItem(GetDisplayName(ruleId)), _mathingRule(ruleId)
     { }
-    adbook::LdapRequest::MathingRule GetMatchingRule() const {
+    adbook::LdapRequestBuilder::MatchingRule GetMatchingRule() const {
         return _mathingRule;
     }    
     virtual FilterConditionItem * clone() const {
         return new FilterConditionItem(*this);
     }
 private:
-    static QString GetDisplayName(adbook::LdapRequest::MathingRule ruleId);
+    static QString GetDisplayName(adbook::LdapRequestBuilder::MatchingRule ruleId);
 private:
-    adbook::LdapRequest::MathingRule _mathingRule;
+    adbook::LdapRequestBuilder::MatchingRule _mathingRule;
 };
 
 #endif // FILTERCONDITIONITEM_H

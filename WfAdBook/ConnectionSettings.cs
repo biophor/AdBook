@@ -56,7 +56,7 @@ namespace WfAdBook
                 unmanagedBuffer = Marshal.SecureStringToGlobalAllocUnicode(secureString);
                 byte[] arrToProtect = new byte[sizeInBytes];
                 Marshal.Copy(unmanagedBuffer, arrToProtect, 0, sizeInBytes);
-                byte[] arrProtected = ProtectedData.Protect(arrToProtect, null, 
+                byte[] arrProtected = ProtectedData.Protect(arrToProtect, null,
                     DataProtectionScope.CurrentUser);
                 return Convert.ToBase64String(arrProtected);
             }
@@ -76,8 +76,8 @@ namespace WfAdBook
             }
             catch (System.FormatException) {    // garbage
                 return secureString;
-            }            
-            byte[] arrUnprotected = ProtectedData.Unprotect(arrProtected, null, 
+            }
+            byte[] arrUnprotected = ProtectedData.Unprotect(arrProtected, null,
                 DataProtectionScope.CurrentUser
                 );
             foreach (char ch in Encoding.Unicode.GetChars(arrUnprotected)) {
@@ -111,6 +111,6 @@ namespace WfAdBook
             Dc = Properties.Settings.Default.DomainOrDc;
             UseDomainYouAreLoggedIn = Properties.Settings.Default.ConnectDefaultDomain;
             UseCurrentUserCredentials = Properties.Settings.Default.UseCurrentUserCredentials;
-        }        
+        }
     }
 }

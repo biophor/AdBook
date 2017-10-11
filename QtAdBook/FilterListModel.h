@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License along with
 #ifndef FILTERLISTMODEL_H
 #define FILTERLISTMODEL_H
 
+#include "AppSettings.h"
 #include "FilterTypeItem.h"
 #include "FilterConditionItem.h"
 
@@ -25,7 +26,8 @@ class FilterListModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
-    FilterListModel(QObject *parent = Q_NULLPTR);
+    FilterListModel(AppSettings & appSettings, QObject *parent = Q_NULLPTR);
+
     int FindFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem, 
         const QString & filterValue
     );
@@ -42,13 +44,14 @@ public:
     int AddFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem, 
         const QString & filterValue
     );
-    adbook::LdapRequest ConstructLdapRequest(bool AllConditionsShouldBeMet);
+    std::wstring ConstructLdapRequest(bool AllConditionsShouldBeMet);
     QStringList GetFilterValues();
 
-    void Save();
-    void Load();
-private:
-    void Load(int filterType, int filterCode, const QString & filterValue, int condition);
+    void SaveState();
+    void LoadState();
+private:    
+    void LoadState(FilterCode filterCode, const QString & filterValue, FilterCondition condition);
+    
     enum ColumnId { 
         FilterNameColId = 0, ConditionColId = 1, ValueColId = 2 
     };
@@ -64,6 +67,7 @@ private:
         return rv;
     }
     static QList<ColumnDef> _columns;
+    AppSettings & _appSettings;    
 };
 
 #endif // FILTERLISTMODEL_H

@@ -35,9 +35,9 @@ namespace WfAdBook
         private void ApplyNewValue()
         {
             using (var cs = new ConnectionSettings()) {
-                using (var adc = new AdConnector(cs, _adp.Dn)) {
+                using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
                     try {
-                        adc.Connect();
+                        adc.Connect(cs, _adp.Dn);
                         if (_attr.Id == AttrId.CommonName) {
                             if (string.IsNullOrWhiteSpace(tboxNewValue.Text)) {
                                 throw new Exception(Properties.Resources.ErrorInvalidValueMsgBoxText);

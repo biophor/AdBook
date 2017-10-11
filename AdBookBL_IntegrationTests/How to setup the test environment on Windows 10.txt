@@ -1,0 +1,23 @@
+
+How to setup the test environment on Windows 10
+
+1. Open 'Control Panel\All Control Panel Items\Programs and Features'
+2. Click on the link 'Turn Window Features on and off'. 'Windows Features dialog' will pop up.
+3. In the 'Windows Features dialog' enable
+    the feature 'Acitive Directory Lightweight Directory Services'
+4. Start 'Active Directory Lightweight Directory Services Setup Wizard'
+    by clicking the appropriate link in the Windows Start Menu
+5. Using the wizard create a unique AD LDS instance with the following parameters
+   - the type of the instance: 'a unique instance'
+   - the name of the instance: AdbookblTestInstance
+   - the description of the instance: default value
+   - the ldap port number: 55555
+   - the ldap ssl port number: 55556
+   - create a new partition with the name 'DC=testdata,DC=adbook,DC=local'
+   - Data files location: default value
+   - Recovery files location: default value
+   - Service account: network service account
+   - AD LDS Administration account: default value(current user)
+   - On the page 'Importing LDIF files' select 'MS-User.LDF'
+6. Build and run the 'AdBookBL_IntegrationTestsPrepareEnvironment.exe' console application.
+

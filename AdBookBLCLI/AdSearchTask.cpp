@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -22,7 +22,7 @@ You should have received a copy of the GNU General Public License along with
 
 #include "stdafx.h"
 #include "AdSearchTask.h"
-
+#include "AdAccessFactory.h"
 namespace adbookcli
 {
 
@@ -37,63 +37,54 @@ using PersonFoundProcType = void(__stdcall *)(adbook::AdPersonDesc &&);
 
 using namespace System::Runtime::InteropServices;
 
-AdSearchTask::AdSearchTask(Arguments^ args)
+void NativeAdSearcherPtr::ReleaseNativeResources()
+{
+    try {}
+    finally{
+        adbook::AbstractAdSearcher * ns = reinterpret_cast<adbook::AbstractAdSearcher *>(handle.ToPointer());
+        try {
+            if (ns != nullptr) {
+                if (ns->IsStarted()) {
+                    ns->Stop();
+                    ns->Wait();
+                }
+                delete ns;
+                ns = nullptr;
+            }
+            handle = IntPtr::Zero;
+        }
+        catch (const adbook::Error & e) {
+            OutputDebugStringW(e.What().c_str());
+        }
+        catch (const std::exception & e) {
+            OutputDebugStringA(e.what());
+        }
+    }
+}
+
+AdSearchTask::AdSearchTask(adbook::AbstractAdSearcher * searcher, Arguments^ args)
     : Task(
         gcnew AdSearchTaskDelegate(this, &AdSearchTask::TaskProc),
         args,
         cancelTokenSource_->Token,
         System::Threading::Tasks::TaskCreationOptions::LongRunning
         ),
-      _nativeSearcher(new adbook::AdSearcher())
+      _nativeSearcher(searcher)
 {
-    adbook::AdSearcher::OnStart searchStartedFunction;
+    adbook::AbstractAdSearcher::OnStart searchStartedFunction;
     searchStartedFunction = CreateSearchStartedCallback(this);
 
-    adbook::AdSearcher::OnStop searchStoppedFunction;
+    adbook::AbstractAdSearcher::OnStop searchStoppedFunction;
     searchStoppedFunction = CreateSearchStoppedCallback(this);
 
-    adbook::AdSearcher::OnNewItem personFoundFunction;
+    adbook::AbstractAdSearcher::OnNewItem personFoundFunction;
     personFoundFunction = CreatePersonFoundCallback(this);
 
     _nativeSearcher->SetCallbacks(personFoundFunction, searchStartedFunction, searchStoppedFunction);
     GC::KeepAlive(this);
 }
 
-AdSearchTask::~AdSearchTask()
-{
-    delete cancelTokenSource_;
-    cancelTokenSource_ = nullptr;
-    CleanupUnmanaged();
-    GC::KeepAlive(this);
-}
-
-AdSearchTask::!AdSearchTask()
-{
-    FINALISER_CALL_WARNING;
-    CleanupUnmanaged();
-}
-
-void AdSearchTask::CleanupUnmanaged()
-{
-    try {
-        if (_nativeSearcher != nullptr) {
-            if (_nativeSearcher->IsStarted()) {
-                _nativeSearcher->Stop();
-                _nativeSearcher->Wait();
-            }
-            delete _nativeSearcher;
-            _nativeSearcher = nullptr;
-        }
-    }
-    catch (const adbook::Error & e) {
-        OutputDebugStringW(e.What().c_str());
-    }
-    catch (const std::exception & e) {
-        OutputDebugStringA(e.what());
-    }
-}
-
-adbook::AdSearcher::OnNewItem AdSearchTask::CreatePersonFoundCallback(AdSearchTask ^ searcher)
+adbook::AbstractAdSearcher::OnNewItem AdSearchTask::CreatePersonFoundCallback(AdSearchTask ^ searcher)
 {
     searcher->_raisePersonFoundDelegate =
         gcnew RaisePersonFoundDelegate(searcher, &AdSearchTask::RaisePersonFoundEvent);
@@ -107,7 +98,7 @@ adbook::AdSearcher::OnNewItem AdSearchTask::CreatePersonFoundCallback(AdSearchTa
     return f;
 }
 
-adbook::AdSearcher::OnStart AdSearchTask::CreateSearchStartedCallback(AdSearchTask ^ searcher)
+adbook::AbstractAdSearcher::OnStart AdSearchTask::CreateSearchStartedCallback(AdSearchTask ^ searcher)
 {
     searcher->_raiseSearchStartedDelegate =
         gcnew RaiseSearchStartedDelegate(searcher, &AdSearchTask::RaiseSearchStartedEvent);
@@ -121,7 +112,7 @@ adbook::AdSearcher::OnStart AdSearchTask::CreateSearchStartedCallback(AdSearchTa
     return f;
 }
 
-adbook::AdSearcher::OnStop AdSearchTask::CreateSearchStoppedCallback(AdSearchTask ^ searcher)
+adbook::AbstractAdSearcher::OnStop AdSearchTask::CreateSearchStoppedCallback(AdSearchTask ^ searcher)
 {
     searcher->_raiseSearchStoppedDelegate =
         gcnew RaiseSearchStoppedDelegate(searcher, &AdSearchTask::RaiseSearchStoppedEvent);
@@ -138,24 +129,29 @@ adbook::AdSearcher::OnStop AdSearchTask::CreateSearchStoppedCallback(AdSearchTas
 void AdSearchTask::TaskProc(Object^ arg)
 {
     try {
-        Arguments^ args = safe_cast<Arguments^>(arg);        
+        Arguments^ args = safe_cast<Arguments^>(arg);
         _nativeSearcher->Start(
-            args->LdapRequest->ToUnderlyingType(),
+            args->LdapRequestBuilder->ToUnderlyingType().Get(),
             args->ConnectionParams->ToUnderlyingType()
         );
         _nativeSearcher->Wait();
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew System::Exception(gcnew String(e.What().c_str()));
+        throw gcnew AdSearchTaskError(gcnew String(e.What().c_str()));
     }
-    catch (const std::exception & e) {        
+    catch (const std::exception & e) {
         throw gcnew System::Exception(gcnew String(e.what()));
     }
+
+    cancelTokenSource_->Token.ThrowIfCancellationRequested();
+
 }
 
 void AdSearchTask::Cancel()
 {
     try {
+        cancelTokenSource_->Cancel();
         _nativeSearcher->Stop();
         GC::KeepAlive(this);
     }
@@ -180,6 +176,28 @@ void AdSearchTask::RaisePersonFoundEvent(adbook::AdPersonDesc && apd)
     PersonFoundEvent(this, gcnew PersonFoundEventArgs(madp));
 }
 
+void AdSearchTask::EnsureSearchIsNotRunning()
+{
+    try {
+        _nativeSearcher->Stop();
+        _nativeSearcher->Wait();
+        GC::KeepAlive(this);
+    }
+    catch (const adbook::Error & e) {
+        throw gcnew System::Exception(gcnew String(e.What().c_str()));
+    }
+}
+
+AdSearchTask::~AdSearchTask() {
+    this->!AdSearchTask();
+}
+
+AdSearchTask::!AdSearchTask() {
+    if (nullptr == cancelTokenSource_) {
+        delete cancelTokenSource_;
+        cancelTokenSource_ = nullptr;
+    }
+}
 
 }   // namespace adbookcli
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License along with
 
 #pragma once
 
+// WndItem - a helper class that is used by the class WindowAnchor.
+// It repersents the position of a control in a window.
 class WndItem
 {
     friend class WindowAnchor;
@@ -39,7 +41,7 @@ private:
     float cxLeft_ = 1.0f, cxRight_ = 1.0f, cyTop_ = 1.0f, cyBottom_ = 1.0f;
 };
 
-
+// WindowAnchor is used for auto correction controls' positions when a window is resising
 class WindowAnchor
 {
 public:
@@ -51,7 +53,7 @@ public:
     void Init(HWND windowHandle);
     void Add(UINT id, UINT flag, float cxLeft = 1.0f, float cxRight = 1.0f, float cyTop = 1.0f,
         float cyBottom = 1.0f);
-    BOOL OnSize();    
+    BOOL OnSize();
 private:
     HWND wndHandle_ = nullptr;
     CRect initRect_;

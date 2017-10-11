@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License along with
 #ifndef CHANGESVATTRDLG_H
 #define CHANGESVATTRDLG_H
 
-#include <QDialog>
 #include "ui_ChangeSvAttrDlg.h"
 
 class ChangeSvAttrDlg : public QDialog
@@ -28,8 +27,8 @@ class ChangeSvAttrDlg : public QDialog
 public:
     ChangeSvAttrDlg(
         const QString & objectDn,
-        const QString & currentValue, 
-        const adbook::Attributes::AttrId attrToChange, 
+        const QString & currentValue,
+        const adbook::Attributes::AttrId attrToChange,
         QWidget *parent = 0
     );
     ~ChangeSvAttrDlg();

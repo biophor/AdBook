@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Compatible with WiX Toolset v3.10-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  
+
   <?define ProductName = "Active Directory Contact Book" ?>
-  <?define ProductVersion = "1.5.0" ?>
-  <?define ProductFullVersion = "1.5.0.1" ?>
+  <?define ProductVersion = "1.6.1" ?>
+  <?define ProductFullVersion = "1.6.1.1" ?>
   <?define ProductAuthor = "Andrei Goncharov" ?>
   <?define ProductAppFolder = "InstallLocation" ?>
 
@@ -17,7 +17,7 @@
 
   <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
            Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
-  	
+
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="x64" />
 
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
@@ -28,13 +28,14 @@
     <InstallExecuteSequence>
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
-    
+
     <MediaTemplate EmbedCab="yes"/>
-		
+
     <Feature Id="ProductFeature" Title="Setup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentGroupRef Id="ProductShortcuts" />
       <ComponentGroupRef Id="Qt5" />
+      <ComponentGroupRef Id="WpfTranslations"/>
       <MergeRef Id="VCRedist"/>
       <MergeRef Id="MFCRedist"/>
     </Feature>
@@ -45,20 +46,20 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      
+
       <Directory Id="$(var.PlatformProgramFilesFolder)" >
         <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)"/>
       </Directory>
-      
+
       <Directory Id="ProgramMenuFolder">
         <Directory Id="ShortcutsDir" Name="Active Directory Contact Book" />
       </Directory>
     </Directory>
-    
+
     <DirectoryRef Id="TARGETDIR">
-      <Merge Id="VCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0"/>      
-      <Merge Id="MFCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_MFC_x64.msm" DiskId="1" Language="0"/>      
-    </DirectoryRef>  
+      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+      <Merge Id="MFCRedist" SourceFile="..\\msm\\Microsoft_VC141_MFC_x64.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
   </Fragment>
 
   <Fragment>
@@ -67,35 +68,41 @@
       <!-- <Component Id="ProductComponent"> -->
       <!-- TODO: Insert files, registry keys, and other resources here. -->
       <!-- </Component> -->
-      <Component Id="CMP_QtAdBookExe" Guid="D37577CD-EFF4-4EB0-A2C2-F703F2FCD71D" >        
+      <Component Id="CMP_QtAdBookExe" Guid="D37577CD-EFF4-4EB0-A2C2-F703F2FCD71D" >
         <File Id="FILE_INSTALLFOLDER_QtAdBookExe"
               Name="QtAdBook.exe"
               Source="$(var.MySource)QtAdBook.exe"
-              KeyPath="yes" />        
+              KeyPath="yes" />
       </Component>
-      <Component Id="CMP_AdBookExe" Guid="BA5B3A53-3CAA-4DA1-962B-97BCAC532E61" >        
+      <Component Id="CMP_AdBookExe" Guid="BA5B3A53-3CAA-4DA1-962B-97BCAC532E61" >
         <File Id="FILE_INSTALLFOLDER_AdBookExe"
               Name="AdBook.exe"
               Source="$(var.MySource)AdBook.exe"
-              KeyPath="yes" />        
+              KeyPath="yes" />
       </Component>
       <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
         <File Id="FILE_INSTALLFOLDER_AdBookBL"
               Name="AdBookBL.dll"
               Source="$(var.MySource)AdBookBL.dll"
               KeyPath="yes" />
-      </Component>      
+      </Component>
       <Component Id="CMP_GplLicence" Guid="224100D8-DA70-4FA5-B8DA-24E576B991FA" >
         <File Id="FILE_INSTALLFOLDER_GplRtf"
               Name="gpl.rtf"
               Source="gpl.rtf"
               KeyPath="yes" />
       </Component>
-      <Component Id="CMP_WfAdBookExe" Guid="7F5215BF-8A6F-4FCF-884F-3331FA5FA896" >        
+      <Component Id="CMP_WfAdBookExe" Guid="7F5215BF-8A6F-4FCF-884F-3331FA5FA896" >
           <File Id="FILE_INSTALLFOLDER_WfAdBookExe"
                 Name="WfAdBook.exe"
                 Source="$(var.MySource)WfAdBook.exe"
-                KeyPath="yes" />        
+                KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_WpfAdBookExe" Guid="AB3B231F-F44C-4A8F-8757-09D545DACA14" >
+        <File Id="FILE_INSTALLFOLDER_WpfAdBookExe"
+              Name="WpfAdBook.exe"
+              Source="$(var.MySource)WpfAdBook.exe"
+              KeyPath="yes" />
       </Component>
       <Component Id="CMP_AdBookBLCLI" Guid="CD2DE8AE-28DB-49EB-B8F2-B2CF25FE0D10" >
           <File Id="FILE_INSTALLFOLDER_AdBookBLCLI"
@@ -103,10 +110,17 @@
                 Source="$(var.MySource)AdBookBLCLI.dll"
                 KeyPath="yes" />
       </Component>
+      <Component Id="CMP_MsftXamlBehaviors" Guid="387AB802-B088-4BF4-B8D5-3C5931679676" >
+        <File Id="FILE_INSTALLFOLDER_MsftXamlBehaviors"
+              Name="Microsoft.Xaml.Behaviors.dll"
+              Source="$(var.MySource)Microsoft.Xaml.Behaviors.dll"
+              KeyPath="yes" />
+      </Component>
+
     </ComponentGroup>
-  
+
     <ComponentGroup Id="ProductShortcuts" Directory="ShortcutsDir">
-      <Component Id="CMP_MainExecutableShortcutQt"
+      <Component Id="CMP_ExecutablesShortcuts"
                  Guid="E184B1FC-B151-4D65-88AF-81BC3F8669E4">
 
         <Shortcut Id="MainExecutableShortcutMfc"
@@ -121,16 +135,21 @@
                   Name="Active Directory Contact Book[WinForms]"
                   Description="Start 'Active Directory Contact Book[WinForms UI]'"
                   Target="[INSTALLFOLDER]WfAdBook.exe" />
-        
+
+        <Shortcut Id="MainExecutableShortcutWpf"
+                  Name="Active Directory Contact Book[WPF]"
+                  Description="Start 'Active Directory Contact Book[WPF UI]'"
+                  Target="[INSTALLFOLDER]WpfAdBook.exe" />
+
         <!--<Shortcut Id="UninstallShortcut"
                   Name="Uninstall 'Active Directory Contact Book'"
                   Description="Uninstall 'Active Directory Contact Book'"
                   Target="[System64Folder]msiexec.exe"
                   Arguments="/x [ProductCode]" />-->
-        
+
         <RemoveFolder Id="RemoveShortcutsDir"
                       On="uninstall" />
-        
+
         <RegistryValue Root="HKCU"
                        Key="Software\Microsoft\AdBook"
                        Name="installed"
@@ -177,9 +196,6 @@
       </Component>
       <Component Id="cmpA4ztxUchF533PFXmwjdVRbgMU44" Directory="dir9o4ZHaDEuPWXFKRWKBwmC.N2MUA" Guid="{C2CC5DBD-6D24-4DEB-9539-E78CF31FA390}">
         <File Id="filWcU9Z51lgQeF8V2dr0rieRzQm_s" KeyPath="yes" Source="$(var.MySource)\iconengines\qsvgicon.dll" />
-      </Component>
-      <Component Id="cmpcttRTsWUCu8r8F0tjhmE4DnYXcI" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{161C04AA-A5F4-4764-85A9-A4DD5213D085}">
-        <File Id="filQoK7C5FcHOWOoxCqVacjzAxiv5o" KeyPath="yes" Source="$(var.MySource)\imageformats\qdds.dll" />
       </Component>
       <Component Id="cmp68IbmiA9H25NNzShh3Ep6uvMCfM" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{91FAF7EB-991B-4793-9D93-BF12196A1277}">
         <File Id="fildbWHBXvoM2o7ncPce8ewvUyc1g4" KeyPath="yes" Source="$(var.MySource)\imageformats\qgif.dll" />
@@ -255,6 +271,18 @@
       </Component>
       <Component Id="cmpeQ9j0LU3UL7gpExP6nUIsi_tv_Q" Directory="dir1Rf6JnYjXgJTtC.YZRkcX1I61tc" Guid="{82C8DFE3-DAE5-4F52-B989-DE69D15D4DA1}">
         <File Id="filEFRrI77MTJPU7AIzTNwRFGHohvw" KeyPath="yes" Source="$(var.MySource)\translations\qt_uk.qm" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Directory Id="WpfRussianResources" Name="ru-RU" />
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="WpfTranslations">
+      <Component Id="WpfRuRuTranslation" Directory="WpfRussianResources" Guid="{0BB6319C-2DB7-4544-A259-D54F931D027B}">
+        <File Id="FILE_INSTALLFOLDER_TRANSLATIONS_WpfAdBook_resources_dll" KeyPath="yes" Source="$(var.MySource)\ru-RU\WpfAdBook.resources.dll" />
       </Component>
     </ComponentGroup>
   </Fragment>

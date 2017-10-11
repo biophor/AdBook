@@ -34,6 +34,5 @@ public ref struct ListCtrlHelper abstract sealed
     static void EnableTooltipsForListCtrl(System::IntPtr listCtrlHandle);
 };
 
-
 }   // namespace adbookcli
 

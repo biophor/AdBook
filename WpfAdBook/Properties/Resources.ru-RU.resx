@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ButtonCancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="ButtonOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DataModificationError" xml:space="preserve">
+    <value>Не удалось изменить данные.</value>
+  </data>
+  <data name="Filter_AnyAttribute" xml:space="preserve">
+    <value>Любой атрибут</value>
+  </data>
+  <data name="LoadFilterControl_AddButton" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+  <data name="LoadFilterControl_AllRules" xml:space="preserve">
+    <value>Все правила должны быть выполнены</value>
+  </data>
+  <data name="LoadFilterControl_AnyRule" xml:space="preserve">
+    <value>Хотя бы одно правило должно быть выполнено</value>
+  </data>
+  <data name="LoadFilterControl_Filter" xml:space="preserve">
+    <value>Фильтр</value>
+  </data>
+  <data name="LoadFilterControl_MatchingRule" xml:space="preserve">
+    <value>Правило</value>
+  </data>
+  <data name="LoadFilterControl_RemoveButton" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="LoadFilterControl_Value" xml:space="preserve">
+    <value>Значение</value>
+  </data>
+  <data name="MainWindow_CloseButton" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="MainWindow_EditButton" xml:space="preserve">
+    <value>Править...</value>
+  </data>
+  <data name="MainWindow_FilterCaption" xml:space="preserve">
+    <value>Фильтр</value>
+  </data>
+  <data name="MainWindow_LoadButton" xml:space="preserve">
+    <value>Загрузить</value>
+  </data>
+  <data name="MainWindow_SettingsButton" xml:space="preserve">
+    <value>Настройки...</value>
+  </data>
+  <data name="MainWindow_StopButton" xml:space="preserve">
+    <value>Остановить</value>
+  </data>
+  <data name="MatchingRule_BeginsWith" xml:space="preserve">
+    <value>начинается с</value>
+  </data>
+  <data name="MatchingRule_Contains" xml:space="preserve">
+    <value>содержит</value>
+  </data>
+  <data name="MatchingRule_EndsWith" xml:space="preserve">
+    <value>заканчивается на</value>
+  </data>
+  <data name="MatchingRule_ExactMatch" xml:space="preserve">
+    <value>эквивалентно</value>
+  </data>
+  <data name="MsgBoxCaption_Error" xml:space="preserve">
+    <value>Ошибка</value>
+    <comment>..</comment>
+  </data>
+  <data name="MsgBoxCaption_Success" xml:space="preserve">
+    <value>Успешный результат</value>
+  </data>
+  <data name="MsgBoxCaption_Warning" xml:space="preserve">
+    <value>Предупреждение</value>
+  </data>
+  <data name="PersonDetailsControl_AttrName" xml:space="preserve">
+    <value>Атрибут</value>
+  </data>
+  <data name="PersonDetailsControl_AttrValue" xml:space="preserve">
+    <value>Значение</value>
+  </data>
+  <data name="PersonDetailsControl_Title" xml:space="preserve">
+    <value>Атрибуты выбранного контакта</value>
+  </data>
+  <data name="PersonEditorWindow_AttrInfo" xml:space="preserve">
+    <value>Информация об атрибутах</value>
+  </data>
+  <data name="PersonEditorWindow_SelectPhoto" xml:space="preserve">
+    <value>Выбрать фотографию...</value>
+  </data>
+  <data name="PersonEditorWindow_TechDetails" xml:space="preserve">
+    <value>Технические подробности</value>
+  </data>
+  <data name="PersonEditorWindow_Title" xml:space="preserve">
+    <value>Редактор свойств</value>
+  </data>
+  <data name="RepositoryInaccessibleError" xml:space="preserve">
+    <value>Не удалось подключиться.</value>
+  </data>
+  <data name="SelectPhotoDialogCaption" xml:space="preserve">
+    <value>Выберите файл. Размер файла должен быть меньше 100kb.</value>
+  </data>
+  <data name="SettingsWindow_AuthGrp" xml:space="preserve">
+    <value>Аутентификация</value>
+  </data>
+  <data name="SettingsWindow_ConnectDefault" xml:space="preserve">
+    <value>Подключаться к домену, в который выполнен вход</value>
+  </data>
+  <data name="SettingsWindow_ConnectionGrp" xml:space="preserve">
+    <value>Подключение</value>
+  </data>
+  <data name="SettingsWindow_ConnectTo" xml:space="preserve">
+    <value>_Подключаться к указанному домену:</value>
+  </data>
+  <data name="SettingsWindow_CurUser" xml:space="preserve">
+    <value>Использовать учетные данные текущего пользователя</value>
+  </data>
+  <data name="SettingsWindow_Login" xml:space="preserve">
+    <value>_Логин:</value>
+  </data>
+  <data name="SettingsWindow_Password" xml:space="preserve">
+    <value>_Пароль:</value>
+  </data>
+  <data name="SettingsWindow_TestButton" xml:space="preserve">
+    <value>Проверить</value>
+  </data>
+  <data name="SettingsWindow_Title" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="SettingsWindow_UseSpecCred" xml:space="preserve">
+    <value>Использовать следующие учетные данные:</value>
+  </data>
+  <data name="TestConnectionSuccessfulMessage" xml:space="preserve">
+    <value>Успешное подключение.</value>
+  </data>
+  <data name="TestConnectionUnsuccessfulMessage" xml:space="preserve">
+    <value>Не удалось подключиться.</value>
+  </data>
+  <data name="MainWindow_AboutButton" xml:space="preserve">
+    <value>О программе...</value>
+  </data>
+  <data name="YouShouldProvideValue" xml:space="preserve">
+    <value>Вам необходимо указать значение.</value>
+  </data>
+  <data name="MainWindow_SearchAdvice1" xml:space="preserve">
+    <value>Щелкните по кнопке 'Загрузить', чтобы загрузить контакты.</value>
+  </data>
+  <data name="MainWindow_SearchAdvice2" xml:space="preserve">
+    <value>Если этот компьютер не является членом домена Active Directory, вы должны настроить подключение, щелкнув по кнопке 'Настройки' внизу окна.</value>
+  </data>
+  <data name="AppExitConfirmationRequst" xml:space="preserve">
+    <value>Вы действительно хотите выйти?</value>
+  </data>
+  <data name="AppTitleForMessageBox" xml:space="preserve">
+    <value>AdBook</value>
+  </data>
+</root>

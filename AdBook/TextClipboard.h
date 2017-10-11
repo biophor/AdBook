@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,7 +29,7 @@ public:
     TextClipboard(const TextClipboard &) = delete;
     TextClipboard(TextClipboard &&) = delete;
     void operator = (const TextClipboard &) = delete;
-    void operator = (TextClipboard &&) = delete;    
+    void operator = (TextClipboard &&) = delete;
 private:
     void Alloc(const size_t sizeInBytes);
     void Lock();

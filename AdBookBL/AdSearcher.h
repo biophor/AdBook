@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -19,41 +19,62 @@ You should have received a copy of the GNU General Public License along with
 #pragma once
 #include "AdBookBLExport.h"
 #include "AdPersonDesc.h"
-#include "LdapRequest.h"
+#include "LdapRequestBuilder.h"
 #include "AdConnector.h"
+#include "AbstractAdSearcher.h"
 
 namespace adbook
 {
 
 struct AdSearcherData;
 
-class ADBOOKBL_API AdSearcher
+class ADBOOKBL_API AdSearcher: public AbstractAdSearcher
 {
 public:
     AdSearcher();
-    ~AdSearcher();
+    virtual ~AdSearcher();
 
     AdSearcher(const AdSearcher &) = delete;
     AdSearcher(AdSearcher &&) = delete;
-    void operator = (const AdSearcher &) = delete;
-    void operator = (AdSearcher &&) = delete;
+    AdSearcher & operator = (const AdSearcher &) = delete;
+    AdSearcher & operator = (AdSearcher &&) = delete;
 
-    using OnNewItem = std::function<void(AdPersonDesc && item)>; // new item has been found.
-    using OnStop = std::function<void()>;   // SearchThread is about to be completed.
-    using OnStart = std::function<void()>;  // SearchThread has just been started.
-
-    void SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop);
-    void Start(const LdapRequest & ldapRequest, const ConnectionParams & cs);
-    bool IsStarted() const;
-    void Stop();
-    void Wait();
+    virtual void SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop) override;
+    virtual void Start(const std::wstring & ldapRequest, const ConnectionParams & cs) override;
+    virtual bool IsStarted() const override;
+    virtual void Stop() override;
+    virtual void Wait() override;
 
 private:
-    void ThreadProc(ConnectionParams cs, LdapRequest ldapRequest);
-    void IterateThroughSearchResults(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle, std::vector<WcharBuf> & attrNames);
-    void ReadNextEntry(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle, std::vector<WcharBuf> & attrNames);
+    void ThreadProc(ConnectionParams cs, std::wstring ldapRequest);
+
+    void IterateThroughSearchResults(
+        IDirectorySearchPtr & dsp,
+        ADS_SEARCH_HANDLE & searchHandle,
+        std::vector<WcharBuf> & attrNames
+    );
+
+    void ReadNextEntry(
+        IDirectorySearchPtr & dsp,
+        ADS_SEARCH_HANDLE & searchHandle,
+        std::vector<WcharBuf> & attrNames
+    );
+
+    void ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person);
+
     void SetCancelationHandle(const IDirectorySearchPtr & dsp, const ADS_SEARCH_HANDLE & searchHandle);
-private:    
+
+    void SetupSearchPrefs(IDirectorySearchPtr & dsp);
+
+    std::vector<WcharBuf> CreateAttrListToRetrieve(std::vector<wchar_t *> & apv);
+
+    void ExecuteSearch(
+        IDirectorySearchPtr & dsp,
+        WcharBuf & searchFilter,
+        std::vector<wchar_t *> & attrsToRetrieve,
+        ADS_SEARCH_HANDLE & searchHandle
+    );
+private:
     std::shared_ptr<AdSearcherData> dataPtr_;
 };
 

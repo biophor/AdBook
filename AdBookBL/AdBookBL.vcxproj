@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -13,21 +13,21 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4DDCFDB2-4424-493B-A255-638087313FD8}</ProjectGuid>
     <RootNamespace>AdBookBL</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <Keyword>MFCDLLProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -48,13 +48,14 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(BOOST);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(BOOST);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -64,6 +65,7 @@
       <PreprocessorDefinitions>ADBOOKBL_EXPORTS;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <EnablePREfast>true</EnablePREfast>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,6 +92,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>ADBOOKBL_EXPORTS;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -113,21 +116,33 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AbstractAdAccessFactory.cpp" />
+    <ClCompile Include="AbstractAdConnector.cpp" />
+    <ClCompile Include="AbstractAdPersonDescKeeper.cpp" />
+    <ClCompile Include="AbstractAdSearcher.cpp" />
     <ClCompile Include="AdBookBL.cpp" />
     <ClCompile Include="AdConnector.cpp" />
     <ClCompile Include="AdPersonDesc.cpp" />
-    <ClCompile Include="AdPersonDescList.cpp" />
+    <ClCompile Include="AdPersonDescSqliteKeeper.cpp" />
     <ClCompile Include="AdSearcher.cpp" />
     <ClCompile Include="adsi.cpp" />
     <ClCompile Include="Attributes.cpp" />
     <ClCompile Include="ConnectionParams.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="error.cpp" />
-    <ClCompile Include="LdapRequest.cpp" />
+    <ClCompile Include="FakeConnector.cpp" />
+    <ClCompile Include="FakeDataSource.cpp" />
+    <ClCompile Include="FakeSearcher.cpp" />
+    <ClCompile Include="LdapRequestBuilder.cpp" />
     <ClCompile Include="shared.cpp" />
     <ClCompile Include="sqlite3\sqlite3.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level3</WarningLevel>
+      <SDLCheck Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</SDLCheck>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd28182 /wd6011 /wd6385 /wd6001 /wd28182  /wd6387  /wd6386  /wd26451 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/wd28182 /wd6011 /wd6385 /wd6001 /wd28182  /wd6387  /wd6386 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -135,11 +150,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AbstractAdAccessFactory.h" />
+    <ClInclude Include="AbstractAdConnector.h" />
+    <ClInclude Include="AbstractAdPersonDescKeeper.h" />
+    <ClInclude Include="AbstractAdSearcher.h" />
     <ClInclude Include="AdBookBL.h" />
     <ClInclude Include="AdBookBLExport.h" />
     <ClInclude Include="AdConnector.h" />
     <ClInclude Include="AdPersonDesc.h" />
-    <ClInclude Include="AdPersonDescList.h" />
+    <ClInclude Include="AdPersonDescSqliteKeeper.h" />
     <ClInclude Include="AdSearcher.h" />
     <ClInclude Include="adsi.h" />
     <ClInclude Include="Attributes.h" />
@@ -147,7 +166,10 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="error.h" />
     <ClInclude Include="export.h" />
-    <ClInclude Include="LdapRequest.h" />
+    <ClInclude Include="FakeConnector.h" />
+    <ClInclude Include="FakeDataSource.h" />
+    <ClInclude Include="FakeSearcher.h" />
+    <ClInclude Include="LdapRequestBuilder.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="shared.h" />
     <ClInclude Include="sqlite3\sqlite3.h" />

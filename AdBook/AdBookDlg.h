@@ -1,7 +1,5 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -34,7 +32,10 @@ class CAdBookDlg : public CDialogEx
 {
 // Construction
 public:
-    CAdBookDlg(CWnd * pParent = NULL);
+    CAdBookDlg(
+        std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,
+        CWnd * pParent = NULL
+    );
 
 // Dialog Data
     enum { IDD = IDD_ADBOOK_DIALOG };
@@ -54,7 +55,7 @@ private:
     void InitSearchResultList();
     void InitMinSize();
     void InitContactDetails();
-        
+
     void SaveWindowPosition();
     void RestoreWindowPosition();
     void SaveSearchResults();
@@ -62,7 +63,7 @@ private:
     void SaveSearchFilterCols();
     void SaveSearchFilterStrings();
     void LoadSearchFilterStrings();
-    void SaveSearchResultCols();    
+    void SaveSearchResultCols();
 
     void CleanSortArrow();
     void Sort(const int colId, const bool ascending);
@@ -75,7 +76,7 @@ private:
     void DisplaySvAttrEditor(CListCtrl & personDetails);
     int GetSelectedPersonIdx();
     void ApplyNewValue(adbook::AdPersonDesc & person, const adbook::Attributes::AttrId, const CString & newValue);
-    adbook::LdapRequest ConstructLdapRequest();
+    std::wstring ConstructLdapRequest();
     void OnNewItem(adbook::AdPersonDesc && item);
     void OnStart();
     void OnStop();
@@ -83,28 +84,30 @@ private:
     LRESULT OnUmStart(WPARAM, LPARAM);
     LRESULT OnUmStop(WPARAM, LPARAM);
 
-    adbook::AdSearcher adSearcher_;
-    MainWndSettings & mws_{ theApp.GetAppSettings().GetMainWndSettings() };
-    WindowAnchor wndAnchor_;
-    CSize minSize_;        
-    std::map<int, adbook::Attributes::AttrId> searchResultsColIdx_;    // <colId, attrId>
-    std::recursive_mutex personsMutex_;
-    adbook::AdPersonDescList persons_;
+    AppSettings & _appSettings = theApp.GetAppSettings();
+    std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;
+    std::unique_ptr<adbook::AbstractAdSearcher> _adSearcher;
+    std::shared_ptr<adbook::AbstractAdPersonDescKeeper> _adPersonKeeper;
+    WindowAnchor _wndAnchor;
+    CSize _minSize;
+    std::map<int, adbook::Attributes::AttrId> _searchResultsColIdx;    // <colId, attrId>
+    std::mutex _peopleMutex;
+    std::vector<adbook::AdPersonDesc> _people;
 
-    CComboBox attrList_;
-    CComboBox condList_;
-    CComboBox valList_;
-    const size_t valListMaxItemCount = 32;
-    CListCtrl searchFilters_;
-    CListCtrl searchResults_;
-    CListCtrl contactDetails1_;
-    CListCtrl contactDetails2_;    
-    ImageDisplayer photo_;
+    CComboBox _attrList;
+    CComboBox _condList;
+    CComboBox _valList;
+    const size_t valListMaxItemCount = 32; //-V112
+    CListCtrl _searchFilters;
+    CListCtrl _searchResults;
+    CListCtrl _contactDetails1;
+    CListCtrl _contactDetails2;
+    ImageDisplayer _photo;
 
 // Implementation
 protected:
     HICON m_hIcon;
-    
+
     // Generated message map functions
     virtual BOOL OnInitDialog();
     afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -114,7 +117,7 @@ protected:
     afx_msg HCURSOR OnQueryDragIcon();
     DECLARE_MESSAGE_MAP()
 public:
-    afx_msg void OnSize(UINT nType, int cx, int cy);        
+    afx_msg void OnSize(UINT nType, int cx, int cy);
     afx_msg void OnBnClickedButtonAdd();
     afx_msg void OnBnClickedButtonRemove();
     afx_msg void OnBnClickedButtonFind();
@@ -123,17 +126,17 @@ public:
     afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
     afx_msg void OnClose();
     afx_msg void OnCbnEditchangeComboText();
-    afx_msg void OnCbnSelchangeComboText();    
+    afx_msg void OnCbnSelchangeComboText();
     afx_msg void OnLvnItemchangedListFilters(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnLvnGetdispinfoListResults(NMHDR *pNMHDR, LRESULT *pResult);
-    afx_msg void OnHdnItemclickListResults(NMHDR *pNMHDR, LRESULT *pResult);       
+    afx_msg void OnHdnItemclickListResults(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnLvnItemchangedListResults(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnLvnItemchangedContactDetails(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnBnClickedButtonCopy1();
     afx_msg void OnBnClickedButtonChange1();
     afx_msg void OnBnClickedButtonCopy2();
     afx_msg void OnBnClickedButtonChange2();
-    afx_msg void OnBnClickedButtonSelect();        
+    afx_msg void OnBnClickedButtonSelect();
     afx_msg void OnNMDblclkContactDetails1(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnNMDblclkContactDetails2(NMHDR *pNMHDR, LRESULT *pResult);
 };

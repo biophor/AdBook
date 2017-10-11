@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -31,76 +31,76 @@ using System::Int32;
 using System::Exception;
 using System::Diagnostics::Trace;
 
-AdConnector::AdConnector(ConnectionParams ^ cs)
-    : _underlyingConnector(new adbook::AdConnector(cs->ToUnderlyingType()))
+void NativeAdConnectorPtr::ReleaseNativeResources()
+{
+    try {}
+    finally{// preventing memory leaks due to ThreadAbortException
+        try {
+            adbook::AbstractAdConnector * adc = reinterpret_cast<adbook::AbstractAdConnector *>(handle.ToPointer());
+            if (adc != nullptr) {
+                if (adc->IsConnected()) {
+                    adc->Disconnect();
+                }
+                delete adc;
+                handle = IntPtr::Zero;
+            }
+        }
+        catch (const adbook::Error & e) {
+            OutputDebugStringW(e.What().c_str());
+        }
+        catch (const std::exception & e) {
+            OutputDebugStringA(e.what());
+        }
+    }
+}
+
+
+AdConnector::AdConnector(adbook::AbstractAdConnector * nativeAdConnector)
+    : _nativeAdConnectorPtr(nativeAdConnector)
 {
     GC::KeepAlive(this);
 }
 
-AdConnector::AdConnector(ConnectionParams ^ cs, String ^ dn)
-    : _underlyingConnector(new adbook::AdConnector(cs->ToUnderlyingType(), StringToStdWstring(dn)))
-{
-    GC::KeepAlive(this);
-}
-
-AdConnector::~AdConnector() {
-	CleanupUnmanaged();
-    GC::KeepAlive(this);
-}
-
-void AdConnector::CleanupUnmanaged()
-{
-	try {
-		if (_underlyingConnector != nullptr) {
-			if (_underlyingConnector->IsConnected()) {
-				_underlyingConnector->Disconnect();
-			}
-            delete _underlyingConnector;
-            _underlyingConnector = nullptr;
-		}
-	}
-	catch (const adbook::Error & e) {
-		OutputDebugStringW(e.What().c_str());
-	}
-	catch (const std::exception & e) {
-		OutputDebugStringA(e.what());
-	}
-}
-
-AdConnector::!AdConnector()
-{
-	FINALISER_CALL_WARNING;
-	CleanupUnmanaged();
-}
-
-void AdConnector::Connect()
+void AdConnector::Connect(ConnectionParams ^ cs)
 {
     try {
-        _underlyingConnector->Connect();
-		GC::KeepAlive(this);
+        _nativeAdConnectorPtr->Connect(cs->ToUnderlyingType());
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
     }
 }
 
-void AdConnector::Disconnect() 
+void AdConnector::Connect(ConnectionParams ^ cs, String ^ dn)
 {
     try {
-        _underlyingConnector->Disconnect();
-		GC::KeepAlive(this);
+        std::wstring wdn = StringToStdWstring(dn);
+        _nativeAdConnectorPtr->Connect(cs->ToUnderlyingType(), wdn);
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
     }
 }
 
-bool AdConnector::IsConnected() 
+void AdConnector::Disconnect()
 {
     try {
-		auto isConnected = _underlyingConnector->IsConnected();
-		GC::KeepAlive(this);
-		return isConnected;
+        _nativeAdConnectorPtr->Disconnect();
+        GC::KeepAlive(this);
+    }
+    catch (const adbook::Error & e) {
+        throw gcnew Exception(gcnew String(e.What().c_str()));
+    }
+}
+
+bool AdConnector::IsConnected()
+{
+    try {
+        auto isConnected = _nativeAdConnectorPtr->IsConnected();
+        GC::KeepAlive(this);
+        return isConnected;
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
@@ -110,8 +110,8 @@ bool AdConnector::IsConnected()
 String ^ AdConnector::GetLdapPath()
 {
     try {
-        auto r = gcnew String(_underlyingConnector->GetLdapPath().c_str());        
-		GC::KeepAlive(this);
+        auto r = gcnew String(_nativeAdConnectorPtr->GetLdapPath().c_str());
+        GC::KeepAlive(this);
         return r;
     }
     catch (const adbook::Error & e) {
@@ -119,23 +119,23 @@ String ^ AdConnector::GetLdapPath()
     }
 }
 
-String ^ AdConnector::GetRDN() 
+String ^ AdConnector::GetRDN()
 {
     try {
-        auto r = gcnew String(_underlyingConnector->GetRDN().c_str());
-		GC::KeepAlive(this);
+        auto r = gcnew String(_nativeAdConnectorPtr->GetRDN().c_str());
+        GC::KeepAlive(this);
         return r;
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
-    }    
+    }
 }
 
 void AdConnector::Rename(String ^ newName)
 {
     try {
-        _underlyingConnector->Rename(StringToStdWstring(newName));
-		GC::KeepAlive(this);
+        _nativeAdConnectorPtr->Rename(StringToStdWstring(newName));
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
@@ -145,11 +145,11 @@ void AdConnector::Rename(String ^ newName)
 void AdConnector::UploadStringAttr(String ^ attrName, String ^ attrVal)
 {
     try {
-        _underlyingConnector->UploadStringAttr (
+        _nativeAdConnectorPtr->UploadStringAttr(
             StringToStdWstring(attrName),
             StringToStdWstring(attrVal)
         );
-		GC::KeepAlive(this);
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
@@ -159,8 +159,8 @@ void AdConnector::UploadStringAttr(String ^ attrName, String ^ attrVal)
 String ^ AdConnector::DownloadStringAttr(String ^ attrName)
 {
     try {
-        auto r = gcnew String(_underlyingConnector->DownloadStringAttr(StringToStdWstring(attrName)).c_str());
-		GC::KeepAlive(this);
+        auto r = gcnew String(_nativeAdConnectorPtr->DownloadStringAttr(StringToStdWstring(attrName)).c_str());
+        GC::KeepAlive(this);
         return r;
     }
     catch (const adbook::Error & e) {
@@ -175,12 +175,12 @@ void AdConnector::UploadBinaryAttr(String ^ attrName, cli::array<Byte> ^ bav)
             pin_ptr<Byte> pinPtr = &bav[0];
             Byte * p = pinPtr;
             adbook::BinaryAttrVal nbav(p, p + bav->Length);
-            _underlyingConnector->UploadBinaryAttr(StringToStdWstring(attrName), nbav);
-			GC::KeepAlive(this);
+            _nativeAdConnectorPtr->UploadBinaryAttr(StringToStdWstring(attrName), nbav);
         }
         else {
-            _underlyingConnector->UploadBinaryAttr(StringToStdWstring(attrName), adbook::BinaryAttrVal());
+            _nativeAdConnectorPtr->UploadBinaryAttr(StringToStdWstring(attrName), adbook::BinaryAttrVal());
         }
+        GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
         throw gcnew Exception(gcnew String(e.What().c_str()));
@@ -190,9 +190,12 @@ void AdConnector::UploadBinaryAttr(String ^ attrName, cli::array<Byte> ^ bav)
 cli::array<Byte> ^ AdConnector::DownloadBinaryAttr(String ^ attrName)
 {
     try {
-        adbook::BinaryAttrVal nbav = _underlyingConnector->DownloadBinaryAttr(StringToStdWstring(attrName));
-		GC::KeepAlive(this);
+        adbook::BinaryAttrVal nbav = _nativeAdConnectorPtr->DownloadBinaryAttr(StringToStdWstring(attrName));
+        GC::KeepAlive(this);
         cli::array<Byte>^ bav = gcnew cli::array<Byte>(boost::numeric_cast<Int32>(nbav.size()));
+        if (nbav.size() == 0) {
+            return bav;
+        }
         pin_ptr<Byte> pinPtr = &bav[0];
         memcpy_s(pinPtr, bav->Length, &nbav[0], nbav.size());
         return bav;

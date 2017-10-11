@@ -44,16 +44,13 @@ namespace WfAdBook
         }
         public void Save()
         {
-            if (!Font.Equals(Properties.Settings.Default.FilterListFont, FilterListFont)) {
-                //Properties.Settings.Default.FilterListFont.Dispose();
+            if (!Font.Equals(Properties.Settings.Default.FilterListFont, FilterListFont)) {                
                 Properties.Settings.Default.FilterListFont = FilterListFont;
             }
-            if (!Font.Equals(Properties.Settings.Default.ContactListFont, ContactListFont)) {
-                //Properties.Settings.Default.ContactListFont.Dispose();
+            if (!Font.Equals(Properties.Settings.Default.ContactListFont, ContactListFont)) {                
                 Properties.Settings.Default.ContactListFont = ContactListFont;
             }
-            if (!Font.Equals(Properties.Settings.Default.ContactDetailsFont, ContactDetailsFont)) {
-                //Properties.Settings.Default.ContactDetailsFont.Dispose();
+            if (!Font.Equals(Properties.Settings.Default.ContactDetailsFont, ContactDetailsFont)) {                
                 Properties.Settings.Default.ContactDetailsFont = ContactDetailsFont;
             }            
         }        

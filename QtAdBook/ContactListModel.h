@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -25,7 +25,10 @@ class ContactListModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    ContactListModel(QObject *parent = Q_NULLPTR);
+    ContactListModel(
+        std::shared_ptr<adbook::AbstractAdPersonDescKeeper> adPersonDescKeeper,
+        QObject *parent = Q_NULLPTR
+    );
     QVariant data(const QModelIndex & index, int nRole) const;
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     int columnCount(const QModelIndex & parent = QModelIndex()) const;
@@ -34,19 +37,21 @@ public:
     bool removeRows(int row, int count, const QModelIndex & parent = QModelIndex());
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
     void AddContacts(std::list<adbook::AdPersonDesc> && );
-    void Clear();    
+    void Clear();
     adbook::AdPersonDesc GetContact(int row) const;
     void SetContact(int row, const adbook::AdPersonDesc & apd);
-    void Save();
-    void Load();
+    void Save(const adbook::ConnectionParams & connectionParams);
+    void Load(const adbook::ConnectionParams & connectionParams);
 private:
     mutable QMutex _contactsMutex;
-    adbook::AdPersonDescList _contacts;
-    
+    std::vector<adbook::AdPersonDesc> _contacts;
+
+    std::shared_ptr<adbook::AbstractAdPersonDescKeeper> _adPersonDescKeeper;
+
     struct ColumnData {
         adbook::Attributes::AttrId attrId;
         QString headerLabel;
-    };    
+    };
     QList<ColumnData> _columnsData;
 };
 

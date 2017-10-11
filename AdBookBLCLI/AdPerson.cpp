@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -33,38 +33,23 @@ AdPerson::AdPerson():
 
 }
 
-AdPerson::~AdPerson()
-{    
-	CleanupUnmanaged();
-    GC::KeepAlive(this);
-}
-
-AdPerson::!AdPerson()
+System::Object ^ AdPerson::Clone()
 {
-	FINALISER_CALL_WARNING;
-	CleanupUnmanaged();
-}
-
-void AdPerson::CleanupUnmanaged()
-{
-	delete _personDescPtr;
-	_personDescPtr = nullptr;
+    return gcnew AdPerson(*_personDescPtr);
 }
 
 bool AdPerson::IsAttributeSet(String ^ ldapAttrName) {
     auto r = _personDescPtr->IsAttributeSet(StringToStdWstring(ldapAttrName));
-	GC::KeepAlive(this);
-	return r;
+    return r;
 }
 
-String ^ AdPerson::StringAttr::get(String ^ attrName) 
+String ^ AdPerson::StringAttr::get(String ^ attrName)
 {
     if (_cashedStringAttributes.ContainsKey(attrName)) {
         return _cashedStringAttributes[attrName];
     }
     auto r = gcnew String(_personDescPtr->GetStringAttr(StringToStdWstring(attrName)).c_str());
-    GC::KeepAlive(this);
-	return r;
+    return r;
 }
 
 void AdPerson::StringAttr::set(String ^ attrName, String^ value)
@@ -73,7 +58,6 @@ void AdPerson::StringAttr::set(String ^ attrName, String^ value)
     _personDescPtr->SetStringAttr (
         StringToStdWstring(attrName), StringToStdWstring(value)
     );
-    GC::KeepAlive(this);
 }
 
 cli::array<Byte> ^ AdPerson::BinaryAttr::get(String ^ attrName)
@@ -84,7 +68,6 @@ cli::array<Byte> ^ AdPerson::BinaryAttr::get(String ^ attrName)
     auto r = StdVectorToCliArray (
         _personDescPtr->GetBinaryAttr(StringToStdWstring(attrName))
     );
-    GC::KeepAlive(this);
     return r;
 }
 
@@ -94,7 +77,6 @@ void AdPerson::BinaryAttr::set(String ^ attrName, cli::array<Byte> ^ value)
     _personDescPtr->SetBinaryAttr(
         StringToStdWstring(attrName), CliArrayToStdVector(value)
     );
-    GC::KeepAlive(this);
 }
 
 AdPerson^ AdPerson::operator = (const adbook::AdPersonDesc & adp)
@@ -127,14 +109,23 @@ adbook::AdPersonDesc AdPerson::ToUnderlyingType() {
 
 bool AdPerson::IsAttributeWritable(AttrId id) {
     auto r = _personDescPtr->IsAttributeWritable(AdAttributes::ConvertAttrId(id));
-    GC::KeepAlive(this);
     return r;
 }
 
 String ^ AdPerson::Dn::get() {
     auto r = gcnew String(_personDescPtr->GetDn().c_str());
-    GC::KeepAlive(this);
     return r;
+}
+
+void AdPerson::SetAttributeWritable(AttrId id, bool writable) {
+    auto attrIds = _personDescPtr->GetWritableAttributes();
+    if (writable) {
+        attrIds.insert(AdAttributes::ConvertAttrId(id));
+    }
+    else {
+        attrIds.erase(AdAttributes::ConvertAttrId(id));
+    }
+    _personDescPtr->SetWritableAttributes(attrIds);
 }
 
 }   // namespace adbookcli

@@ -3,8 +3,8 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
   <?define ProductName = "Active Directory Contact Book" ?>
-  <?define ProductVersion = "1.4.2" ?>
-  <?define ProductFullVersion = "1.4.2.1" ?>
+  <?define ProductVersion = "1.4.3" ?>
+  <?define ProductFullVersion = "1.4.3.1" ?>
   <?define ProductAuthor = "Andrei Goncharov" ?>
   <?define ProductAppFolder = "InstallLocation" ?>
   
@@ -18,7 +18,7 @@
   <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
            Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
 
-    <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="$(var.Platform)" />
+    <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="x64" />
 
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
     <Upgrade Id="$(var.ProductUpgradeCode)">
@@ -54,7 +54,7 @@
     </Directory>
     
     <DirectoryRef Id="TARGETDIR">
-      <Merge Id="VCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0"/>      
+      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>      
     </DirectoryRef>    
   </Fragment>
 

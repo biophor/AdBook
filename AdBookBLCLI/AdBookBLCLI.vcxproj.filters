@@ -33,9 +33,6 @@
     <ClInclude Include="InteropHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LdapRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AdAttribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,10 +42,19 @@
     <ClInclude Include="AdPerson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdPersonListKeeper.h">
+    <ClInclude Include="AdSearchTask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdSearchTask.h">
+    <ClInclude Include="NativeObjectPtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LdapRequestBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AdAccessFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AdPersonDescKeeper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,9 +77,6 @@
     <ClCompile Include="InteropHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LdapRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AdAttributes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,10 +86,19 @@
     <ClCompile Include="AdPerson.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdPersonListKeeper.cpp">
+    <ClCompile Include="AdSearchTask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdSearchTask.cpp">
+    <ClCompile Include="NativeObjectPtr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LdapRequestBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AdAccessFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AdPersonDescKeeper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

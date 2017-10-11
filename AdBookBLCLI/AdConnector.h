@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with
 */
 #pragma once
 
+#include "NativeObjectPtr.h"
 #include "ConnectionParams.h"
 
 namespace adbookcli
@@ -24,15 +25,26 @@ namespace adbookcli
 using System::String;
 using System::Byte;
 
+using System::Runtime::CompilerServices::RuntimeHelpers;
+
+public ref class NativeAdConnectorPtr : NativeAbstractObjectPtr<adbook::AbstractAdConnector>
+{
+public:
+    NativeAdConnectorPtr(adbook::AbstractAdConnector * adc)
+        : NativeAbstractObjectPtr<adbook::AbstractAdConnector>(adc) {}
+
+protected:
+    virtual void ReleaseNativeResources() override;
+};
+
+
 public ref class AdConnector sealed
 {
 public:
-    AdConnector(ConnectionParams ^ cs);
-    AdConnector(ConnectionParams ^ cs, String ^ dn);
-    ~AdConnector();
-    !AdConnector();
+    explicit AdConnector(adbook::AbstractAdConnector * nativeAdConnector);
 
-    void Connect();
+    void Connect(ConnectionParams ^ cs);
+    void Connect(ConnectionParams ^ cs, String ^ dn);
     void Disconnect();
     bool IsConnected();
     String ^ GetLdapPath();
@@ -45,9 +57,7 @@ public:
     void UploadBinaryAttr(String ^ attrName, cli::array<Byte> ^ bav);
     cli::array<Byte> ^ DownloadBinaryAttr(String ^ attrName);
 private:
-	void CleanupUnmanaged();
-private:
-    adbook::AdConnector * _underlyingConnector;
+    NativeAdConnectorPtr _nativeAdConnectorPtr;
 };
 
 }   // adbookcli

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -26,24 +26,32 @@ class FilterTypeItem : public QStandardItem
 public:    
     FilterTypeItem(adbook::Attributes::AttrId attrId)
         : QStandardItem(QString::fromStdWString(adbook::Attributes::GetInstance().GetUiAttrName(attrId))),
-        _filterType(FilterType::LdapAttr), _filterCode(attrId)
-    { }        
+        _filterType{ FilterType::LdapAttr }, _filterCode{ attrId }
+    { }
     FilterTypeItem(CompositeFilterId filterId)
         : QStandardItem(GetFilterUiName(filterId)), 
-        _filterType(FilterType::Composite), _filterCode(static_cast<int>(filterId))
+        _filterType(FilterType::Composite), _filterCode{ filterId }
     { }
     virtual FilterTypeItem * clone() const {
         return new FilterTypeItem(*this);
     }
     int GetFilterCode() const {
+        return static_cast<int>(std::get<adbook::Attributes::AttrId>(_filterCode));
+    }
+    std::variant< adbook::Attributes::AttrId, CompositeFilterId> GetFilterCode2() const {
         return _filterCode;
     }
     FilterType GetFilterType() {
         return _filterType;
     }
+
+    QString GetFilterUiName(CompositeFilterId id);
+
+    QString GetFilterUiName(adbook::Attributes::AttrId attrId);
+
 private:
     FilterType _filterType;
-    int _filterCode;
+    std::variant< adbook::Attributes::AttrId, CompositeFilterId> _filterCode;
 };
 
 #endif // FILTERTYPEITEM_H

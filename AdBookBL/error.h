@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -15,6 +15,7 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
+
 
 #pragma once
 
@@ -78,11 +79,11 @@ protected:
 class ADBOOKBL_API HrError : public Error
 {
 public:
-    HrError(const HRESULT hr, const wchar_t * where = nullptr) : Error(where), hr_(hr) 
+    HrError(const HRESULT hr, const wchar_t * where = nullptr) : Error(where), hr_(hr)
     {
         sprintf_s(whatBuf_, "0x%X.", hr);
     }
-    HrError(const HRESULT hr, const wchar_t * what, const wchar_t * where) : Error(what, where), hr_(hr) 
+    HrError(const HRESULT hr, const wchar_t * what, const wchar_t * where) : Error(what, where), hr_(hr)
     {
         sprintf_s(whatBuf_, "0x%X.", hr);
     }
@@ -103,7 +104,7 @@ private:
 class Sqlite3Error : public Error
 {
 public:
-    Sqlite3Error(const int err, const wchar_t * what, const wchar_t * where) : 
+    Sqlite3Error(const int err, const wchar_t * what, const wchar_t * where) :
         Error(what, where), errCode_(err)
     {
         sprintf_s(whatBuf_, "%d", err);

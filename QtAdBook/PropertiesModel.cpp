@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -32,12 +32,11 @@ PropertiesModel::PropertiesModel(QObject *parent)
     auto colNames = GetColumnNames();
     setColumnCount(colNames.size());
     setHorizontalHeaderLabels(colNames);
-
-    auto & attrInst = adbook::Attributes::GetInstance();
-    auto attrIds = attrInst.GetAttrIds();
+    auto & attributes = adbook::Attributes::GetInstance();
+    auto attrIds = attributes.GetAttrIds();
     for (auto attrId : attrIds) {
-        if (attrInst.IsEditableString(attrId)) {
-            QString uiAttrName = QString::fromStdWString(attrInst.GetUiAttrName(attrId));
+        if (attributes.IsEditableString(attrId)) {
+            QString uiAttrName = QString::fromStdWString(attributes.GetUiAttrName(attrId));
             QStandardItem * attrNameItem = new QStandardItem(uiAttrName);            
             QStandardItem * attrValueItem = new QStandardItem();
             attrValueItem->setData(attrId);
@@ -46,10 +45,7 @@ PropertiesModel::PropertiesModel(QObject *parent)
     }
 }
 
-PropertiesModel::~PropertiesModel()
-{
-
-}
+PropertiesModel::~PropertiesModel() = default;
 
 void PropertiesModel::SetContact(const adbook::AdPersonDesc & apd)
 {
@@ -60,9 +56,10 @@ void PropertiesModel::SetContact(const adbook::AdPersonDesc & apd)
 void PropertiesModel::DisplayProperties()
 {        
     const int numRows = rowCount();
+    auto & attributes = adbook::Attributes::GetInstance();
     for (int i = 0; i < numRows; ++i) {
         auto attrId = static_cast<adbook::Attributes::AttrId>(item(i, AttrValueColId)->data().toInt());
-        const QString attrValue = QString::fromStdWString(_apd.GetStringAttr(attrId));
+        const QString attrValue = QString::fromStdWString(_apd.GetStringAttr(attributes.GetLdapAttrName(attrId)));
         item(i, AttrValueColId)->setText(attrValue);
     }
 }

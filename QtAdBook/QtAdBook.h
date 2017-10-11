@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -19,9 +19,8 @@ You should have received a copy of the GNU General Public License along with
 #ifndef QTADBOOK_H
 #define QTADBOOK_H
 
-#include <QtWidgets/QDialog>
 #include "ui_QtAdBook.h"
-
+#include "AppSettings.h"
 
 class FilterNamesModel;
 class FilterListModel;
@@ -34,7 +33,11 @@ class QtAdBook : public QDialog
     Q_OBJECT
 
 public:
-    QtAdBook(QWidget *parent = 0);
+    QtAdBook(
+        std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,                
+        AppSettings & appSettings,
+        QWidget *parent = 0
+    );
     ~QtAdBook();
 protected:
     void closeEvent(QCloseEvent *event);
@@ -51,7 +54,7 @@ private:
     void SearchStoppedCallback();
     void SaveState();
     void RestoreState();
-    adbook::LdapRequest ConstructLdapRequest();
+    std::wstring ConstructLdapRequest();
     void SaveSuccessfulFilterValue();
     void RefreshNumFoundContacts();
     void UpdatePhotoSizeAfterResizing();
@@ -81,8 +84,12 @@ private slots:
     void OnAnotherAttributeSelected(const QModelIndex &current, const QModelIndex &previous);
     void OnSplitterMoved(int pos, int index);
 private:
-    Ui::QtAdBookClass ui;    
-    adbook::AdSearcher _adSearcher;
+    Ui::QtAdBookClass ui;
+
+    std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;    
+    AppSettings & _appSettings;
+    std::unique_ptr<adbook::AbstractAdSearcher> _adSearcher;
+
     FilterConditionModel * _filterConditionModel;
     FilterNamesModel * _filterNamesModel;
     FilterListModel * _filterListModel;

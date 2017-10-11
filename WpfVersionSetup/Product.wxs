@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Compatible with WiX Toolset v3.10-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?define ProductName = "Active Directory Contact Book" ?>
+  <?define ProductVersion = "1.6.1" ?>
+  <?define ProductFullVersion = "1.6.1.1" ?>
+  <?define ProductAuthor = "Andrei Goncharov" ?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+
+  <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
+  <?define ProductId = "*" ?>
+  <?define ProductUpgradeCode = "cb561d1a-6073-4c1d-a92f-f6a343d149b5" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define MySource = "../x64/Release/" ?>
+
+  <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
+           Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
+
+    <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="x64" />
+
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="$(var.ProductUpgradeCode)">
+      <UpgradeVersion Minimum="1.0.0.0" Maximum="99.0.0.0" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade>
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts Before="InstallInitialize" />
+    </InstallExecuteSequence>
+
+    <!-- <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." /> -->
+    <MediaTemplate EmbedCab="yes"/>
+
+    <Feature Id="ProductFeature" Title="Setup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="ProductShortcuts" />
+      <ComponentGroupRef Id="Translations"/>
+      <MergeRef Id="VCRedist"/>
+    </Feature>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="gpl.rtf" />
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.PlatformProgramFilesFolder)" >
+        <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)"/>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ShortcutsDir" Name="Active Directory Contact Book" />
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+      <!-- <Component Id="ProductComponent"> -->
+      <!-- TODO: Insert files, registry keys, and other resources here. -->
+      <!-- </Component> -->
+      <Component Id="CMP_WpfAdBookExe" Guid="AB3B231F-F44C-4A8F-8757-09D545DACA14" >
+        <File Id="FILE_INSTALLFOLDER_WpfAdBookExe"
+              Name="WpfAdBook.exe"
+              Source="$(var.MySource)WpfAdBook.exe"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
+        <File Id="FILE_INSTALLFOLDER_AdBookBL"
+              Name="AdBookBL.dll"
+              Source="$(var.MySource)AdBookBL.dll"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_AdBookBLCLI" Guid="CD2DE8AE-28DB-49EB-B8F2-B2CF25FE0D10" >
+        <File Id="FILE_INSTALLFOLDER_AdBookBLCLI"
+              Name="AdBookBLCLI.dll"
+              Source="$(var.MySource)AdBookBLCLI.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="CMP_MsftXamlBehaviors" Guid="387AB802-B088-4BF4-B8D5-3C5931679676" >
+        <File Id="FILE_INSTALLFOLDER_MsftXamlBehaviors"
+              Name="Microsoft.Xaml.Behaviors.dll"
+              Source="$(var.MySource)Microsoft.Xaml.Behaviors.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="CMP_GplLicence" Guid="224100D8-DA70-4FA5-B8DA-24E576B991FA" >
+        <File Id="FILE_INSTALLFOLDER_GplRtf"
+              Name="gpl.rtf"
+              Source="gpl.rtf"
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ProductShortcuts" Directory="ShortcutsDir">
+      <Component Id="CMP_MainExecutableShortcut"
+                 Guid="4AE1ADC0-52FD-40A9-850A-C9E58464C11E">
+
+        <Shortcut Id="MainExecutableShortcut"
+                  Name="Active Directory Contact Book"
+                  Description="Start 'Active Directory Contact Book'"
+                  Target="[INSTALLFOLDER]WpfAdBook.exe" />
+
+        <Shortcut Id="UninstallShortcut"
+                  Name="Uninstall 'Active Directory Contact Book'"
+                  Description="Uninstall 'Active Directory Contact Book'"
+                  Target="[System64Folder]msiexec.exe"
+                  Arguments="/x [ProductCode]" />
+
+        <RemoveFolder Id="RemoveShortcutsDir"
+                      On="uninstall" />
+
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\AdBook"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Directory Id="RussianResources" Name="ru-RU" />
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="Translations">
+      <Component Id="RuRuTranslation" Directory="RussianResources" Guid="{0BB6319C-2DB7-4544-A259-D54F931D027B}">
+        <File Id="FILE_INSTALLFOLDER_TRANSLATIONS_WpfAdBook_resources_dll" KeyPath="yes" Source="$(var.MySource)\ru-RU\WpfAdBook.resources.dll" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
+
+
+

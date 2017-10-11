@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -27,29 +27,34 @@ class CSettingsDlg : public CDialogEx
     DECLARE_DYNAMIC(CSettingsDlg)
 
 public:
-    CSettingsDlg(AppSettings & appSettings, CWnd* pParent = nullptr);   // standard constructor
+    CSettingsDlg(
+        std::shared_ptr<adbook::AbstractAdAccessFactory> adAccessFactory,
+        const adbook::ConnectionParams & connectionParams,
+        CWnd * pParent = nullptr
+    );
     virtual ~CSettingsDlg();
 
-    const AppSettings & GetAppSettings() const;
+    adbook::ConnectionParams GetConnectionParams() const;
 
     BOOL OnInitDialog();
 // Dialog Data
     enum { IDD = IDD_SETTINGS};
 
 private:
-    AppSettings appSettings_;
-    CEdit password_;
-    wchar_t defaultPasswordChar_ = 0;
+    adbook::ConnectionParams _connectionParams;
+    CEdit _password;
+    wchar_t _defaultPasswordChar = 0;
+    std::shared_ptr<adbook::AbstractAdAccessFactory> _adAccessFactory;
 private:
-    void ProcessUserInput();
+    bool ProcessUserInput();
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
     DECLARE_MESSAGE_MAP()
 public:
-    afx_msg void OnBnClickedOk();    
+    afx_msg void OnBnClickedOk();
     afx_msg void OnBnClickedCheckUseCurusercred();
     afx_msg void OnBnClickedCheckUserDomain();
-    afx_msg void OnBnClickedCheckDisplayPassword();    
+    afx_msg void OnBnClickedCheckDisplayPassword();
     afx_msg void OnBnClickedButtonVerify();
 };

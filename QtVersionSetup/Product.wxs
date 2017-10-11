@@ -17,7 +17,7 @@
 
   <Product Id="$(var.ProductId)" Name="$(var.ProductDisplayName) (v$(var.ProductVersion))" Language="1033"
            Version="$(var.ProductFullVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="$(var.ProductUpgradeCode)">
-  	
+    
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.ProductAuthor)" Platform="x64" />
 
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
@@ -30,7 +30,7 @@
     </InstallExecuteSequence>
     
     <MediaTemplate EmbedCab="yes"/>
-		
+    
     <Feature Id="ProductFeature" Title="Setup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentGroupRef Id="ProductShortcuts" />
@@ -55,7 +55,7 @@
     </Directory>
     
     <DirectoryRef Id="TARGETDIR">
-      <Merge Id="VCRedist" SourceFile="c:\\Program Files (x86)\\Common Files\\Merge Modules\\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0"/>      
+      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>      
     </DirectoryRef>  
   </Fragment>
 
@@ -149,10 +149,7 @@
       </Component>
       <Component Id="cmpA4ztxUchF533PFXmwjdVRbgMU44" Directory="dir9o4ZHaDEuPWXFKRWKBwmC.N2MUA" Guid="{C2CC5DBD-6D24-4DEB-9539-E78CF31FA390}">
         <File Id="filWcU9Z51lgQeF8V2dr0rieRzQm_s" KeyPath="yes" Source="$(var.MySource)\iconengines\qsvgicon.dll" />
-      </Component>
-      <Component Id="cmpcttRTsWUCu8r8F0tjhmE4DnYXcI" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{161C04AA-A5F4-4764-85A9-A4DD5213D085}">
-        <File Id="filQoK7C5FcHOWOoxCqVacjzAxiv5o" KeyPath="yes" Source="$(var.MySource)\imageformats\qdds.dll" />
-      </Component>
+      </Component>      
       <Component Id="cmp68IbmiA9H25NNzShh3Ep6uvMCfM" Directory="dirWZftpQyhndj9mqRn.U8i9Dqp2.Q" Guid="{91FAF7EB-991B-4793-9D93-BF12196A1277}">
         <File Id="fildbWHBXvoM2o7ncPce8ewvUyc1g4" KeyPath="yes" Source="$(var.MySource)\imageformats\qgif.dll" />
       </Component>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -14,20 +14,20 @@
     <ProjectGuid>{865CDC4D-B5AD-479E-8BC9-3EAF60350798}</ProjectGuid>
     <RootNamespace>AdBook</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -46,13 +46,13 @@
     <LinkIncremental>true</LinkIncremental>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <IncludePath>$(BOOST);..\\..\\Eskimo;$(IncludePath);..\\;</IncludePath>
+    <IncludePath>$(BOOST);$(IncludePath);..\\</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(BOOST);..\\..\\Eskimo;$(IncludePath);..\\;</IncludePath>
+    <IncludePath>$(BOOST);$(IncludePath);..\\</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(VC_LibraryPath_x64);$(UniversalCRT_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -67,6 +67,7 @@
       <EnablePREfast>true</EnablePREfast>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DisableSpecificWarnings>28313</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,6 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,14 +127,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AbstractAppSettingsKeeper.h" />
     <ClInclude Include="AdBook.h" />
     <ClInclude Include="AdBookDlg.h" />
     <ClInclude Include="AppSettings.h" />
-    <ClInclude Include="ConnectionSettings.h" />
+    <ClInclude Include="AppSettingsRegistryKeeper.h" />
     <ClInclude Include="MainWndSettings.h" />
     <ClInclude Include="ImageDisplayer.h" />
-    <ClInclude Include="SearchFilters.h" />
     <ClInclude Include="SettingsDlg.h" />
+    <ClInclude Include="shared.h" />
     <ClInclude Include="SvAttrEditor.h" />
     <ClInclude Include="TextClipboard.h" />
     <ClInclude Include="WindowAnchor.h" />
@@ -141,13 +144,15 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AbstractAppSettingsKeeper.cpp" />
     <ClCompile Include="AdBook.cpp" />
-    <ClCompile Include="AdBookDlg.cpp" />
+    <ClCompile Include="AdBookDlg.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd26454 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="AppSettings.cpp" />
-    <ClCompile Include="ConnectionSettings.cpp" />
+    <ClCompile Include="AppSettingsRegistryKeeper.cpp" />
     <ClCompile Include="MainWndSettings.cpp" />
     <ClCompile Include="ImageDisplayer.cpp" />
-    <ClCompile Include="SearchFilters.cpp" />
     <ClCompile Include="SettingsDlg.cpp" />
     <ClCompile Include="SvAttrEditor.cpp" />
     <ClCompile Include="TextClipboard.cpp" />

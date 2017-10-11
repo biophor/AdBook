@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -18,21 +18,26 @@ You should have received a copy of the GNU General Public License along with
 #ifndef SETTINGSDLG_H
 #define SETTINGSDLG_H
 
-#include <QDialog>
+
 #include "ui_SettingsDlg.h"
+#include "AppSettings.h"
 
 class SettingsDlg : public QDialog
 {
     Q_OBJECT
 
 public:
-    SettingsDlg(QWidget *parent = 0);
+    SettingsDlg(
+        std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,
+        AppSettings & appSettings,
+        QWidget *parent = 0
+    );
     ~SettingsDlg();
 protected:
     void closeEvent(QCloseEvent *event);
 private slots:
     void OnDefaultDcStateChanged(int state);
-    void OnCurrentUserStateChanged(int state);    
+    void OnCurrentUserStateChanged(int state);
     void OnTestClicked();
     void OnOk();
     void OnCancel();
@@ -46,6 +51,8 @@ private:
     void SetupSignals();
     void SetupWindowProperties();
 private:
+    std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;
+    AppSettings & _appSettings;
     Ui::SettingsDlg ui;
 };
 

@@ -226,9 +226,9 @@ namespace WfAdBook
                 cs.UseCurrentUserCredentials = rbuttonCurUserCred.Checked;
                 cs.UseDomainYouAreLoggedIn = rbuttonDefaultDomain.Checked;
 
-                using (AdConnector adc = new AdConnector(cs)) {
+                using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
                     try {
-                        adc.Connect();
+                        adc.Connect(cs);
                     }
                     catch (Exception exc) {
                         MessageBox.Show(exc.Message, Properties.Resources.ErrorMsgBoxTitle,

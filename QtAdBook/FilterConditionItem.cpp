@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -21,16 +21,16 @@ You should have received a copy of the GNU General Public License along with
 #include "FilterConditionItem.h"
 
 
-QString FilterConditionItem::GetDisplayName(adbook::LdapRequest::MathingRule ruleId) 
+QString FilterConditionItem::GetDisplayName(adbook::LdapRequestBuilder::MatchingRule ruleId) 
 {
     switch (ruleId) {
-    case adbook::LdapRequest::Contains:
+    case adbook::LdapRequestBuilder::Contains:
         return QObject::tr("contains");
-    case adbook::LdapRequest::BeginWith:
+    case adbook::LdapRequestBuilder::BeginWith:
         return QObject::tr("begin with");
-    case adbook::LdapRequest::ExactMatch:
+    case adbook::LdapRequestBuilder::ExactMatch:
         return QObject::tr("exact match");
-    case adbook::LdapRequest::EndWith:
+    case adbook::LdapRequestBuilder::EndWith:
         return QObject::tr("end with");
     default:
         throw adbook::HrError(E_INVALIDARG, __FUNCTIONW__);

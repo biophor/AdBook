@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -18,92 +18,195 @@ You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include "stdafx.h"
 #include "error.h"
+#include "adsi.h"
 #include "shared.h"
 #include "AdConnector.h"
 
 namespace adbook
 {
 
-AdConnector::AdConnector(const ConnectionParams & cs) : cs_(cs)
+
+AdConnector::AdConnector() = default;
+
+AdConnector::~AdConnector() = default;
+
+
+bool IsLdapPath(const std::wstring & str)
 {
+    if (str.empty())
+    {
+        return false;
+    }
+    IADsPathNamePtr adsName;
+    if (SUCCEEDED(adsName.CoCreateInstance(CLSID_Pathname, NULL, CLSCTX_INPROC_SERVER)))
+    {
+        HRESULT hr = adsName->Set(CComBSTR(str.c_str()), ADS_SETTYPE_FULL);
+        return SUCCEEDED(hr);
+    }
+
+    return false;
 }
 
-AdConnector::AdConnector(const ConnectionParams & cs, const std::wstring & dn) : cs_(cs), dn_(dn)
+std::wstring RetrieveDefaultNamingContextName(const ConnectionParams & connectionSettings)
 {
-    boost::trim(dn_);    
+    std::wstring domainNameOrDc = connectionSettings.GetDomainController();
+    boost::trim(domainNameOrDc);
+    if (domainNameOrDc.empty())
+    {
+        HR_ERROR(E_INVALIDARG);
+    }
+    std::wstring ldapPathName = L"LDAP://";
+    if (!connectionSettings.CurrentDomain())
+    {
+        ldapPathName += domainNameOrDc + L"/";
+    }
+    HRESULT hr = S_OK;
+    wchar_t rootDse[] = L"rootDSE";
+    ldapPathName += rootDse;
+    IADsPtr rootDsePtr;
+    if (connectionSettings.IsCurrentUserCredentialsUsed())
+    {
+        hr = ADsGetObject(
+            ldapPathName.c_str(),
+            IID_IADs,
+            reinterpret_cast<void **>(&rootDsePtr.p)
+        );
+    }
+    else
+    {
+        hr = ADsOpenObject(
+            ldapPathName.c_str(),
+            connectionSettings.GetLogin().c_str(),
+            connectionSettings.GetPassword().c_str(),
+            ADS_SECURE_AUTHENTICATION, IID_IADs,
+            reinterpret_cast<void **>(&rootDsePtr.p)
+        );
+    }
+    if (FAILED(hr))
+    {
+        HR_ERROR(hr);
+    }
+    _variant_t defaultNamingContext;
+    hr = rootDsePtr->Get(CComBSTR(L"defaultNamingContext"), &defaultNamingContext);
+    if (FAILED(hr))
+    {
+        HR_ERROR(hr);
+    }
+    std::wstring defaultNamingContextDN = defaultNamingContext.bstrVal;
+    if (defaultNamingContextDN.empty())
+    {
+        HR_ERROR(E_UNEXPECTED);
+    }
+
+    size_t rootDsePos = ldapPathName.rfind(rootDse);
+    if (rootDsePos != std::wstring::npos)
+    {
+        ldapPathName.replace(rootDsePos, _countof(rootDse), defaultNamingContextDN);
+    }
+    return defaultNamingContext.bstrVal;
 }
 
-AdConnector::~AdConnector()
+std::wstring ReplaceDnInLdapPath(const std::wstring & ldapPath, const std::wstring & dn)
 {
+    if (ldapPath.empty())
+    {
+        HR_ERROR(E_INVALIDARG);
+    }
+    if (dn.empty())
+    {
+        return ldapPath;
+    }
+    const bool ldapPathContainsDn = (ldapPath.find(L'=') != std::wstring::npos);
+
+    std::wstring resultLdapPath;
+    if (ldapPathContainsDn)
+    {
+        resultLdapPath = ldapPath.substr(0, ldapPath.rfind(L'/')+1) + dn;
+    }
+    else
+    {
+        if (ldapPath.back() == L'/')
+        {
+            resultLdapPath = ldapPath + dn;
+        }
+        else
+        {
+            resultLdapPath = ldapPath + L'/' + dn;
+        }
+    }
+    return resultLdapPath;
 }
 
-void AdConnector::Connect()
+
+std::wstring BuildLdapPath(const ConnectionParams & connectionSettings, const std::wstring & dn)
+{
+    std::wstring domainName_or_DC_or_LdapPath = connectionSettings.GetDomainController();
+    boost::trim(domainName_or_DC_or_LdapPath);
+
+    if (IsLdapPath(domainName_or_DC_or_LdapPath))
+    {
+        return ReplaceDnInLdapPath(domainName_or_DC_or_LdapPath, dn);
+    }
+
+    std::wstring ldapPathName = L"LDAP://";
+    if (false == connectionSettings.CurrentDomain())
+    {
+        ldapPathName += domainName_or_DC_or_LdapPath + L"/";
+    }
+
+    std::wstring distinguishedName = dn;
+    boost::trim(distinguishedName);
+
+    if (distinguishedName.empty())
+    {
+        distinguishedName = RetrieveDefaultNamingContextName(connectionSettings);
+    }
+    ldapPathName += distinguishedName;
+    return ldapPathName;
+}
+
+void AdConnector::Connect(const ConnectionParams & connectionParams)
+{
+    Connect(connectionParams, L"");
+}
+
+void AdConnector::Connect(const ConnectionParams & connectionSettings, const std::wstring & dn)
 {
     if (IsConnected())
     {
         objectPtr_.Release();
     }
-    std::wstring ldapPathName = L"LDAP://";
-    if (!cs_.CurrentDomain())
-    {
-        ldapPathName += cs_.GetDC() + L"/";
-    }
+
+    std::wstring ldapPathName = BuildLdapPath(connectionSettings, dn);
+
     HRESULT hr = S_OK;
-    if (dn_.empty())
+    if (connectionSettings.IsCurrentUserCredentialsUsed())
     {
-        ldapPathName += L"rootDSE";
-        IADsPtr rootDsePtr;
-        if (cs_.CurrentUserCredentials())
-        {
-            hr = ADsGetObject(ldapPathName.c_str(), IID_IADs, reinterpret_cast<void **>(&rootDsePtr.p));
-        }
-        else
-        {
-            hr = ADsOpenObject(ldapPathName.c_str(), cs_.GetLogin().c_str(), cs_.GetPassword().c_str(), 
-                ADS_SECURE_AUTHENTICATION, IID_IADs, reinterpret_cast<void **>(&rootDsePtr.p));
-        }
-        if (FAILED(hr))
-        {
-            throw HrError(hr);
-        }
-        _variant_t defaultNamingContext;
-        hr = rootDsePtr->Get(CComBSTR(L"defaultNamingContext"), &defaultNamingContext);
-        if (FAILED(hr))
-        {
-            throw HrError(hr);
-        }
-        std::wstring defaultNamingContextDN = defaultNamingContext.bstrVal;
-        if (defaultNamingContextDN.empty())
-        {
-            throw HrError(E_UNEXPECTED);
-        }
-        wchar_t rootDse[] = L"rootDSE";
-        size_t rootDsePos = ldapPathName.rfind(rootDse);
-        if (rootDsePos != std::wstring::npos)
-        {
-            ldapPathName.replace(rootDsePos, _countof(rootDse), defaultNamingContextDN);
-        }        
-        dn_ = defaultNamingContext.bstrVal;
+        hr = ADsGetObject(
+            ldapPathName.c_str(),
+            IID_IDirectoryObject,
+            reinterpret_cast<void **>(&objectPtr_.p)
+        );
     }
     else
     {
-        ldapPathName += dn_;
-    }
-    if (cs_.CurrentUserCredentials())
-    {
-        hr = ADsGetObject(ldapPathName.c_str(), IID_IDirectoryObject, reinterpret_cast<void **>(&objectPtr_.p));
-    }
-    else
-    {
-        hr = ADsOpenObject(ldapPathName.c_str(), cs_.GetLogin().c_str(), cs_.GetPassword().c_str(), 
-            ADS_SECURE_AUTHENTICATION, IID_IDirectoryObject, reinterpret_cast<void **>(&objectPtr_.p));
+        hr = ADsOpenObject(ldapPathName.c_str(),
+            connectionSettings.GetLogin().c_str(),
+            connectionSettings.GetPassword().c_str(),
+            ADS_SECURE_AUTHENTICATION,
+            IID_IDirectoryObject,
+            reinterpret_cast<void **>(&objectPtr_.p)
+        );
     }
     if (FAILED(hr))
     {
-        throw HrError(hr);
+        HR_ERROR(hr);
     }
+    connectionSettings_ = connectionSettings;
+    distinguishedName_ = dn;
 }
 
 void AdConnector::Disconnect()
@@ -128,10 +231,11 @@ void AdConnector::UploadStringAttr(const std::wstring & attrName, const std::wst
         HR_ERROR(E_UNEXPECTED);
     }
     DWORD numChanged = 0;
-    ADSVALUE adsValue{};
+
     WcharBuf attrNameBuf = ToWcharBuf(attrName);
     if (!attrVal.empty())
     {
+        ADSVALUE adsValue{};
         ADS_ATTR_INFO attrInfo[] = { { &attrNameBuf.at(0), ADS_ATTR_UPDATE, ADSTYPE_CASE_IGNORE_STRING, &adsValue, 1 } };
         adsValue.dwType = ADSTYPE_CASE_IGNORE_STRING;
         WcharBuf newAttrValue = ToWcharBuf(attrVal);
@@ -144,6 +248,7 @@ void AdConnector::UploadStringAttr(const std::wstring & attrName, const std::wst
     }
     else
     {
+        ADSVALUE adsValue{};
         ADS_ATTR_INFO attrInfo[] = { { &attrNameBuf.at(0), ADS_ATTR_CLEAR, ADSTYPE_CASE_IGNORE_STRING, NULL, 1 } };
         adsValue.dwType = ADSTYPE_CASE_IGNORE_STRING;
         const HRESULT hr = objectPtr_->SetObjectAttributes(&attrInfo[0], _countof(attrInfo), &numChanged);
@@ -164,15 +269,27 @@ std::wstring AdConnector::DownloadStringAttr(const std::wstring & attrName)
     DWORD numReturned = 0;
     WcharBuf wAttrName = ToWcharBuf(attrName);
     LPWSTR attrNames[] = { &wAttrName.at(0) };
-    const HRESULT hr = objectPtr_->GetObjectAttributes(attrNames, _countof(attrNames), &attrInfo, &numReturned);
+    HRESULT hr = objectPtr_->GetObjectAttributes(attrNames, _countof(attrNames), &attrInfo, &numReturned);
     if (FAILED(hr))
     {
         HR_ERROR(hr);
     }
-    std::shared_ptr<ADS_ATTR_INFO> freeAdsMemPtr(attrInfo, FreeADsMem);
+    std::unique_ptr<ADS_ATTR_INFO, BOOL  (__stdcall *)(LPVOID)> freeAdsMemPtr(attrInfo, &FreeADsMem);
     if (1 != numReturned)
     {
-        HR_ERROR(ERROR_READ_FAULT);
+        // attr value is not set or attr doesn't exist
+        // we need to differentiate these two cases.
+        // we can try to clear the value of the attribute.
+        // if attr doesn't exist we will get the ERROR_DS_NO_ATTRIBUTE_OR_VALUE error code
+        ADS_ATTR_INFO attrInfoToTest[] = { { &wAttrName.at(0), ADS_ATTR_CLEAR, ADSTYPE_CASE_IGNORE_STRING, NULL, 1 } };
+        DWORD numChanged = 0;
+        hr = objectPtr_->SetObjectAttributes(&attrInfoToTest[0], _countof(attrInfoToTest), &numChanged);
+        if (hr == HRESULT_FROM_WIN32(ERROR_DS_NO_ATTRIBUTE_OR_VALUE)) {
+            // attrName is invalid
+            HR_ERROR(hr);
+        }
+        // attrValue is not set or access to the value is denied.
+        return {};
     }
 
     switch (attrInfo[0].dwADsType)
@@ -187,7 +304,7 @@ std::wstring AdConnector::DownloadStringAttr(const std::wstring & attrName)
     case ADSTYPE_PROV_SPECIFIC:
         return std::wstring(
             reinterpret_cast<LPCWSTR>(attrInfo[0].pADsValues->ProviderSpecific.lpValue),
-            attrInfo[0].pADsValues->ProviderSpecific.dwLength / sizeof(wchar_t)
+            static_cast<size_t>(attrInfo[0].pADsValues->ProviderSpecific.dwLength) / sizeof(wchar_t)
         );
 
     default:
@@ -202,10 +319,11 @@ void AdConnector::UploadBinaryAttr(const std::wstring & attrName, const BinaryAt
         HR_ERROR(E_UNEXPECTED);
     }
     DWORD numChanged = 0;
-    ADSVALUE adsValue{};
+
     WcharBuf attrNameBuf = ToWcharBuf(attrName);
     if (!bav.empty())
     {
+        ADSVALUE adsValue{};
         ADS_ATTR_INFO attrInfo[] = { { &attrNameBuf.at(0), ADS_ATTR_UPDATE, ADSTYPE_OCTET_STRING, &adsValue, 1 } };
         adsValue.dwType = ADSTYPE_OCTET_STRING;
         BinaryAttrVal newAttrValue = bav;
@@ -219,6 +337,7 @@ void AdConnector::UploadBinaryAttr(const std::wstring & attrName, const BinaryAt
     }
     else
     {
+        ADSVALUE adsValue{};
         ADS_ATTR_INFO attrInfo[] = { { &attrNameBuf.at(0), ADS_ATTR_CLEAR, ADSTYPE_OCTET_STRING, NULL, 1 } };
         adsValue.dwType = ADSTYPE_OCTET_STRING;
         const HRESULT hr = objectPtr_->SetObjectAttributes(&attrInfo[0], _countof(attrInfo), &numChanged);
@@ -272,7 +391,7 @@ std::wstring AdConnector::GetLdapPath()
     {
         HR_ERROR(E_UNEXPECTED);
     }
-    IADsPtr ads = objectPtr_;    
+    IADsPtr ads = objectPtr_;
     CComBSTR personLdapPath;
     HRESULT hr = ads->get_ADsPath(&personLdapPath);
     if (FAILED(hr))
@@ -312,13 +431,13 @@ IDirectoryObjectPtr AdConnector::GetParentObject()
         HR_ERROR(hr);
     }
     IDirectoryObjectPtr parent;
-    if (cs_.CurrentUserCredentials())
+    if (connectionSettings_.IsCurrentUserCredentialsUsed())
     {
         hr = ADsGetObject(parentLdapPath, IID_IDirectoryObject, reinterpret_cast<void**>(&parent.p));
     }
     else
     {
-        hr = ADsOpenObject(parentLdapPath, cs_.GetLogin().c_str(), cs_.GetPassword().c_str(), 
+        hr = ADsOpenObject(parentLdapPath, connectionSettings_.GetLogin().c_str(), connectionSettings_.GetPassword().c_str(),
             ADS_SECURE_AUTHENTICATION, IID_IDirectoryObject, reinterpret_cast<void**>(&parent.p));
     }
     if (FAILED(hr))
@@ -341,12 +460,12 @@ void AdConnector::Rename(const std::wstring & newName)
         HR_ERROR(E_INVALIDARG);
     }
     IADsContainerPtr parent = GetParentObject();
-    std::wstring personLdapPath = GetLdapPath();    
+    std::wstring personLdapPath = GetLdapPath();
     Disconnect();
     std::wstring newPersonRDN(L"CN=");
     newPersonRDN += newName;
     MyIDispatchPtr disp;
-    const HRESULT hr = parent->MoveHere(CComBSTR(personLdapPath.c_str()), 
+    const HRESULT hr = parent->MoveHere(CComBSTR(personLdapPath.c_str()),
                                         CComBSTR(newPersonRDN.c_str()), &disp);
     if (FAILED(hr))
     {
@@ -355,4 +474,7 @@ void AdConnector::Rename(const std::wstring & newName)
     objectPtr_ = disp;
 }
 
+
+
 }   // namespace adbook
+

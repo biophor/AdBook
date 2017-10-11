@@ -1,7 +1,5 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -31,13 +29,13 @@ public:
     ImageDisplayer(ImageDisplayer &&) = delete;
     void operator = (const ImageDisplayer &) = delete;
     void operator = (ImageDisplayer &&) = delete;
-    
+
 public:
     void Load(const std::vector<BYTE> & image);
     void Unload();
 protected:
     virtual void PreSubclassWindow();
     virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-private:	
-    CComQIPtr<IStream> streamPtr_;
+private:
+    CComQIPtr<IStream> _streamPtr;
 };

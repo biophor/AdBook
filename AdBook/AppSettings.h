@@ -1,7 +1,5 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -19,42 +17,41 @@ You should have received a copy of the GNU General Public License along with
 */
 
 #pragma once
-#include "ConnectionSettings.h"
 #include "MainWndSettings.h"
 
 class AppSettings
 {
-public:    
-    MainWndSettings & GetMainWndSettings() {
-        return mws_;
+public:
+    MainWndSettings & GetMainWndSettings() noexcept {
+        return _mainWndSettings;
     }
-    const MainWndSettings & GetMainWndSettings() const {
-        return mws_;
-    }
-    ConnectionSettings & GetConnectionSettings() {
-        return cs_;
-    }
-    const ConnectionSettings & GetConnectionSettings() const {
-        return cs_;
+    const MainWndSettings & GetMainWndSettings() const noexcept {
+        return _mainWndSettings;
     }
 
-    CRect GetSvChangeAttrDlgPos() const {
-        return changeSvAttrDlgPos_;
+    adbook::ConnectionParams & GetConnectionParams() {
+        return _connectionParams;
     }
-    void SetChangeSvAttrDlgPos(const CRect & rc)
+
+    const adbook::ConnectionParams & GetConnectionParams() const {
+        return _connectionParams;
+    }
+
+    CRect GetSvAttrEditorPosition() const noexcept {
+        return _svAttrEditorPosition;
+    }
+    void SetSvAttrEditorPosition(const CRect & rc)
     {
         if (rc.IsRectEmpty() || rc.IsRectNull())
         {
             HR_ERROR(E_INVALIDARG);
         }
-        changeSvAttrDlgPos_ = rc;
+        _svAttrEditorPosition = rc;
     }
-    void SaveSettings();
-    void LoadSettings();
 
 private:
-    CRect changeSvAttrDlgPos_;  // sv -> single value
-    ConnectionSettings cs_;
-    MainWndSettings mws_;
+    CRect _svAttrEditorPosition;  // sv -> single value
+    MainWndSettings _mainWndSettings;
+    adbook::ConnectionParams _connectionParams;
 };
 

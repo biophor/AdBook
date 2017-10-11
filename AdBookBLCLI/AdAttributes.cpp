@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,11 +29,33 @@ namespace adbookcli
 using System::Collections::Generic::Dictionary;
 using System::Collections::Generic::List;
 
+void NativeAttributesPtr::ReleaseNativeResources()
+{
+    try {}
+    finally{// preventing memory leaks due to ThreadAbortException
+        try {
+            adbook::Attributes * attributes = reinterpret_cast<adbook::Attributes *>(handle.ToPointer());
+            if (attributes != nullptr) {
+                delete attributes;
+                handle = IntPtr::Zero;
+            }
+        }
+        catch (const adbook::Error & e) {
+            OutputDebugStringW(e.What().c_str());
+        }
+        catch (const std::exception & e) {
+            OutputDebugStringA(e.what());
+        }
+    }
+}
+
+
 static AdAttributes::AdAttributes()
 {
     adbook::Attributes & attributes = adbook::Attributes::GetInstance();
     const auto attrIds = attributes.GetAttrIds();
     Dictionary<AttrId, AdAttribute^>^ dict = gcnew Dictionary<AttrId, AdAttribute^>();
+    Dictionary<String^, AdAttribute^>^ dict2 = gcnew Dictionary<String^, AdAttribute^>();
     List<AttrId>^ ids = gcnew List<AttrId>();
 
     for (const auto attrId : attrIds) {
@@ -47,9 +69,11 @@ static AdAttributes::AdAttributes()
         Int32 maxLen = boost::numeric_cast<Int32>(attributes.GetAttrMaxLength(attrId));
         AdAttribute attr(id, oid, ldapName, displayName, isReadOnly, isString, maxLen);
         dict[id] = %attr;
+        dict2[ldapName] = %attr;
     }
     _attrIds = ids;
-    _attributes = dict;
+    _attrMapById = dict;
+    _attrMapByName = dict2;
     _textAttrMaxLength = boost::numeric_cast<Int32>(attributes.GetTextAttrMaxLength());
     _binaryAttrMaxLength = boost::numeric_cast<Int32>(attributes.GetBinaryAttrMaxLength());
 

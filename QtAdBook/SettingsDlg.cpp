@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2020 Goncharov Andrei.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -20,22 +20,24 @@ You should have received a copy of the GNU General Public License along with
 #include "stdafx.h"
 #include "SettingsDlg.h"
 #include "WaitCursor.h"
-#include "ConnectionSettings.h"
+#include "application.h"
 
-SettingsDlg::SettingsDlg(QWidget *parent)
-    : QDialog(parent)
+
+SettingsDlg::SettingsDlg(
+    std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,
+    AppSettings & appSettings,
+    QWidget *parent
+)
+    : QDialog(parent), _appSettings{ appSettings }, _adFactory{adFactory}
 {
-    ui.setupUi(this);    
+    ui.setupUi(this);
     SetupSignals();
     SetupWindowProperties();
     ReadSettings();
     LoadWindowSettings();
 }
 
-SettingsDlg::~SettingsDlg()
-{
-    
-}
+SettingsDlg::~SettingsDlg() = default;
 
 void SettingsDlg::SetupSignals()
 {
@@ -68,7 +70,7 @@ void SettingsDlg::SetupWindowProperties()
 void SettingsDlg::OnOk()
 {
     if (!ui.defaultDc->isChecked() && ui.domain->text().trimmed().isEmpty()) {
-        QMessageBox::warning(this, QApplication::applicationName(), 
+        QMessageBox::warning(this, QApplication::applicationName(),
             tr("You should specify a domain or a domain controller."));
         ui.domain->setFocus();
         return;
@@ -85,7 +87,7 @@ void SettingsDlg::OnOk()
         ui.password->setFocus();
         return;
     }
-    WriteSettings();    
+    WriteSettings();
     done(QDialog::Accepted);
 }
 
@@ -103,26 +105,24 @@ void SettingsDlg::OnDefaultDcStateChanged(int state)
 void SettingsDlg::OnCurrentUserStateChanged(int state)
 {
     ui.groupCred->setEnabled(Qt::Checked != state);
-
-    // Create a palette
-    
 }
 
 void SettingsDlg::OnTestClicked()
-{    
+{
     try
     {
         adbook::ConnectionParams connectionParams;
-        connectionParams.SetDC(ui.domain->text().trimmed().toStdWString());
+        connectionParams.SetDomainController(ui.domain->text().trimmed().toStdWString());
         connectionParams.SetLogin(ui.login->text().trimmed().toStdWString());
         connectionParams.SetPassword(ui.password->text().trimmed().toStdWString());
-        connectionParams.CurrentDomain(ui.defaultDc->isChecked());
-        connectionParams.CurrentUserCredentials(ui.currentUser->isChecked());
-        adbook::AdConnector ac(connectionParams);
+        connectionParams.ConnectDomainYouAreLoggedIn(ui.defaultDc->isChecked());
+        connectionParams.UseCurrentUserCredentials(ui.currentUser->isChecked());
+
+        auto connector = _adFactory->CreateConnector();
         WaitCursor wc;
-        ac.Connect();
+        connector->Connect(connectionParams);
         wc.RestoreCursor();
-        QMessageBox::information(this, QApplication::applicationName(), 
+        QMessageBox::information(this, QApplication::applicationName(),
             tr("Connection succeeded."), QMessageBox::Ok);
     }
     catch (const adbook::HrError & e)
@@ -132,49 +132,43 @@ void SettingsDlg::OnTestClicked()
     }
     catch (const std::exception & e)
     {
-        QMessageBox::warning(this, QApplication::applicationName(), e.what(), QMessageBox::Ok);        
+        QMessageBox::warning(this, QApplication::applicationName(), e.what(), QMessageBox::Ok);
     }
 }
 
-namespace SettingsWndSettings
-{
-const QString wndPos = "SettingsWindowPosition";
-
-}
 
 void SettingsDlg::SaveWindowSettings()
 {
-    QSettings appSettings(QApplication::organizationName(), QApplication::applicationName());
-    appSettings.setValue(SettingsWndSettings::wndPos, geometry());
+    _appSettings.SetSettingsDlgGeometry(geometry());
 }
 
 void SettingsDlg::LoadWindowSettings()
 {
-    QSettings appSettings(QApplication::organizationName(), QApplication::applicationName());
-    if (appSettings.contains(SettingsWndSettings::wndPos)) {
-        setGeometry(appSettings.value(SettingsWndSettings::wndPos, geometry()).toRect());
+    QRect pos = _appSettings.GetSettingsDlgGeometry();
+    if (pos.isValid()) {
+        setGeometry(pos);
     }
 }
 
 void SettingsDlg::ReadSettings()
 {
-    auto & connectionSettings = ConnectionSettings::Instance();
-    ui.domain->setText(QString::fromStdWString(connectionSettings.GetDC()));
-    ui.login->setText(QString::fromStdWString(connectionSettings.GetLogin()));
-    ui.defaultDc->setChecked(connectionSettings.CurrentDomain());
-    ui.currentUser->setChecked(connectionSettings.CurrentUserCredentials());
-    ui.password->setText(QString::fromStdWString(connectionSettings.GetPassword()));    
+    adbook::ConnectionParams connectionParams = _appSettings.GetConnectionParams();
+    ui.domain->setText(QString::fromStdWString(connectionParams.GetDomainController()));
+    ui.login->setText(QString::fromStdWString(connectionParams.GetLogin()));
+    ui.defaultDc->setChecked(connectionParams.CurrentDomain());
+    ui.currentUser->setChecked(connectionParams.IsCurrentUserCredentialsUsed());
+    ui.password->setText(QString::fromStdWString(connectionParams.GetPassword()));
 }
 
 void SettingsDlg::WriteSettings()
 {
-    auto & connectionSettings = ConnectionSettings::Instance();
-    connectionSettings.SetDC(ui.domain->text().trimmed().toStdWString());
-    connectionSettings.SetLogin(ui.login->text().trimmed().toStdWString());
-    connectionSettings.SetPassword(ui.password->text().trimmed().toStdWString());
-    connectionSettings.CurrentDomain(ui.defaultDc->isChecked());
-    connectionSettings.CurrentUserCredentials(ui.currentUser->isChecked());    
-    connectionSettings.Save();    
+    adbook::ConnectionParams connectionParams;
+    connectionParams.SetDomainController(ui.domain->text().trimmed().toStdWString());
+    connectionParams.SetLogin(ui.login->text().trimmed().toStdWString());
+    connectionParams.SetPassword(ui.password->text().trimmed().toStdWString());
+    connectionParams.ConnectDomainYouAreLoggedIn(ui.defaultDc->isChecked());
+    connectionParams.UseCurrentUserCredentials(ui.currentUser->isChecked());
+    _appSettings.SetConnectionParams(connectionParams);
 }
 
 void SettingsDlg::OnDisplayPasswordStateChanged(int state)
@@ -189,5 +183,5 @@ void SettingsDlg::OnDisplayPasswordStateChanged(int state)
 
 void SettingsDlg::closeEvent(QCloseEvent *)
 {
-    SaveWindowSettings();    
+    SaveWindowSettings();
 }

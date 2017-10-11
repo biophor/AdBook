@@ -121,7 +121,7 @@
     <value>Any attribute</value>
   </data>
   <data name="ConnectionFailedMsgBoxTitle" xml:space="preserve">
-    <value>Failed to connect</value>
+    <value>Failed to connect.</value>
   </data>
   <data name="ConnectionSucceededMsgBoxText" xml:space="preserve">
     <value>Connection succeeded.</value>
@@ -151,7 +151,7 @@
     <value>You should enter the password.</value>
   </data>
   <data name="FailedToLoadSettingsMsgBoxText" xml:space="preserve">
-    <value>Failed to load settings.</value>
+    <value>Failed to load the settings.</value>
   </data>
   <data name="FailedToReadTheFileMsgBoxText" xml:space="preserve">
     <value>Failed to read the file.</value>
