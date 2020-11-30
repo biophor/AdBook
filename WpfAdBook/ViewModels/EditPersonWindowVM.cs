@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -21,6 +21,7 @@ You should have received a copy of the GNU General Public License along with
 using adbookcli;
 using System;
 using System.ComponentModel;
+using System.Windows.Input;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -37,10 +38,12 @@ namespace WpfAdBook.ViewModels
         private IDialogService _dialogService;
         private IDataService _dataService;
 
-        public CustomCommand OkCommand { get; }
-        public CustomCommand CancelCommand { get; }
-        public CustomCommand SelectPhotoCommand { get; }
-        public CustomCommand WindowClosedNotification { get; }
+        public ICommand OkCommand { get; }
+        public ICommand CancelCommand { get; }
+        public ICommand SelectPhotoCommand { get; }
+        public ICommand ClearPhotoCommand { get; }
+        public ICommand WindowClosedNotification { get; }
+        public ICommand WindowLoadedNotification { get; }
 
         public EditPersonWindowVM(IDataService dataService, IDialogService dialogService)
         {
@@ -51,7 +54,9 @@ namespace WpfAdBook.ViewModels
             OkCommand = new CustomCommand(ExecuteOkCommand);
             CancelCommand = new CustomCommand(ExecuteCancelCommand);
             SelectPhotoCommand = new CustomCommand(ExecuteSelectPhotoCommand, CanExecuteSelectPhotoCommand);
+            ClearPhotoCommand = new CustomCommand(ExecuteClearPhotoCommand, CanExecuteClearPhotoCommand);
             WindowClosedNotification = new CustomCommand(OnWindowClosed);
+            WindowLoadedNotification = new CustomCommand(OnWindowLoaded);
 
             StringBuilder sb = new StringBuilder();
             foreach (var id in adbookcli.AdAttributes.AttrIds) {
@@ -62,6 +67,11 @@ namespace WpfAdBook.ViewModels
             AttributeDetails = sb.ToString();
         }
 
+        private void OnWindowLoaded(object obj)
+        {
+            _dialogService.RestoreEditPersonWindowState();
+        }
+
         private bool CanExecuteSelectPhotoCommand(object arg)
         {
             if (_selectedPersonCopy != null) {
@@ -70,8 +80,20 @@ namespace WpfAdBook.ViewModels
             return false;
         }
 
+        private bool CanExecuteClearPhotoCommand(object arg)
+        {
+            if (_selectedPersonCopy != null) {
+                bool photoExists = (_selectedPersonCopy.BinaryAttrs[AdAttributesVM.ThumbnailPhoto.LdapName].Value != null) &&
+                    (_selectedPersonCopy.BinaryAttrs[AdAttributesVM.ThumbnailPhoto.LdapName].Value.Length > 0);
+
+                return photoExists && _selectedPersonCopy.IsAttributeWrittable(adbookcli.AttrId.ThumbnailPhoto);
+            }
+            return false;
+        }
+
         private void OnWindowClosed(object obj)
         {
+            _dialogService.SaveEditPersonWindowState();
             _selectedPersonCopy?.Dispose();
             _selectedPersonCopy = null;
         }
@@ -98,7 +120,9 @@ namespace WpfAdBook.ViewModels
             // Open a stream and decode a JPEG image
             try {
                 byte[] photoData = File.ReadAllBytes(filePath);
-                // TODO: check size limitations
+                if (photoData.Length > AdAttributesVM.ThumbnailPhoto.MaxLen) {
+                    throw new ArgumentOutOfRangeException(filePath, "The file size exceeds the limit.");
+                }
                 Stream imageStreamSource = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var decoder = new JpegBitmapDecoder(imageStreamSource, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
 
@@ -107,6 +131,14 @@ namespace WpfAdBook.ViewModels
             catch (FileFormatException formatError) {
                 _dialogService.DisplayErrorMessage(formatError.Message);
             }
+            catch (ArgumentOutOfRangeException error) {
+                _dialogService.DisplayErrorMessage(error.Message);
+            }
+        }
+
+        private void ExecuteClearPhotoCommand(object obj)
+        {
+            _selectedPersonCopy.BinaryAttrs[AdAttributesVM.ThumbnailPhoto.LdapName].Value = new byte[0];
         }
 
         private void ExecuteCancelCommand(object obj)

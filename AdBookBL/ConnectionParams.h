@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -26,56 +26,43 @@ class ADBOOKBL_API ConnectionParams final
 {
 public:
     template <class T>
-    void SetDomainController(T && dc);
-
-    template <class T>
-    void SetLdapPath(T && ldapPath);
-
-    std::wstring GetDomainController() const;
-
-    std::wstring GetLdapPath() const;
-
-    template <class T>
     void SetLogin(T && login);
 
     template <class T>
-    void SetPassword(T && password);
+    void SetPassword( T && password );
 
-    void UseCurrentUserCredentials(bool useCurrentUserCredentials) noexcept;
-    bool IsCurrentUserCredentialsUsed() const noexcept;
-    void ConnectDomainYouAreLoggedIn(bool connectDomainYouAreLoggedIn) noexcept;
-    bool CurrentDomain() const noexcept;
     std::wstring GetLogin() const;
     std::wstring GetPassword() const;
 
+    bool Get_ConnectAsCurrentUser() const;
+    void Set_ConnectAsCurrentUser( bool connectAsCurrentUser );
+
+    bool Get_ConnectDomainYouLoggedIn() const;
+    void Set_ConnectDomainYouLoggedIn( bool connectDomainYouLoggedIn );
+
+    void SetAddress( const std::wstring & address );
+    std::wstring GetAddress() const;
+
+    void SetLogin( const std::wstring & login );
+    void SetPassword( const std::wstring & password );
+
+    bool IsConsistent() const noexcept;
 private:
     // address_ can be one of the following:
     // * active directory domain name
     // * active directory domain controller address (ip-address, dns name, netbios name)
     // * LDAP full path. In this case _address should start with 'LDAP://' and point to
     //   the specifiec object in AD LDS instance
-    std::wstring address_;
-    bool useCurrentUserCred_ = true;
-    bool connectCurrentDomain_ = true;
-    std::wstring login_, _password;
+    std::wstring _address;
+    bool _connectAsCurrentUser = true;
+    bool _connectCurrentDomain = true;
+    std::wstring _login, _password;
 };
-
-template <class T>
-void ConnectionParams::SetDomainController(T && dc)
-{
-    address_ = std::forward<T>(dc);
-}
-
-template <class T>
-void ConnectionParams::SetLdapPath(T && ldapPath)
-{
-    address_ = std::forward<T>(ldapPath);
-}
 
 template <class T>
 void ConnectionParams::SetLogin(T && login)
 {
-    login_ = std::forward<T>(login);
+    _login = std::forward<T>(login);
 }
 
 template <class T>
@@ -83,7 +70,6 @@ void ConnectionParams::SetPassword(T && password)
 {
     _password = std::forward<T>(password);
 }
-
 
 }
 

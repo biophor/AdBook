@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -31,15 +31,33 @@ class ADBOOKBL_API AbstractAdSearcher
 public:
     virtual ~AbstractAdSearcher() = 0;
 
-    using OnNewItem = std::function<void(AdPersonDesc && item)>; // new item has been found.
+    using OnNewItem = std::function<void(AdPersonDesc && item)>; // new item has just been found.
     using OnStop = std::function<void()>;   // SearchThread is about to be completed.
     using OnStart = std::function<void()>;  // SearchThread has just been started.
+    using OnError = std::function<void(const std::wstring & errorDescription)>;
 
-    virtual void SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop) = 0;
-    virtual void Start(const std::wstring & ldapRequest, const ConnectionParams & cs) = 0;
+    virtual void SetCallbacks (
+        const OnNewItem & onNewItem,
+        const OnStart & onStart,
+        const OnStop & onStop
+    ) = 0;
+
+    virtual void SetCallbacks (
+        const OnNewItem & onNewItem,
+        const OnStart & onStart,
+        const OnStop & onStop,
+        const OnError & onError
+    ) = 0;
+
+    virtual void Start (
+        const std::wstring & ldapRequest,
+        const ConnectionParams & cs
+    ) = 0;
+
     virtual bool IsStarted() const = 0;
     virtual void Stop() = 0;
     virtual void Wait() = 0;
+    virtual void PropogateSearchException() = 0;
 };
 
 }   // namespace adbook

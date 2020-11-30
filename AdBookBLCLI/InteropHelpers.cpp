@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -75,7 +75,7 @@ std::vector<BYTE> CliArrayToStdVector(cli::array<Byte> ^ data)
 
 cli::array<Byte> ^ StdVectorToCliArray(std::vector<BYTE> data)
 {
-    cli::array<Byte> ^ ret = gcnew cli::array<Byte>(boost::numeric_cast<System::Int32>(data.size()));
+    cli::array<Byte> ^ ret = gcnew cli::array<Byte>(static_cast<System::Int32>(data.size()));
     if (data.size() > 0) {
         IntPtr p(&data[0]);
         Marshal::Copy(p, ret, 0, ret->Length);

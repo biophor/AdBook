@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -40,7 +40,7 @@ public:
     )
         : _filterValue{ filterValue },
         _condition{ condition }, _filterCode{filterId}
-    {        
+    {
     }
 
     FilterEntry(
@@ -50,11 +50,11 @@ public:
     )
         : _filterValue{ filterValue },
         _condition{ condition }, _filterCode{ filterCode }
-    {                
+    {
     }
 
     FilterEntry(const FilterEntry & entry) = default;
-    FilterEntry & operator = (const FilterEntry & entry) = default;    
+    FilterEntry & operator = (const FilterEntry & entry) = default;
 
     FilterCode GetFilterCode() const {
         return _filterCode;
@@ -76,7 +76,7 @@ public:
     QString GetValue() const {
         return _filterValue;
     }
-private:    
+private:
     FilterCondition _condition;
     QString _filterValue;
     FilterCode _filterCode;
@@ -84,7 +84,7 @@ private:
 
 class FilterListSettings
 {
-public:    
+public:
     void AddFilter(const FilterEntry & entry) {
         _filters.push_back(entry);
     }

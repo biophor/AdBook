@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -246,7 +246,7 @@ void QtAdBook::OnSelectPhoto()
             tr("A file is empty."));
         return;
     }
-    if (boost::numeric_cast<decltype(photoMaxSizeInBytes)>(photoFileSize) > photoMaxSizeInBytes) {
+    if (static_cast<decltype(photoMaxSizeInBytes)>(photoFileSize) > photoMaxSizeInBytes) {
         QMessageBox::warning(this, QApplication::applicationName(),
             tr("File size should be less than 100kb"));
         return;
@@ -494,23 +494,31 @@ char origUserPhotoPixmapPropertyName[] = "origPixmap";
 
 void QtAdBook::OnAnotherContactSelected(const QModelIndex &current, const QModelIndex &/*previous*/)
 {
-    if (current.isValid()) {
-        auto contact = _contactListModel->GetContact(current.row());
-        bool canChangePhoto = contact.IsAttributeWritable(adbook::Attributes::ThumbnailPhoto);
-        ui.selectPhoto->setEnabled(canChangePhoto);
-        ui.clearPhoto->setEnabled(canChangePhoto);
-        _propertiesModel->SetContact(std::move(contact));
-        auto & attributes = adbook::Attributes::GetInstance();
-        adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(attributes.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto));
-        ui.photo->clear();
-        ui.photo->setProperty(origUserPhotoPixmapPropertyName, QVariant());
-        if (!photoBytes.empty()) {
-            QPixmap photoPixmap;
-            if (photoPixmap.loadFromData(&photoBytes[0], boost::numeric_cast<uint>(photoBytes.size()))) {
-                ui.photo->setProperty(origUserPhotoPixmapPropertyName, photoPixmap);
-                SetPhoto(photoPixmap);
-            }
+    if (!current.isValid()) {
+        return;
+    }
+    auto & attrTraits = adbook::Attributes::GetInstance();
+    auto contact = _contactListModel->GetContact(current.row());
+    bool contactHasPhoto = contact.IsAttributeSet(attrTraits.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto));
+    bool canChangePhoto = contact.IsAttributeWritable(adbook::Attributes::ThumbnailPhoto);
+    ui.selectPhoto->setEnabled(canChangePhoto);
+    ui.clearPhoto->setEnabled(canChangePhoto && contactHasPhoto);
+    _propertiesModel->SetContact(std::move(contact));
+
+    adbook::BinaryAttrVal photoBytes = contact.GetBinaryAttr(attrTraits.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto));
+    ui.photo->clear();
+    ui.photo->setProperty(origUserPhotoPixmapPropertyName, QVariant());
+    if (!photoBytes.empty()) {
+        QPixmap photoPixmap;
+        if (photoPixmap.loadFromData(&photoBytes[0], static_cast<uint>(photoBytes.size()))) {
+            ui.photo->setProperty(origUserPhotoPixmapPropertyName, photoPixmap);
+            SetPhoto(photoPixmap);
         }
+    }
+    if (QModelIndex curPropIdx = ui.properties->currentIndex(); curPropIdx.isValid()) {
+        ui.changeProperty->setEnabled(_propertiesModel->IsAttrWritable(curPropIdx.row()));
+        ui.copyProperty->setEnabled(!_propertiesModel->item(
+            curPropIdx.row(), PropertiesModel::AttrValueColId)->text().isEmpty());
     }
 }
 

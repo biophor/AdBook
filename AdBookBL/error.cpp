@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -57,17 +57,19 @@ ADSERRMSG adsErr[] =
 };
 ADSERRMSG * adsErrEnd = adsErr + _countof(adsErr);
 
-bool IsAdsiSpecificCode(const HRESULT hr)
-{
+bool IsAdsiSpecificCode(const HRESULT hr) {
     return (hr > 0x80005000 && hr < 0x80006000);
 }
 
 std::wstring GetAdsiErrorName(const HRESULT hr)
 {
-    const ADSERRMSG * errItem = std::find_if(adsErr, adsErrEnd, [hr](const ADSERRMSG & i) { return (i.hr == hr); });
+    const ADSERRMSG * errItem = std::find_if(
+        adsErr, adsErrEnd,
+        [hr](const ADSERRMSG & i) { return (i.hr == hr); }
+    );
     if (errItem == adsErrEnd)
     {
-        return std::wstring();
+        return {};
     }
     return errItem->errorName;
 }
@@ -79,10 +81,18 @@ std::wstring GetAdsiExtErrorDesc()
     DWORD   lastAdsiError = 0;
     std::wstring errorDesc;
 
-    HRESULT hr = ADsGetLastError(&lastAdsiError, lastAdsiErrorBuffer, _countof(lastAdsiErrorBuffer), lastAdsiErrorName,
-        _countof(lastAdsiErrorName));
+    const HRESULT hr = ADsGetLastError(
+        &lastAdsiError,
+        lastAdsiErrorBuffer, _countof(lastAdsiErrorBuffer),
+        lastAdsiErrorName, _countof(lastAdsiErrorName)
+    );
 
-    if (SUCCEEDED(hr) && lastAdsiError != ERROR_INVALID_DATA && wcslen(lastAdsiErrorBuffer) && wcslen(lastAdsiErrorName))
+    if (
+        SUCCEEDED(hr)
+        && lastAdsiError != ERROR_INVALID_DATA
+        && wcslen(lastAdsiErrorBuffer)
+        && wcslen(lastAdsiErrorName)
+        )
     {
         errorDesc = L"ADSI Extended Error: ";
         errorDesc += lastAdsiErrorName;
@@ -96,8 +106,15 @@ std::wstring GetWin32ErrorDesc(const DWORD lastError)
 {
     std::wstring errorDesc;
     LPWSTR buf = nullptr;
-    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
-        lastError, 0, reinterpret_cast<LPWSTR>(&buf), 0, nullptr);
+    FormatMessageW (
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr,
+        lastError,
+        0,
+        reinterpret_cast<LPWSTR>(&buf),
+        0,
+        nullptr
+    );
     if (nullptr != buf)
     {
         errorDesc = buf;
@@ -109,20 +126,18 @@ std::wstring GetWin32ErrorDesc(const DWORD lastError)
 std::wstring GetHrErrorDesc(const HRESULT hr)
 {
     std::wstring errorDesc;
-    if (SUCCEEDED(hr))
-    {
+
+    if (SUCCEEDED(hr)) {
         return L"Success";
     }
-    if (IsAdsiSpecificCode(hr))
-    {
+    if (IsAdsiSpecificCode(hr)) {
         errorDesc = GetAdsiErrorName(hr);
     }
-    else if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
-    {
+    else if (HRESULT_FACILITY(hr) == FACILITY_WIN32) {
         errorDesc = GetWin32ErrorDesc(static_cast<DWORD>(hr));
     }
-    std::wstring adsiExtErr = GetAdsiExtErrorDesc();
-    if (!adsiExtErr.empty())
+
+    if (const std::wstring adsiExtErr = GetAdsiExtErrorDesc(); !adsiExtErr.empty())
     {
         errorDesc += L". ";
         errorDesc += adsiExtErr;
@@ -130,15 +145,14 @@ std::wstring GetHrErrorDesc(const HRESULT hr)
     return errorDesc;
 }
 
-std::wstring HrError::What() const
+const wchar_t * HrError::GetHrDescription() const
 {
-    return GetHrErrorDesc(hr_);
-}
-
-std::wstring Sqlite3Error::What() const
-{
-    std::wstring message = L"sqlite3 error: " + std::to_wstring(errCode_);
-    return message;
+    if (wcslen(_hrDescriptionBuf) == 0) {
+        const std::wstring errDesc = GetHrErrorDesc(_hr);
+        wcsncpy_s(_hrDescriptionBuf, errDesc.c_str(), _TRUNCATE);
+    }
+    return _hrDescriptionBuf;
 }
 
 }   // namespace adbook
+

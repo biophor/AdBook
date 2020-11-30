@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -32,18 +32,6 @@ You should have received a copy of the GNU General Public License along with
 
 class CAdBookApp : public CWinApp
 {
-    struct MyCommandLine : public CCommandLineInfo
-    {
-        virtual void ParseParam(const wchar_t* paramName, BOOL flag, BOOL /*last*/) {
-            if (flag && !lstrcmpW(paramName, L"FakeDataSource")) {
-                // the option '/FakeDataSource'
-                useFakeDataSource = true;
-            }
-        }
-
-        bool useFakeDataSource = false;
-    };
-
 public:
     CAdBookApp();
     ~CAdBookApp();
@@ -59,7 +47,6 @@ private:
     void CreateAdAccessFactory();
 private:
     std::shared_ptr<adbook::AbstractAdAccessFactory> _adAccessFactory;
-    MyCommandLine _cmdLine;
 
     AppSettings _appSet;
     ULONG_PTR _gdiplusToken = 0;

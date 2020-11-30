@@ -30,21 +30,13 @@
 #include <comutil.h>
 #include <strsafe.h>
 #include <activeds.h>
+#include <string_view>
+#include <string>
+#include <iterator>
 
 #pragma warning(disable: 26495)
 
-
-#include <boost/assert.hpp>
-#include <boost/scope_exit.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include "sqlite3/sqlite3.h"
-
 
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)

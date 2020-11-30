@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -30,10 +30,8 @@ public:
 private:
     void SaveSettings();
     void LoadSettings();
-    void ParseCommandLine();
 private:
     AppSettings _appSettings;
-    adbook::AbstractAdAccessFactory::ProductsType _factoryPupose;
     std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;
 };
 

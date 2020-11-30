@@ -3,11 +3,11 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
   <?define ProductName = "Active Directory Contact Book" ?>
-  <?define ProductVersion = "1.4.3" ?>
-  <?define ProductFullVersion = "1.4.3.1" ?>
+  <?define ProductVersion = "1.4.4" ?>
+  <?define ProductFullVersion = "1.4.4.1" ?>
   <?define ProductAuthor = "Andrei Goncharov" ?>
   <?define ProductAppFolder = "InstallLocation" ?>
-  
+
   <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
   <?define ProductId = "*" ?>
   <?define ProductUpgradeCode = "cb561d1a-6073-4c1d-a92f-f6a343d149b5" ?>
@@ -43,7 +43,7 @@
   </Product>
 
   <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">      
+    <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)" >
         <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)"/>
       </Directory>
@@ -52,10 +52,10 @@
         <Directory Id="ShortcutsDir" Name="Active Directory Contact Book" />
       </Directory>
     </Directory>
-    
+
     <DirectoryRef Id="TARGETDIR">
-      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>      
-    </DirectoryRef>    
+      <Merge Id="VCRedist" SourceFile="..\\msm\\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
   </Fragment>
 
   <Fragment>
@@ -64,17 +64,17 @@
       <!-- <Component Id="ProductComponent"> -->
       <!-- TODO: Insert files, registry keys, and other resources here. -->
       <!-- </Component> -->
-      <Component Id="CMP_AdBookExe" Guid="7F5215BF-8A6F-4FCF-884F-3331FA5FA896" >        
+      <Component Id="CMP_AdBookExe" Guid="7F5215BF-8A6F-4FCF-884F-3331FA5FA896" >
         <File Id="FILE_INSTALLFOLDER_WfAdBookExe"
               Name="WfAdBook.exe"
               Source="$(var.MySource)WfAdBook.exe"
-              KeyPath="yes" />        
+              KeyPath="yes" />
       </Component>
-      <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >        
+      <Component Id="CMP_AdBookBL" Guid="95966586-5145-472E-A7C2-19DE08B77C0D" >
         <File Id="FILE_INSTALLFOLDER_AdBookBL"
               Name="AdBookBL.dll"
               Source="$(var.MySource)AdBookBL.dll"
-              KeyPath="yes" />        
+              KeyPath="yes" />
       </Component>
       <Component Id="CMP_AdBookBLCLI" Guid="CD2DE8AE-28DB-49EB-B8F2-B2CF25FE0D10" >
         <File Id="FILE_INSTALLFOLDER_AdBookBLCLI"

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -95,7 +95,7 @@ void AppSettingsQtFacilityKeeper::Load(AppSettings & appSettings)
     appSettings.SetFilterListSettings(fls);
 }
 
-void AppSettingsQtFacilityKeeper::Save(const AppSettings & appSettings) 
+void AppSettingsQtFacilityKeeper::Save(const AppSettings & appSettings)
 {
     SaveConnectionParams(appSettings.GetConnectionParams());
     SaveSettingsDlgGeometry(appSettings.GetSettingsDlgGeometry());
@@ -109,11 +109,11 @@ void AppSettingsQtFacilityKeeper::LoadConnectionParams(adbook::ConnectionParams 
     QSettings settings(QApplication::organizationName(), QApplication::applicationName());
 
     QSettingsAutoGroup autoGroup(settings, connectionSettingsSection);
-    connectionParams.SetDomainController(settings.value(dcNameParam).toString().toStdWString());
+    connectionParams.SetAddress(settings.value(dcNameParam).toString().toStdWString());
     connectionParams.SetLogin(settings.value(userNameParam).toString().toStdWString());
     QString protectedPassword = settings.value(passwordParam).toString();
-    connectionParams.UseCurrentUserCredentials(settings.value(currentUserCredParam, true).toBool());
-    connectionParams.ConnectDomainYouAreLoggedIn(settings.value(currentDomainParam, true).toBool());
+    connectionParams.Set_ConnectAsCurrentUser(settings.value(currentUserCredParam, true).toBool());
+    connectionParams.Set_ConnectDomainYouLoggedIn(settings.value(currentDomainParam, true).toBool());
     // ProtectPassword() can throw an exception in rare cases
     QString unprotectedPassword = UnprotectPassword(protectedPassword);
     connectionParams.SetPassword(unprotectedPassword.toStdWString());
@@ -122,12 +122,12 @@ void AppSettingsQtFacilityKeeper::LoadConnectionParams(adbook::ConnectionParams 
 void AppSettingsQtFacilityKeeper::SaveConnectionParams(const adbook::ConnectionParams & connectionParams)
 {
     using namespace ConnectionSettingsStrings;
-    QSettings settings(QApplication::organizationName(), QApplication::applicationName());    
+    QSettings settings(QApplication::organizationName(), QApplication::applicationName());
     QSettingsAutoGroup autoGroup(settings, connectionSettingsSection);
-    settings.setValue(dcNameParam, QString::fromStdWString(connectionParams.GetDomainController()));
-    settings.setValue(userNameParam, QString::fromStdWString(connectionParams.GetLogin()));        
-    settings.setValue(currentUserCredParam, connectionParams.IsCurrentUserCredentialsUsed());
-    settings.setValue(currentDomainParam, connectionParams.CurrentDomain());
+    settings.setValue(dcNameParam, QString::fromStdWString(connectionParams.GetAddress()));
+    settings.setValue(userNameParam, QString::fromStdWString(connectionParams.GetLogin()));
+    settings.setValue(currentUserCredParam, connectionParams.Get_ConnectAsCurrentUser());
+    settings.setValue(currentDomainParam, connectionParams.Get_ConnectDomainYouLoggedIn());
     // ProtectPassword() can throw an exception in very rare cases
     QString protectedPassword = ProtectPassword(QString::fromStdWString(connectionParams.GetPassword()));
     settings.setValue(passwordParam, protectedPassword);
@@ -179,10 +179,10 @@ void AppSettingsQtFacilityKeeper::LoadMainWndSettings(MainWndSettings & mws)
     mws.SetFlagAllConditionsShouldBeMet(settings.value(filterTopLevelRuleParam, true).toBool());
     mws.SetFlagMaximized(settings.value(wndMaximizedParam, false).toBool());
     mws.SetGeometry(settings.value(wndPosParam, QRect()).toRect());
-    
+
     QVariantList csvl = settings.value(contactSplitterParam, QStringList()).toList();
     mws.SetContactsSplitterState(VarListToIntList(csvl));
-    
+
     QVariantList msvl = settings.value(mainSplitterParam, QVariantList()).toList();
     mws.SetMainWndSplitterState(VarListToIntList(msvl));
 
@@ -262,7 +262,7 @@ void AppSettingsQtFacilityKeeper::SaveFilterListSettings(const FilterListSetting
     settings.setValue(numFiltersParam, fls.GetNumFilters());
     for (size_t i = 0, count = fls.GetNumFilters(); i < count; ++i) {
         QSettingsAutoGroup autoEndGroupInternal(settings, QString::number(i));
-        const FilterEntry & fe = fls.GetFilter(i);        
+        const FilterEntry & fe = fls.GetFilter(i);
         settings.setValue(typeParam, std::underlying_type_t<FilterType>(fe.GetFilterType()));
 
         std::visit (
@@ -275,7 +275,7 @@ void AppSettingsQtFacilityKeeper::SaveFilterListSettings(const FilterListSetting
                 if constexpr (std::is_same_v<T, CompositeFilterId>) {
                     settings.setValue(codeParam, std::underlying_type_t<T>(arg));
                 }
-            }, 
+            },
             fe.GetFilterCode()
         );
         settings.setValue(conditionParam,  std::underlying_type_t<FilterCondition>(fe.GetCondition()));

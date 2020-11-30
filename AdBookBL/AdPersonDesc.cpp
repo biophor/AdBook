@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -26,20 +26,27 @@ namespace adbook
 {
 
 template <class T>
-inline T GetAttrVal(const LdapAttrName & an, const std::map<LdapAttrName, T> & m)
+inline T GetAttrVal (
+    const LdapAttrName & an,
+    const std::map<LdapAttrName, T> & m
+)
 {
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     T ret;
-    BOOST_ASSERT(!an.empty());
     auto i = m.find(an);
-    if (i != m.end())
-    {
+    if (i != m.end()) {
         ret = i->second;
     }
     return ret;
 }
 
-const wchar_t * AdPersonDesc::GetStringAttrPtr(const LdapAttrName & an) const
+const wchar_t * AdPersonDesc::GetStringAttrPtr( const LdapAttrName & an ) const
 {
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     auto attrIter = stringAttrs_.find(an);
     if (attrIter == stringAttrs_.cend()) {
         throw HrError(E_INVALIDARG, L"an param", __FUNCTIONW__);
@@ -47,11 +54,17 @@ const wchar_t * AdPersonDesc::GetStringAttrPtr(const LdapAttrName & an) const
     return attrIter->second.c_str();
 }
 
-const BYTE * AdPersonDesc::GetBinaryAttrPtr(const LdapAttrName & an, size_t & attrSize) const
+const BYTE * AdPersonDesc::GetBinaryAttrPtr (
+    const LdapAttrName & an,
+    size_t & attrSize
+) const
 {
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     auto attrIter = binaryAttrs_.find(an);
     if (attrIter == binaryAttrs_.cend()) {
-        throw HrError(E_INVALIDARG, L"an param", __FUNCTIONW__);
+        throw HrError(E_INVALIDARG, L"an", __FUNCTIONW__);
     }
     if (attrIter->second.empty())
     {
@@ -62,44 +75,50 @@ const BYTE * AdPersonDesc::GetBinaryAttrPtr(const LdapAttrName & an, size_t & at
     return &attrIter->second[0];
 }
 
-StringAttrVal AdPersonDesc::GetStringAttr(const LdapAttrName & an) const
-{
+StringAttrVal AdPersonDesc::GetStringAttr( const LdapAttrName & an ) const {
     return GetAttrVal(an, stringAttrs_);
 }
 
-BinaryAttrVal AdPersonDesc::GetBinaryAttr(const LdapAttrName & an) const
-{
+BinaryAttrVal AdPersonDesc::GetBinaryAttr( const LdapAttrName & an ) const {
     return GetAttrVal(an, binaryAttrs_);
 }
 
-bool AdPersonDesc::IsAttributeSet(const LdapAttrName & an) const
+bool AdPersonDesc::IsAttributeSet( const LdapAttrName & an ) const
 {
-    BOOST_VERIFY(!an.empty());
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     return (stringAttrs_.find(an) != stringAttrs_.end()) || (binaryAttrs_.find(an) != binaryAttrs_.end());
 }
 
-bool AdPersonDesc::IsAttributeWritable(const Attributes::AttrId id) const noexcept
-{
+bool AdPersonDesc::IsAttributeWritable( const Attributes::AttrId id ) const noexcept {
     return (writableAttributes_.find(id) != writableAttributes_.end());
 }
 
-StringAttrVal AdPersonDesc::GetDn() const
-{
+StringAttrVal AdPersonDesc::GetDn() const {
     return GetStringAttr(AdAttrDn);
 }
 
-AdPersonDesc::AttrIds AdPersonDesc::GetWritableAttributes() const
-{
+
+AdPersonDesc::AttrIds AdPersonDesc::GetWritableAttributes() const {
     return writableAttributes_;
 }
 
-bool AdPersonDesc::LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const
+
+bool AdPersonDesc::LexicographicalCompareStringAttrs (
+    const AdPersonDesc & apd,
+    Attributes::AttrId id
+) const
 {
     const LdapAttrName ldapAttrName = Attributes::GetInstance().GetLdapAttrName(id);
     return LexicographicalCompareStringAttrs(apd, ldapAttrName);
 }
 
-bool AdPersonDesc::LexicographicalCompareStringAttrs(const AdPersonDesc & apd, const std::wstring & ldapAttrName) const
+
+bool AdPersonDesc::LexicographicalCompareStringAttrs (
+    const AdPersonDesc & apd,
+    const std::wstring & ldapAttrName
+) const
 {
     auto li = stringAttrs_.find(ldapAttrName);
     auto ri = apd.stringAttrs_.find(ldapAttrName);

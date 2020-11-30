@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -40,23 +40,29 @@ public:
         static Attributes instance;
         return instance;
     }
-    bool IsEditable(const AttrId id) const;
-    bool IsString(const AttrId id) const;
-    bool IsEditableString(const AttrId id) const;
-    std::wstring GetAttrOid(const AttrId id) const;
     size_t GetAttrCount() const noexcept;
-    std::wstring GetUiAttrName(const AttrId id) const;
-    std::wstring GetLdapAttrName(const AttrId id) const;
-    const wchar_t * GetLdapAttrNamePtr(const AttrId id) const;
+
+    bool IsString(const AttrId id) const;
+    bool IsEditable( const AttrId id ) const;
+    bool IsEditableString( const AttrId id ) const;
     size_t GetAttrMaxLength(const AttrId id) const;
+    std::wstring GetAttrOid( const AttrId id ) const;
+    std::wstring GetUiAttrName( const AttrId id ) const;
+    std::wstring GetLdapAttrName( const AttrId id ) const;
+    const wchar_t * GetLdapAttrNamePtr( const AttrId id ) const;
+
+    AttrId GetAttrId( const wchar_t * attrName ) const;
+
     size_t GetTextAttrMaxLength() const;
     size_t GetBinaryAttrMaxLength() const;
-    AttrId GetAttrId(const wchar_t * attrName) const;
+
     std::vector<WcharBuf> GetAdsiComplientAttrNames() const;
     const std::list<std::wstring> & GetLdapAttrNames() const;
     const std::vector<AttrId> & GetAttrIds() const;
-    bool IsAttrSupported(const AttrId attrId) const noexcept;
-    bool IsAttrSupported(const wchar_t * ldapAttrName) const;
+
+    bool IsAttrSupported( const AttrId attrId ) const noexcept;
+    bool IsAttrSupported( const wchar_t * ldapAttrName ) const;
+
     static void PreExitUnload();    // to prevent false memory leaks warnings
 private:
     Attributes();
@@ -66,6 +72,7 @@ private:
     Attributes & operator = (Attributes &&) = delete;
 private:
     static void PopulateTables();
+
 private:
     struct LdapAttr
     {
@@ -84,7 +91,7 @@ private:
         const unsigned int uiIds;
         const bool isSingleValued;
         const bool isString;
-        const bool isEditable;
+        const bool isEditable;  // attribute value can be change directly
     };
 
 private:

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -113,16 +113,7 @@ void CAdBookApp::DisplayUI()
 
 void CAdBookApp::CreateAdAccessFactory()
 {
-    if (_cmdLine.useFakeDataSource) {
-        _adAccessFactory = adbook::CreateAdAccessFactory(
-            adbook::AbstractAdAccessFactory::ProductsType::Fake
-        );
-    }
-    else {
-        _adAccessFactory = adbook::CreateAdAccessFactory(
-            adbook::AbstractAdAccessFactory::ProductsType::Real
-        );
-    }
+    _adAccessFactory = adbook::GetAdAccessFactory();
 }
 
 BOOL CAdBookApp::InitInstance()
@@ -141,6 +132,7 @@ BOOL CAdBookApp::InitInstance()
 
     AfxEnableControlContainer();
 
+    SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
     // Create the shell manager, in case the dialog contains
     // any shell tree view or shell list view controls.
 
@@ -159,10 +151,10 @@ BOOL CAdBookApp::InitInstance()
     SetRegistryKey(_T("Active Directory Contact Book"));
 
     LoadSettings();
-    ParseCommandLine(_cmdLine);
     CreateAdAccessFactory();
     DisplayUI();
     SaveSettings();
+
     // Since the dialog has been closed, return FALSE so that we exit the
     // application, rather than start the application's message pump.
 

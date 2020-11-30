@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -41,11 +41,15 @@ namespace WpfAdBook.Services
     {
         ConnectionParams ConnectionParams { get; set; }
         FilteringParams FilteringParams { get; set; }
+        string SerializedFilterValues { get; set; }
         ObservableCollection<AdPersonVM> SavedSearchResult { get; set; }
 
         System.Drawing.Size MainWndSize { get; set; }
         System.Drawing.Point MainWndPos { get; set; }
         bool MainWndMaximized { get; set; }
+
+        System.Drawing.Size EditPersonWndSize { get; set; }
+        System.Drawing.Point EditPersonWndPos { get; set; }
 
         void Save();
         void Load();

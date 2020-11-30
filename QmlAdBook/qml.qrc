@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>MainWindow.qml</file>
+        <file>AboutDlg.qml</file>
+        <file>SettingsDlg.qml</file>
+        <file>SearchResultFragment.qml</file>
+        <file>FiltersFragment.qml</file>
+        <file>app.ico</file>
+        <file>TableViewItemDelegate.qml</file>
+        <file>TableViewRowDelegate.qml</file>
+        <file>MyButton.qml</file>
+        <file>AttrEditorDlg.qml</file>
+    </qresource>
+</RCC>

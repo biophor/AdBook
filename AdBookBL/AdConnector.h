@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -38,27 +38,70 @@ public:
     AdConnector & operator = (const AdConnector&) = delete;
     AdConnector & operator - (AdConnector&&) = delete;
 
-    void Connect(const ConnectionParams & connectionParams) override;
-    void Connect(const ConnectionParams & connectionSettings, const std::wstring & distinguishedName) override;
+    void Connect (
+        const ConnectionParams & connectionParams
+    ) override;
+
+    void Connect (
+        const ConnectionParams & connectionSettings,
+        const std::wstring & distinguishedName
+    ) override;
+
     void Disconnect() override;
     bool IsConnected() const override;
-    std::wstring GetLdapPath() override; // https://docs.microsoft.com/en-us/windows/win32/adsi/ldap-adspath
-    std::wstring GetRDN()override;  // RDN - relative distinguished name
 
-    IDirectoryObjectPtr GetParentObject();
-    IDirectoryObjectPtr GetDirectoryObject() const override;
-    void Rename(const std::wstring & newName) override;
-    void UploadStringAttr(const std::wstring & attrName, const std::wstring & attrVal) override;
-    std::wstring DownloadStringAttr(const std::wstring & attrName) override;
+    void Rename (
+        const std::wstring & newName
+    ) override;
 
-    void UploadBinaryAttr(const std::wstring & attrName, const BinaryAttrVal & bav)override;
-    BinaryAttrVal DownloadBinaryAttr(const std::wstring & attrName)override;
+    void UploadStringAttr (
+        const std::wstring & attrName,
+        const std::wstring & attrVal
+    ) override;
 
+    std::wstring DownloadStringAttr (
+        const std::wstring & attrName
+    ) override;
+
+    void UploadBinaryAttr (
+        const std::wstring & attrName,
+        const BinaryAttrVal & bav
+    ) override;
+
+    BinaryAttrVal DownloadBinaryAttr (
+        const std::wstring & attrName
+    )override;
+
+    IDirectoryObjectPtr GetDirectoryObject() const;
 
 private:
-    IDirectoryObjectPtr objectPtr_;
-    ConnectionParams connectionSettings_;
-    std::wstring distinguishedName_;    // https://ldap.com/ldap-dns-and-rdns/
+    std::wstring GetLdapPath(); // https://docs.microsoft.com/en-us/windows/win32/adsi/ldap-adspath
+    std::wstring GetRDN();  // RDN - relative distinguished name
+    std::wstring GetParentLdapPath();
+    IDirectoryObjectPtr GetParentObject();
+
+    void GetObjectAttributesWrp (
+        LPWSTR * attributeNames,
+        DWORD numberAttributes,
+        PADS_ATTR_INFO * attributeEntries,
+        DWORD * numAttributesReturned
+    );
+
+    void SetObjectAttributesWrp (
+        PADS_ATTR_INFO attributeEntries,
+        DWORD numAttributes,
+        DWORD * numAttributesModified
+    );
+
+    void CheckAttrNameByClearingAttribute (
+        const std::wstring & attrName,
+        ADSTYPE attrYype
+    );
+
+private:
+    IDirectoryObjectPtr _objectPtr;
+    ConnectionParams _connectionParams;
+    std::wstring _distinguishedName;    // https://ldap.com/ldap-dns-and-rdns/
 };
 
 }   // namespace adbook

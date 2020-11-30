@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -61,8 +61,8 @@ namespace WpfAdBook.ViewModels
 
         private void LoadSettings()
         {
-            Domain = _settingsService.ConnectionParams.Dc;
-            ConnectDefaultDomain = _settingsService.ConnectionParams.UseDomainYouAreLoggedIn;
+            Domain = _settingsService.ConnectionParams.Address;
+            ConnectDefaultDomain = _settingsService.ConnectionParams.ConnectDomainYouLoggedIn;
             UseCurrentUserCredentials = _settingsService.ConnectionParams.UseCurrentUserCredentials;
             Login = _settingsService.ConnectionParams.Login;
             SecurePassword = _settingsService.ConnectionParams.Password;
@@ -152,9 +152,9 @@ namespace WpfAdBook.ViewModels
                     connectionParams.UseCurrentUserCredentials = UseCurrentUserCredentials.Value;
                 }
                 if (ConnectDefaultDomain.HasValue) {
-                    connectionParams.UseDomainYouAreLoggedIn = ConnectDefaultDomain.Value;
+                    connectionParams.ConnectDomainYouLoggedIn = ConnectDefaultDomain.Value;
                 }
-                connectionParams.Dc = Domain;
+                connectionParams.Address = Domain;
                 connectionParams.Login = Login;
                 connectionParams.Password = SecurePassword.Copy();
 
@@ -192,9 +192,9 @@ namespace WpfAdBook.ViewModels
                 _settingsService.ConnectionParams.UseCurrentUserCredentials = UseCurrentUserCredentials.Value;
             }
             if (ConnectDefaultDomain.HasValue) {
-                _settingsService.ConnectionParams.UseDomainYouAreLoggedIn = ConnectDefaultDomain.Value;
+                _settingsService.ConnectionParams.ConnectDomainYouLoggedIn = ConnectDefaultDomain.Value;
             }
-            _settingsService.ConnectionParams.Dc = Domain;
+            _settingsService.ConnectionParams.Address = Domain;
             _settingsService.ConnectionParams.Login = Login;
             _settingsService.ConnectionParams.Password = SecurePassword;
             _settingsService.Save();

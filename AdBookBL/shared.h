@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -18,16 +18,52 @@ You should have received a copy of the GNU General Public License along with
 
 #pragma once
 
+#include "AdBookBLExport.h"
+
 namespace adbook
 {
 
 typedef std::vector<wchar_t> WcharBuf;  // Several ADSI functions require non-const IN arguments.
 
-WcharBuf ADBOOKBL_API ToWcharBuf(const std::wstring & s);
+WcharBuf ADBOOKBL_API ToWcharBuf (
+    const std::wstring & s
+);
 
-std::wstring ADBOOKBL_API LoadString(UINT resId);
+std::wstring ADBOOKBL_API ToWstring (
+    const CComBSTR & bstr
+);
 
-std::wstring ADBOOKBL_API ExtractDirFromFilePath(const std::wstring & filePath);
+std::wstring ADBOOKBL_API ToWstring (
+    const char * s
+);
+
+std::wstring ADBOOKBL_API LoadString (
+    UINT resId
+);
+
+std::wstring ADBOOKBL_API ExtractDirFromFilePath (
+    const std::wstring & filePath
+);
+
+std::wstring ADBOOKBL_API Trim(
+    const std::wstring &
+);
+
+std::wstring ADBOOKBL_API ReplaceAll (
+    const std::wstring & sourceString,
+    const std::wstring & whatToReplace,
+    const std::wstring & replacement
+);
+
+void ADBOOKBL_API ReplaceAllInPlace (
+    std::wstring & sourceString,
+    const std::wstring & whatToReplace,
+    const std::wstring & replacement
+);
+
+std::wstring ADBOOKBL_API ToLower (
+    const std::wstring & s
+);
 
 class ComAutoInitializer final {
 public:

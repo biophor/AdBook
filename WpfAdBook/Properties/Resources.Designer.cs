@@ -115,6 +115,24 @@ namespace WpfAdBook.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Names: Common name, Given name, Surname, Display name.
+        /// </summary>
+        public static string Filter_Names {
+            get {
+                return ResourceManager.GetString("Filter_Names", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Phones: Home phone, work phone, mobile phone.
+        /// </summary>
+        public static string Filter_Phones {
+            get {
+                return ResourceManager.GetString("Filter_Phones", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
         public static string LoadFilterControl_AddButton {
@@ -358,6 +376,15 @@ namespace WpfAdBook.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear the photo.
+        /// </summary>
+        public static string PersonEditorWindow_ClearPhoto {
+            get {
+                return ResourceManager.GetString("PersonEditorWindow_ClearPhoto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select a photo....
         /// </summary>
         public static string PersonEditorWindow_SelectPhoto {
@@ -412,7 +439,7 @@ namespace WpfAdBook.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect to the domain you logged on to.
+        ///   Looks up a localized string similar to Connect the domain you logged on to.
         /// </summary>
         public static string SettingsWindow_ConnectDefault {
             get {
@@ -430,7 +457,7 @@ namespace WpfAdBook.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to _Connect to a specifiec domain:.
+        ///   Looks up a localized string similar to _Connect the following domain:.
         /// </summary>
         public static string SettingsWindow_ConnectTo {
             get {

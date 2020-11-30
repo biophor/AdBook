@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="DomainOrDc" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Login" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ConnectDefaultDomain" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -21,22 +21,22 @@
       <Value Profile="(Default)">Normal</Value>
     </Setting>
     <Setting Name="MainFormLocation" Type="System.Drawing.Point" Scope="User">
-      <Value Profile="(Default)">0, 19</Value>
+      <Value Profile="(Default)">200, 200</Value>
     </Setting>
     <Setting Name="MainFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">300, 300</Value>
+      <Value Profile="(Default)">600, 400</Value>
     </Setting>
     <Setting Name="SettingsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">300, 300</Value>
     </Setting>
     <Setting Name="MainFormSplitterDistance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">136</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="MainFormBottomSplitterDistance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">286</Value>
+      <Value Profile="(Default)">400</Value>
     </Setting>
     <Setting Name="MainFormBottomRightSplitterDistance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">128</Value>
+      <Value Profile="(Default)">200</Value>
     </Setting>
     <Setting Name="MainFormPersonListColumnSizes" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -64,6 +64,18 @@
     </Setting>
     <Setting Name="FilterListFont" Type="System.Drawing.Font" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Login" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ConnectDefaultDomain" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="MainFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">100, 100</Value>
+    </Setting>
+    <Setting Name="MainFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">600, 400</Value>
     </Setting>
   </Settings>
 </SettingsFile>

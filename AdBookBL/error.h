@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License along with
 'Active Directory Contact Book'. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #pragma once
-
 #include "AdBookBLExport.h"
+#include "debug.h"
 
 namespace adbook
 {
@@ -29,93 +28,86 @@ class ADBOOKBL_API Error : public std::exception
 public:
     Error(const wchar_t * what, const wchar_t * where)
     {
-        if (what)
-        {
+        if (what) {
             size_t numCharsConverted = 0;
-            wcstombs_s(&numCharsConverted, whatBuf_, what, _countof(whatBuf_));
+            wcstombs_s(&numCharsConverted, _stdExceptionWhatBuf, what, _TRUNCATE);
+            wcsncpy_s(_whatBuf, what, _TRUNCATE);
         }
-        if (where)
-        {
-            wcscpy_s(whereBuf_, where);
-        }
-    }
-    Error(const char * what, const wchar_t * where)
-    {
-        if (what)
-        {
-            strcpy_s(whatBuf_, what);
-        }
-        if (where)
-        {
-            wcscpy_s(whereBuf_, where);
-        }
-    }
-    Error(const wchar_t * where)
-    {
-        if (where)
-        {
-            wcscpy_s(whereBuf_, where);
+        if (where) {
+            wcsncpy_s(_whereBuf, where, _TRUNCATE);
         }
     }
 
-    virtual std::wstring What() const = 0;
-    std::wstring Where() const
-    {
-        return whereBuf_;
+    Error(const wchar_t * where) {
+        if (where) {
+            wcscpy_s(_whereBuf, where);
+        }
     }
 
-    virtual const char * what() const
-    {
-        return whatBuf_;
+    const wchar_t * What() const {
+        return _whatBuf;
+    }
+
+    const wchar_t * Where() const {
+        return _whereBuf;
+    }
+
+    virtual const char * what() const {
+        return _stdExceptionWhatBuf;
     }
 
 protected:
-    mutable wchar_t errorBuf_[512] = {};
-    char whatBuf_[128] = {};
-    wchar_t whereBuf_[128] = {};
+    char _stdExceptionWhatBuf[128] = {};    // for 'const char * std::exception::what()'
+    wchar_t _whatBuf[128] = {};
+    wchar_t _whereBuf[64] = {};
 };
 
+#define MY_TRACE_ERROR(e) MY_TRACE(L"Error: what:%s where:%s", e.What(), e.Where());
 
 class ADBOOKBL_API HrError : public Error
 {
 public:
-    HrError(const HRESULT hr, const wchar_t * where = nullptr) : Error(where), hr_(hr)
+    HrError(const HRESULT hr, const wchar_t * where = nullptr)
+        : Error(where), _hr(hr)
     {
-        sprintf_s(whatBuf_, "0x%X.", hr);
+        sprintf_s(_stdExceptionWhatBuf, "0x%X", hr);
+        swprintf_s(_whatBuf, L"0x%X", hr);
     }
-    HrError(const HRESULT hr, const wchar_t * what, const wchar_t * where) : Error(what, where), hr_(hr)
-    {
-        sprintf_s(whatBuf_, "0x%X.", hr);
-    }
-    virtual std::wstring What() const;
 
-    HRESULT GetHR() const
-    {
-        return hr_;
+    HrError(const HRESULT hr, const wchar_t * what, const wchar_t * where)
+        : Error(what, where), _hr(hr)
+    { }
+
+    HRESULT GetHR() const {
+        return _hr;
     }
+
+    const wchar_t * GetHrDescription() const;
+
 private:
-    HRESULT hr_;
+    HRESULT _hr;
+    mutable wchar_t _hrDescriptionBuf[128] = {};
 };
 
-#define HR_ERROR(hr) throw adbook::HrError(hr,__FUNCTIONW__)
+#define HR_ERROR(hr) throw adbook::HrError(hr, __FUNCTIONW__)
 
 #define INVALID_PARAM_TYPE  "Invalid parameter's type"
+
+#define MY_TRACE_HRERROR(e) MY_TRACE(L"HrError: hr:%d what:%s where:%s", e.GetHR(), e.What(), e.Where());
 
 class Sqlite3Error : public Error
 {
 public:
     Sqlite3Error(const int err, const wchar_t * what, const wchar_t * where) :
         Error(what, where), errCode_(err)
-    {
-        sprintf_s(whatBuf_, "%d", err);
-    }
-    int GetErrCode()
-    {
+    { }
+
+    int GetErrCode() const {
         return errCode_;
     }
-    virtual std::wstring What() const;
+
 private:
-    int errCode_ = 0;
+    int errCode_{};
 };
 
 }   // namespace adbook

@@ -2,19 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="AdAccessFactoryTests.cpp" />
     <ClCompile Include="AdSearchTests.cpp" />
     <ClCompile Include="AdConnectorTests.cpp" />
     <ClCompile Include="AdPersonDescKeeperTests.cpp" />
     <ClCompile Include="SharedStandaloneFunctionsTests.cpp" />
+    <ClCompile Include="TestSuiteBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="TestSuiteBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="How to setup the test environment on Windows 10.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

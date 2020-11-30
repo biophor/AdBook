@@ -8,8 +8,7 @@
 #pragma once
 #include "..\AdBookBL\export.h"
 
-#include <boost/numeric/conversion/cast.hpp>
-#include <vcclr.h>  
+#include <vcclr.h>
 
 #include <Commctrl.h>
 #include <exception>

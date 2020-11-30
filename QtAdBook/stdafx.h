@@ -17,5 +17,3 @@
 #include "AdBookBL/export.h"
 #pragma warning(pop)
 #include <variant>
-#include <boost/scope_exit.hpp>
-#include <boost/numeric/conversion/cast.hpp>

@@ -46,14 +46,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(BOOST);$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(BOOST);$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -130,9 +130,6 @@
     <ClCompile Include="ConnectionParams.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="error.cpp" />
-    <ClCompile Include="FakeConnector.cpp" />
-    <ClCompile Include="FakeDataSource.cpp" />
-    <ClCompile Include="FakeSearcher.cpp" />
     <ClCompile Include="LdapRequestBuilder.cpp" />
     <ClCompile Include="shared.cpp" />
     <ClCompile Include="sqlite3\sqlite3.c">
@@ -163,12 +160,10 @@
     <ClInclude Include="adsi.h" />
     <ClInclude Include="Attributes.h" />
     <ClInclude Include="ConnectionParams.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="error.h" />
     <ClInclude Include="export.h" />
-    <ClInclude Include="FakeConnector.h" />
-    <ClInclude Include="FakeDataSource.h" />
-    <ClInclude Include="FakeSearcher.h" />
     <ClInclude Include="LdapRequestBuilder.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="shared.h" />

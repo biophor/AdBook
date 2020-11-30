@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -28,10 +28,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setOrganizationName(QObject::tr("biophor"));
     setOrganizationDomain("github.com/biophor");
 
-    ParseCommandLine();
     LoadSettings();
 
-    _adFactory = adbook::CreateAdAccessFactory(_factoryPupose);
+    _adFactory = adbook::GetAdAccessFactory();
 }
 
 Application::~Application()
@@ -87,20 +86,6 @@ void Application::LoadSettings()
             QString::fromStdWString(e.What()),
             QMessageBox::Ok
         );
-    }
-}
-
-void Application::ParseCommandLine()
-{
-    QCommandLineOption fakeDataOption(QStringList() << "f" << "fake_data", "Return fake contacts when searching.");
-    QCommandLineParser parser;
-    parser.addOption(fakeDataOption);
-    parser.process(*this);
-    if (parser.isSet(fakeDataOption)) {
-        _factoryPupose = adbook::AbstractAdAccessFactory::ProductsType::Fake;
-    }
-    else {
-        _factoryPupose = adbook::AbstractAdAccessFactory::ProductsType::Real;
     }
 }
 

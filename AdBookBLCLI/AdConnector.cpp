@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -46,10 +46,10 @@ void NativeAdConnectorPtr::ReleaseNativeResources()
             }
         }
         catch (const adbook::Error & e) {
-            OutputDebugStringW(e.What().c_str());
+            MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
         }
         catch (const std::exception & e) {
-            OutputDebugStringA(e.what());
+            MY_TRACE("%s %s", __FUNCTION__, e.what());
         }
     }
 }
@@ -68,7 +68,8 @@ void AdConnector::Connect(ConnectionParams ^ cs)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -80,7 +81,8 @@ void AdConnector::Connect(ConnectionParams ^ cs, String ^ dn)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -91,7 +93,8 @@ void AdConnector::Disconnect()
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -103,31 +106,7 @@ bool AdConnector::IsConnected()
         return isConnected;
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
-    }
-}
-
-String ^ AdConnector::GetLdapPath()
-{
-    try {
-        auto r = gcnew String(_nativeAdConnectorPtr->GetLdapPath().c_str());
-        GC::KeepAlive(this);
-        return r;
-    }
-    catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
-    }
-}
-
-String ^ AdConnector::GetRDN()
-{
-    try {
-        auto r = gcnew String(_nativeAdConnectorPtr->GetRDN().c_str());
-        GC::KeepAlive(this);
-        return r;
-    }
-    catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -138,7 +117,8 @@ void AdConnector::Rename(String ^ newName)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -152,7 +132,8 @@ void AdConnector::UploadStringAttr(String ^ attrName, String ^ attrVal)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -164,7 +145,8 @@ String ^ AdConnector::DownloadStringAttr(String ^ attrName)
         return r;
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -183,7 +165,8 @@ void AdConnector::UploadBinaryAttr(String ^ attrName, cli::array<Byte> ^ bav)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 
@@ -192,7 +175,7 @@ cli::array<Byte> ^ AdConnector::DownloadBinaryAttr(String ^ attrName)
     try {
         adbook::BinaryAttrVal nbav = _nativeAdConnectorPtr->DownloadBinaryAttr(StringToStdWstring(attrName));
         GC::KeepAlive(this);
-        cli::array<Byte>^ bav = gcnew cli::array<Byte>(boost::numeric_cast<Int32>(nbav.size()));
+        cli::array<Byte>^ bav = gcnew cli::array<Byte>(static_cast<Int32>(nbav.size()));
         if (nbav.size() == 0) {
             return bav;
         }
@@ -201,7 +184,8 @@ cli::array<Byte> ^ AdConnector::DownloadBinaryAttr(String ^ attrName)
         return bav;
     }
     catch (const adbook::Error & e) {
-        throw gcnew Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew Exception(gcnew String(e.What()));
     }
 }
 

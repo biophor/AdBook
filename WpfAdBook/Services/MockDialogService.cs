@@ -80,7 +80,19 @@ namespace WpfAdBook.Services
 
         public bool RequestConfirmationOnAppExit()
         {
-            throw new NotImplementedException();
+            Debug.WriteLine("called RequestConfirmationOnAppExit()");
+            return true;
+        }
+
+
+        public void SaveEditPersonWindowState()
+        {
+
+        }
+
+        public void RestoreEditPersonWindowState()
+        {
+
         }
     }
 }

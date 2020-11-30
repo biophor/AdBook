@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -34,10 +34,10 @@ public:
     ~PropertiesModel();
     void SetContact(const adbook::AdPersonDesc & apd);
     adbook::AdPersonDesc GetContact();
-    void Clear();    
+    void Clear();
     bool IsAttrWritable(int row) const;
     adbook::Attributes::AttrId GetAttr(int row) const;
-private:    
+private:
     void DisplayProperties();
     struct ColumnDef {
         ColumnId colId;

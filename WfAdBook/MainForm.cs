@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2016 Goncharov Andrei.
+Copyright (C) 2015-2016 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -27,11 +27,17 @@ using adbookcli;
 using System.Diagnostics;
 using System.Collections;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace WfAdBook
 {
     public partial class MainForm : Form //-V3073
     {
+        [DllImport("Kernel32.dll", CharSet = CharSet.Auto)]
+        static extern System.UInt16 SetThreadUILanguage(
+            System.UInt16 LangId
+            );
+
         private int _sortCol = -1;
         private SortOrder _sortOrder = SortOrder.None;
         private Stopwatch _timer = new Stopwatch();
@@ -41,6 +47,7 @@ namespace WfAdBook
         public MainForm()
         {
             InitializeComponent();
+            SetThreadUILanguage(0x409); // en-US
             InitFilterList();
             InitFilterNamesList();
             InitLdapMatchingRules();
@@ -122,7 +129,6 @@ namespace WfAdBook
             using (var about = new AboutForm()) {
                 about.ShowDialog();
             }
-
         }
         private void _adSearcher_SearchStoppedEvent(object sender, EventArgs e)
         {
@@ -211,6 +217,7 @@ namespace WfAdBook
             buttonClearPhoto.Enabled = false;
             buttonFind.Text = Properties.Resources.FindButtonTextDuringSearch;
             lviewResult.VirtualListSize = 0;
+            ClearPersonDetails();
             lock (_personListItems) {
                 _personListItems.Clear();
             }
@@ -238,19 +245,46 @@ namespace WfAdBook
             }
             cboxFilterNames.SelectedIndex = 0;
         }
+        private ListViewItem FindFilterListViewItem(object filter, LdapMatchingRule mr, string val)
+        {
+            foreach (ListViewItem filterItem in lviewFilters.Items) {
+                LdapMatchingRule lmr = (LdapMatchingRule)filterItem.SubItems[1].Tag;
+                string lval = filterItem.SubItems[2].Text;
+                object lfilter = filterItem.Tag;
+                bool isDuplicate = (filter == lfilter) && (mr == lmr) && (0 == string.Compare(val, lval, true));
+                if (isDuplicate) {
+                    return filterItem;
+                }
+            }
+            return null;
+        }
+
         private void CreateFilter()
         {
-            var item = new ListViewItem(cboxFilterNames.SelectedItem.ToString());
-            item.Tag = cboxFilterNames.SelectedItem;
-            var matchingRuleItem = item.SubItems.Add(cboxConditions.SelectedItem.ToString());
-            matchingRuleItem.Tag = cboxConditions.SelectedItem;
-            var filterValue = item.SubItems.Add(cboxFilterValues.Text);
-            lviewFilters.Items.Add(item);
+            object filter = cboxFilterNames.SelectedItem;
+            LdapMatchingRule matchingRule = cboxConditions.SelectedItem as LdapMatchingRule;
+            string filterValue = cboxFilterValues.Text.Trim();
+
+            if (FindFilterListViewItem(filter, matchingRule, filterValue) != null) {
+                // duplicate
+                return;
+            }
+            var filterListViewItem = new ListViewItem(filter.ToString());
+            filterListViewItem.Tag = filter;
+
+            var matchingRuleListViewItem = filterListViewItem.SubItems.Add(matchingRule.DisplayName);
+            matchingRuleListViewItem.Tag = matchingRule;
+
+            var filterValueListViewItem = filterListViewItem.SubItems.Add(filterValue);
+
+            lviewFilters.Items.Add(filterListViewItem);
         }
+
         private void buttonAddFilter_Click(object sender, EventArgs e)
         {
             CreateFilter();
         }
+
         private void RemoveFilter()
         {
             var selectedItems = lviewFilters.SelectedItems;
@@ -264,17 +298,12 @@ namespace WfAdBook
         }
         private LdapRequestBuilder ConstructLdapRequest()
         {
-            LdapRequestBuilder lr = new adbookcli.LdapRequestBuilder();
+            var lr = new LdapRequestBuilder();
             foreach (ListViewItem filterItem in lviewFilters.Items) {
-                LdapMatchingRule lmr = (LdapMatchingRule)filterItem.SubItems[1].Tag;
-                string filterValue = filterItem.SubItems[2].Text;
-                AdAttribute adAttr = filterItem.Tag as AdAttribute;
-                if (adAttr != null) {
-                    lr.AddRule(adAttr.Id, lmr.Id, filterValue);
-                    continue;
-                }
                 CompositeFilter cf = filterItem.Tag as CompositeFilter;
                 if (cf != null) {
+                    LdapMatchingRule lmr = (LdapMatchingRule)filterItem.SubItems[1].Tag;
+                    string filterValue = filterItem.SubItems[2].Text;
                     if (cf.Id == CompositeFilterId.AnyAttribute) {
                         foreach (var attrId in AdAttributes.AttrIds) {
                             var attr = AdAttributes.Get(attrId);
@@ -284,9 +313,15 @@ namespace WfAdBook
                         }
                         lr.AddOR();
                     }
-                    continue;
                 }
-                throw new InvalidOperationException("unknown filter type");
+            }
+            foreach (ListViewItem filterItem in lviewFilters.Items) {
+                LdapMatchingRule lmr = (LdapMatchingRule)filterItem.SubItems[1].Tag;
+                string filterValue = filterItem.SubItems[2].Text;
+                AdAttribute adAttr = filterItem.Tag as AdAttribute;
+                if (adAttr != null) {
+                    lr.AddRule(adAttr.Id, lmr.Id, filterValue);
+                }
             }
             if (lviewFilters.Items.Count > 0) {
                 if (rbuttonAllFilters.Checked) {
@@ -527,6 +562,14 @@ namespace WfAdBook
             }
             if (redrawItem) {
                 lviewResult.RedrawItems(itemIndex, itemIndex, false);
+            }
+        }
+        private void ClearPersonDetails()
+        {
+            lviewDetails.Tag = null;
+
+            foreach (ListViewItem lvi in lviewDetails.Items) {
+                lvi.SubItems[1].Text = "";
             }
         }
         private void RefreshSelectedPersonDetails()

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -47,8 +47,6 @@ public:
     void Connect(ConnectionParams ^ cs, String ^ dn);
     void Disconnect();
     bool IsConnected();
-    String ^ GetLdapPath();
-    String ^ GetRDN();
 
     void Rename(String ^ newName);
     void UploadStringAttr(String ^ attrName, String ^ attrVal);

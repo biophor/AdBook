@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -48,7 +48,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
 
                 settingsService.Setup(ss => ss.ConnectionParams).Returns(connectionParams);
@@ -91,7 +91,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
 
                 settingsService.Setup(ss => ss.ConnectionParams).Returns(connectionParams);
@@ -134,7 +134,7 @@ namespace WpfAdBook_IntegrationTests
             using (var ldapRequestBuilder = new LdapRequestBuilder())
             using (var dataService = new DataService(settingsService.Object, repo)) {
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=INVALID,DC=INVALID";
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
                 ldapRequestBuilder.AddRule("cn", LdapRequestBuilder.MatchingRule.ExactMatch, "Kristie Etherton");
@@ -157,7 +157,7 @@ namespace WpfAdBook_IntegrationTests
             using (var ldapRequestBuilder = new LdapRequestBuilder())
             using (var dataService = new DataService(settingsService.Object, repo)) {
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
 
@@ -191,7 +191,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("cn", LdapRequestBuilder.MatchingRule.ExactMatch, "Kristie Etherton");
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
@@ -239,7 +239,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("cn", LdapRequestBuilder.MatchingRule.ExactMatch, "Kristie Etherton");
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
@@ -281,7 +281,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
 
@@ -315,7 +315,7 @@ namespace WpfAdBook_IntegrationTests
             using (var dataService = new DataService(settingsService.Object, repo)) {
 
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");
 
@@ -348,7 +348,7 @@ namespace WpfAdBook_IntegrationTests
             using (var ldapRequestBuilder = new LdapRequestBuilder())
             using (var dataService = new DataService(settingsService.Object, repo)) {
                 connectionParams.UseCurrentUserCredentials = true;
-                connectionParams.UseDomainYouAreLoggedIn = false;
+                connectionParams.ConnectDomainYouLoggedIn = false;
                 connectionParams.LdapPath = "LDAP://localhost:55555/CN=users,DC=testdata,DC=adbook,DC=local";
                 ldapRequestBuilder.AddRule("cn", LdapRequestBuilder.MatchingRule.ExactMatch, "Kristie Etherton");
                 ldapRequestBuilder.AddRule("objectCategory", LdapRequestBuilder.MatchingRule.ExactMatch, "person");

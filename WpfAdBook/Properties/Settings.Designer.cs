@@ -26,12 +26,12 @@ namespace WpfAdBook.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string DomainOrDc {
+        public string Address {
             get {
-                return ((string)(this["DomainOrDc"]));
+                return ((string)(this["Address"]));
             }
             set {
-                this["DomainOrDc"] = value;
+                this["Address"] = value;
             }
         }
         
@@ -62,12 +62,12 @@ namespace WpfAdBook.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ConnectToDefaultDomain {
+        public bool ConnectDomainYouLoggedIn {
             get {
-                return ((bool)(this["ConnectToDefaultDomain"]));
+                return ((bool)(this["ConnectDomainYouLoggedIn"]));
             }
             set {
-                this["ConnectToDefaultDomain"] = value;
+                this["ConnectDomainYouLoggedIn"] = value;
             }
         }
         
@@ -97,18 +97,6 @@ namespace WpfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string FilterRules {
-            get {
-                return ((string)(this["FilterRules"]));
-            }
-            set {
-                this["FilterRules"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool StrictFiltering {
             get {
@@ -133,7 +121,7 @@ namespace WpfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100, 100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("200, 200")]
         public global::System.Drawing.Point MainWndPos {
             get {
                 return ((global::System.Drawing.Point)(this["MainWndPos"]));
@@ -152,6 +140,42 @@ namespace WpfAdBook.Properties {
             }
             set {
                 this["MainWndMaximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("400, 300")]
+        public global::System.Drawing.Size EditPersonWndSize {
+            get {
+                return ((global::System.Drawing.Size)(this["EditPersonWndSize"]));
+            }
+            set {
+                this["EditPersonWndSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200, 200")]
+        public global::System.Drawing.Point EditPersonWndPos {
+            get {
+                return ((global::System.Drawing.Point)(this["EditPersonWndPos"]));
+            }
+            set {
+                this["EditPersonWndPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SerializedFilterValues {
+            get {
+                return ((string)(this["SerializedFilterValues"]));
+            }
+            set {
+                this["SerializedFilterValues"] = value;
             }
         }
     }

@@ -152,6 +152,22 @@ namespace WpfAdBook.Controls
                 new PropertyMetadata(new ObservableCollection<FilterRuleVM>())
                 );
 
+
+        // FilterValues property. Tt contains previous filter values specified by the user
+        public ObservableCollection<string> FilterValues
+        {
+            get { return (ObservableCollection<string>)GetValue(FilterValuesProperty); }
+            set { SetValueDp(FilterValuesProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterValuesProperty =
+            DependencyProperty.Register(
+                "FilterValues",
+                typeof(ObservableCollection<string>),
+                typeof(LoadFilterControl),
+                new PropertyMetadata(new ObservableCollection<string>())
+                );
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void SetValueDp(DependencyProperty property, object value, [CallerMemberName] string p = null)

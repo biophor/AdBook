@@ -116,8 +116,8 @@
             // splitContBottom.Panel2
             // 
             this.splitContBottom.Panel2.Controls.Add(this.splitContBottomRight);
-            this.splitContBottom.Size = new System.Drawing.Size(763, 323);
-            this.splitContBottom.SplitterDistance = 351;
+            this.splitContBottom.Size = new System.Drawing.Size(763, 340);
+            this.splitContBottom.SplitterDistance = 450;
             this.splitContBottom.TabIndex = 1;
             // 
             // labelNumContacts
@@ -152,7 +152,7 @@
             this.lviewResult.Location = new System.Drawing.Point(0, 16);
             this.lviewResult.Margin = new System.Windows.Forms.Padding(2);
             this.lviewResult.Name = "lviewResult";
-            this.lviewResult.Size = new System.Drawing.Size(352, 308);
+            this.lviewResult.Size = new System.Drawing.Size(451, 325);
             this.lviewResult.TabIndex = 0;
             this.lviewResult.UseCompatibleStateImageBehavior = false;
             this.lviewResult.View = System.Windows.Forms.View.Details;
@@ -183,8 +183,8 @@
             this.splitContBottomRight.Panel2.Controls.Add(this.buttonSelectPhoto);
             this.splitContBottomRight.Panel2.Controls.Add(this.personPhoto);
             this.splitContBottomRight.Panel2.Controls.Add(this.label3);
-            this.splitContBottomRight.Size = new System.Drawing.Size(408, 323);
-            this.splitContBottomRight.SplitterDistance = 130;
+            this.splitContBottomRight.Size = new System.Drawing.Size(309, 340);
+            this.splitContBottomRight.SplitterDistance = 136;
             this.splitContBottomRight.SplitterWidth = 3;
             this.splitContBottomRight.TabIndex = 0;
             // 
@@ -192,7 +192,7 @@
             // 
             this.buttonChangeAttr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonChangeAttr.Enabled = false;
-            this.buttonChangeAttr.Location = new System.Drawing.Point(334, 43);
+            this.buttonChangeAttr.Location = new System.Drawing.Point(235, 43);
             this.buttonChangeAttr.Margin = new System.Windows.Forms.Padding(2);
             this.buttonChangeAttr.Name = "buttonChangeAttr";
             this.buttonChangeAttr.Size = new System.Drawing.Size(75, 23);
@@ -205,7 +205,7 @@
             // 
             this.buttonCopyAttr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCopyAttr.Enabled = false;
-            this.buttonCopyAttr.Location = new System.Drawing.Point(334, 16);
+            this.buttonCopyAttr.Location = new System.Drawing.Point(235, 16);
             this.buttonCopyAttr.Margin = new System.Windows.Forms.Padding(2);
             this.buttonCopyAttr.Name = "buttonCopyAttr";
             this.buttonCopyAttr.Size = new System.Drawing.Size(75, 23);
@@ -230,7 +230,7 @@
             this.lviewDetails.Margin = new System.Windows.Forms.Padding(2);
             this.lviewDetails.MultiSelect = false;
             this.lviewDetails.Name = "lviewDetails";
-            this.lviewDetails.Size = new System.Drawing.Size(326, 105);
+            this.lviewDetails.Size = new System.Drawing.Size(227, 111);
             this.lviewDetails.TabIndex = 1;
             this.lviewDetails.UseCompatibleStateImageBehavior = false;
             this.lviewDetails.View = System.Windows.Forms.View.Details;
@@ -251,7 +251,7 @@
             // 
             this.buttonClearPhoto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonClearPhoto.Enabled = false;
-            this.buttonClearPhoto.Location = new System.Drawing.Point(334, 43);
+            this.buttonClearPhoto.Location = new System.Drawing.Point(235, 43);
             this.buttonClearPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.buttonClearPhoto.Name = "buttonClearPhoto";
             this.buttonClearPhoto.Size = new System.Drawing.Size(75, 23);
@@ -264,7 +264,7 @@
             // 
             this.buttonSelectPhoto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSelectPhoto.Enabled = false;
-            this.buttonSelectPhoto.Location = new System.Drawing.Point(334, 16);
+            this.buttonSelectPhoto.Location = new System.Drawing.Point(235, 16);
             this.buttonSelectPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.buttonSelectPhoto.Name = "buttonSelectPhoto";
             this.buttonSelectPhoto.Size = new System.Drawing.Size(75, 23);
@@ -282,7 +282,7 @@
             this.personPhoto.Location = new System.Drawing.Point(4, 16);
             this.personPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.personPhoto.Name = "personPhoto";
-            this.personPhoto.Size = new System.Drawing.Size(326, 190);
+            this.personPhoto.Size = new System.Drawing.Size(227, 207);
             this.personPhoto.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.personPhoto.TabIndex = 1;
             this.personPhoto.TabStop = false;
@@ -394,7 +394,7 @@
             this.lviewFilters.Margin = new System.Windows.Forms.Padding(2);
             this.lviewFilters.MultiSelect = false;
             this.lviewFilters.Name = "lviewFilters";
-            this.lviewFilters.Size = new System.Drawing.Size(685, 106);
+            this.lviewFilters.Size = new System.Drawing.Size(685, 89);
             this.lviewFilters.TabIndex = 9;
             this.lviewFilters.UseCompatibleStateImageBehavior = false;
             this.lviewFilters.View = System.Windows.Forms.View.Details;
@@ -432,7 +432,7 @@
             // buttonFind
             // 
             this.buttonFind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFind.Location = new System.Drawing.Point(689, 107);
+            this.buttonFind.Location = new System.Drawing.Point(689, 90);
             this.buttonFind.Margin = new System.Windows.Forms.Padding(2);
             this.buttonFind.Name = "buttonFind";
             this.buttonFind.Size = new System.Drawing.Size(75, 23);
@@ -465,7 +465,7 @@
             this.splitCont.Panel2.Controls.Add(this.splitContBottom);
             this.splitCont.Panel2MinSize = 200;
             this.splitCont.Size = new System.Drawing.Size(763, 463);
-            this.splitCont.SplitterDistance = 137;
+            this.splitCont.SplitterDistance = 120;
             this.splitCont.SplitterWidth = 3;
             this.splitCont.TabIndex = 12;
             // 
@@ -473,7 +473,7 @@
             // 
             this.rbuttonAnyFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.rbuttonAnyFilter.AutoSize = true;
-            this.rbuttonAnyFilter.Location = new System.Drawing.Point(203, 113);
+            this.rbuttonAnyFilter.Location = new System.Drawing.Point(203, 96);
             this.rbuttonAnyFilter.Margin = new System.Windows.Forms.Padding(2);
             this.rbuttonAnyFilter.Name = "rbuttonAnyFilter";
             this.rbuttonAnyFilter.Size = new System.Drawing.Size(231, 17);
@@ -486,7 +486,7 @@
             this.rbuttonAllFilters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.rbuttonAllFilters.AutoSize = true;
             this.rbuttonAllFilters.Checked = true;
-            this.rbuttonAllFilters.Location = new System.Drawing.Point(3, 114);
+            this.rbuttonAllFilters.Location = new System.Drawing.Point(3, 97);
             this.rbuttonAllFilters.Margin = new System.Windows.Forms.Padding(2);
             this.rbuttonAllFilters.Name = "rbuttonAllFilters";
             this.rbuttonAllFilters.Size = new System.Drawing.Size(174, 17);
@@ -521,6 +521,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MinimumSize = new System.Drawing.Size(800, 600);
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Active Directory Contact Book";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Shown += new System.EventHandler(this.MainForm_Shown);

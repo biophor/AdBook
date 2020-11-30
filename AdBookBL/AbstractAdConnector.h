@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,20 +29,41 @@ class ADBOOKBL_API AbstractAdConnector
 {
 public:
     virtual ~AbstractAdConnector() = 0;
-    virtual void Connect(const ConnectionParams & connectionParams) = 0;
-    virtual void Connect(const ConnectionParams & connectionSettings, const std::wstring & distinguishedName) = 0;
+
+    virtual void Connect (
+        const ConnectionParams & connectionParams
+    ) = 0;
+
+    virtual void Connect (
+        const ConnectionParams & connectionSettings,
+        const std::wstring & distinguishedName
+    ) = 0;
+
     virtual void Disconnect() = 0;
+
     virtual bool IsConnected() const = 0;
 
-    virtual std::wstring GetLdapPath() = 0; // https://docs.microsoft.com/en-us/windows/win32/adsi/ldap-adspath
-    virtual std::wstring GetRDN() = 0;  // RDN - relative distinguished name
-    virtual IDirectoryObjectPtr GetDirectoryObject() const = 0;
-    virtual void Rename(const std::wstring & newName) = 0;
-    virtual void UploadStringAttr(const std::wstring & attrName, const std::wstring & attrVal) = 0;
-    virtual std::wstring DownloadStringAttr(const std::wstring & attrName) = 0;
+    virtual void Rename (
+        const std::wstring & newName
+    ) = 0;
 
-    virtual void UploadBinaryAttr(const std::wstring & attrName, const BinaryAttrVal & bav) = 0;
-    virtual BinaryAttrVal DownloadBinaryAttr(const std::wstring & attrName) = 0;
+    virtual void UploadStringAttr (
+        const std::wstring & attrName,
+        const std::wstring & attrVal
+    ) = 0;
+
+    virtual std::wstring DownloadStringAttr (
+        const std::wstring & attrName
+    ) = 0;
+
+    virtual void UploadBinaryAttr (
+        const std::wstring & attrName,
+        const BinaryAttrVal & bav
+    ) = 0;
+
+    virtual BinaryAttrVal DownloadBinaryAttr (
+        const std::wstring & attrName
+    ) = 0;
 };
 
 }   // namespace adbook

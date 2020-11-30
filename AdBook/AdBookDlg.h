@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -91,7 +91,7 @@ private:
     WindowAnchor _wndAnchor;
     CSize _minSize;
     std::map<int, adbook::Attributes::AttrId> _searchResultsColIdx;    // <colId, attrId>
-    std::mutex _peopleMutex;
+    std::recursive_mutex _peopleMutex;
     std::vector<adbook::AdPersonDesc> _people;
 
     CComboBox _attrList;

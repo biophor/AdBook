@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,6 +29,7 @@ using System.ComponentModel;
 using WpfAdBook.Services;
 using WpfAdBook.DAL;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.CompilerServices;
 
@@ -58,6 +59,7 @@ namespace WpfAdBook.ViewModels
 
         public ICommand DisplayAboutBoxCommand { get; }
 
+        public ObservableCollection<string> FilterValues { get; } = new ObservableCollection<string>();
         public ObservableCollection<AdPersonVM> PersonCollection { get; } = new ObservableCollection<AdPersonVM>();
         public PredefinedMatchingRulesVM PredefinedMatchingRules { get; }= new PredefinedMatchingRulesVM();
         public PredefinedFilterListVM PredefinedFilterList { get; } = new PredefinedFilterListVM();
@@ -147,6 +149,7 @@ namespace WpfAdBook.ViewModels
 
             _dataService.DataPortionAvailable += _dataService_DataPortionAvailable;
             LoadFilterRules();
+            LoadFilterValues();
             PersonCollection = _settingsService.SavedSearchResult;
         }
 
@@ -243,7 +246,12 @@ namespace WpfAdBook.ViewModels
         {
             IVisitor visitor = new Visitor();
             var ldapReq = new LdapRequestBuilder();
-            foreach(FilterRuleVM filterRule in FilterRules) {
+            var complexRules = FilterRules.Where(rule => !(rule.Filter is SingleAttrFilterVM));
+            var simpleRules = FilterRules.Where(rule => rule.Filter is SingleAttrFilterVM);
+            foreach (FilterRuleVM filterRule in complexRules) {
+                filterRule.Filter.Accept(visitor, ldapReq, filterRule.MatchingRule, filterRule.Value);
+            }
+            foreach (FilterRuleVM filterRule in simpleRules) {
                 filterRule.Filter.Accept(visitor, ldapReq, filterRule.MatchingRule, filterRule.Value);
             }
             if (FilterRules.Count != 0) {
@@ -272,6 +280,9 @@ namespace WpfAdBook.ViewModels
                 using (_searchTask = _dataService.StartSearchAsync(_ldapRequst)) {
                     await _searchTask;
                 }
+                if (PersonCollection.Count > 0) {
+                    SaveCurrentFilterValues();
+                }
             }
             catch(AdSearchTaskError searchError) {
                 _dialogService.DisplayErrorMessage(searchError.Message);
@@ -285,6 +296,20 @@ namespace WpfAdBook.ViewModels
             finally {
                 _searchTask = null;
                 CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        private void SaveCurrentFilterValues()
+        {
+            foreach (var filterRule in FilterRules) {
+
+                bool alreadyInList = FilterValues.Count(
+                    filterValue => 0 == string.Compare(filterValue, filterRule.Value, true)
+                    ) > 0;
+                if (alreadyInList) {
+                    continue;
+                }
+                FilterValues.Add(filterRule.Value);
             }
         }
 
@@ -374,7 +399,33 @@ namespace WpfAdBook.ViewModels
             }
         }
 
-#region IDisposable Support
+        private void SaveFilterValues()
+        {
+            var bf = new BinaryFormatter();
+            using (var ms = new MemoryStream()) {
+                bf.Serialize(ms, FilterValues);
+                _settingsService.SerializedFilterValues = Convert.ToBase64String(ms.GetBuffer());
+            }
+        }
+
+        private void LoadFilterValues()
+        {
+            if (string.IsNullOrWhiteSpace(_settingsService.SerializedFilterValues)) {
+                return;
+            }
+            byte[] data = Convert.FromBase64String(_settingsService.SerializedFilterValues);
+
+            using (MemoryStream ms = new MemoryStream(data)) {
+                var bf = new BinaryFormatter();
+                var t = (ObservableCollection<string>)bf.Deserialize(ms);
+                FilterValues.Clear();
+                foreach (var v in t) {
+                    FilterValues.Add(v);
+                }
+            }
+        }
+
+        #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -382,6 +433,7 @@ namespace WpfAdBook.ViewModels
             if (!disposedValue) {
                 if (disposing) {
                     SaveFilterRules();
+                    SaveFilterValues();
 
                     _dataService.DataPortionAvailable -= _dataService_DataPortionAvailable;
 

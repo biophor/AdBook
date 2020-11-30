@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -20,22 +20,13 @@ You should have received a copy of the GNU General Public License along with
 
 #include "stdafx.h"
 #include "error.h"
+#include "shared.h"
 #include "LdapRequestBuilder.h"
 
 namespace adbook
 {
 
-LdapRequestBuilder::LdapRequestBuilder()
-{
-}
-
-
-LdapRequestBuilder::~LdapRequestBuilder()
-{
-}
-
-
-void LdapRequestBuilder::AddRule(
+void LdapRequestBuilder::AddRule (
     const Attributes::AttrId attrId,
     const MatchingRule rule,
     const std::wstring & value
@@ -46,45 +37,41 @@ void LdapRequestBuilder::AddRule(
     AddRule(attrName, rule, value);
 }
 
-void LdapRequestBuilder::AddRule(
+void LdapRequestBuilder::AddRule (
     const std::wstring & attrName,
     const MatchingRule rule,
     const std::wstring & value
 )
 {
-    std::wstring lan = attrName;
-    boost::trim(lan);
-    if (lan.empty())
-    {
+    const std::wstring trimmedAttrName = Trim(attrName);
+    if (trimmedAttrName.empty()) {
         throw HrError(E_INVALIDARG);
     }
-    std::wstring lv = value;
-    boost::trim(lv);
-    if (!lv.empty())
+    std::wstring trimmedValue = Trim(value);
+    if (!trimmedValue.empty())
     {
-        boost::replace_all(lv, L"\\", L"\\5c");
-        boost::replace_all(lv, L"*", L"\\2a");
-        boost::replace_all(lv, L"/", L"\\2f");
-        boost::replace_all(lv, L"\0", L"\\00");
-        boost::replace_all(lv, L"(", L"\\28");
-        boost::replace_all(lv, L")", L"\\29");
+        ReplaceAllInPlace(trimmedValue, L"\\", L"\\5c");
+        ReplaceAllInPlace(trimmedValue, L"*", L"\\2a");
+        ReplaceAllInPlace(trimmedValue, L"/", L"\\2f");
+        ReplaceAllInPlace(trimmedValue, L"(", L"\\28");
+        ReplaceAllInPlace(trimmedValue, L")", L"\\29");
     }
     switch (rule)
     {
     case Contains:
-        lv = std::wstring(L"*") + lv + L"*";
+        trimmedValue = std::wstring(L"*") + trimmedValue + L"*";
         break;
     case BeginWith:
-        lv = lv + L"*";
+        trimmedValue = trimmedValue + L"*";
         break;
     case EndWith:
-        lv = std::wstring(L"*") + lv;
+        trimmedValue = std::wstring(L"*") + trimmedValue;
         break;
     case ExactMatch:
         // do nothing
         break;
     }
-    std::wstring s = std::wstring(L"(") + lan + L"=" + lv + L")";
+    std::wstring s = std::wstring(L"(") + trimmedAttrName + L"=" + trimmedValue + L")";
     request_ = request_ + s;
 }
 
@@ -111,6 +98,11 @@ std::wstring LdapRequestBuilder::Get() const
 void LdapRequestBuilder::Clear()
 {
     request_.clear();
+}
+
+void LdapRequestBuilder::AddObjectCategoryRule()
+{
+    AddRule(L"objectCategory", adbook::LdapRequestBuilder::ExactMatch, L"person");
 }
 
 }   // namespace adbook

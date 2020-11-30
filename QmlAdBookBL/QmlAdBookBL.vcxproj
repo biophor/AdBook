@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{96523A88-9154-4ABF-BCC2-93CD6ACB25F5}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>v_5126_msvc2017_64</QtInstall>
+    <QtModules>core;quick</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>v_5126_msvc2017_64</QtInstall>
+    <QtModules>core;quick</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>../;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>../;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Crypt32.lib;AdbookBL.lib;Gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Crypt32.lib;AdbookBL.lib;Gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UsePrecompiledHeader>Use</UsePrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>QMLADBOOKBL_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <QtMoc>
+      <PrependInclude>stdafx.h;%(PrependInclude)</PrependInclude>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UsePrecompiledHeader>Use</UsePrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>QMLADBOOKBL_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+    <QtMoc>
+      <PrependInclude>stdafx.h;%(PrependInclude)</PrependInclude>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <QtMoc Include="AContactFinder.h" />
+    <ClInclude Include="AClipboardService.h" />
+    <ClInclude Include="AContactPhotoProvider.h" />
+    <ClInclude Include="AContactsKeeper.h" />
+    <QtMoc Include="AContactsModel.h" />
+    <ClInclude Include="AContactUpdater.h" />
+    <ClInclude Include="ADataExchanger.h" />
+    <ClInclude Include="ADependencyResolver.h" />
+    <ClInclude Include="ASettingsChecker.h" />
+    <ClInclude Include="ASettingsKeeper.h" />
+    <QtMoc Include="AttrEditorViewModel.h" />
+    <ClInclude Include="AFileSystemService.h" />
+    <ClInclude Include="AttrTraits.h" />
+    <ClInclude Include="ClipboardService.h" />
+    <ClInclude Include="ConnectionSettings.h" />
+    <ClInclude Include="Contact.h" />
+    <QtMoc Include="ContactDetailsModel.h" />
+    <QtMoc Include="ContactFinder.h" />
+    <ClInclude Include="ContactAttributeValidator.h" />
+    <ClInclude Include="ContactPhotoProvider.h" />
+    <ClInclude Include="ContactsKeeper.h" />
+    <QtMoc Include="ContactsModel.h" />
+    <ClInclude Include="ContactUpdater.h" />
+    <ClInclude Include="DataExchanger.h" />
+    <ClInclude Include="DependencyResolver.h" />
+    <ClInclude Include="export.h" />
+    <ClInclude Include="FileSystemService.h" />
+    <ClInclude Include="GdiPlusInitializer.h" />
+    <ClInclude Include="LdapRequestCreator.h" />
+    <QtMoc Include="MainWindowViewModel.h" />
+    <ClInclude Include="Password.h" />
+    <ClInclude Include="qmladbookbl_global.h" />
+    <ClInclude Include="QmlAdBookBL.h" />
+    <ClCompile Include="AClipboardService.cpp" />
+    <ClCompile Include="AContactFinder.cpp" />
+    <ClCompile Include="AContactPhotoProvider.cpp" />
+    <ClCompile Include="AContactsKeeper.cpp" />
+    <ClCompile Include="AContactsModel.cpp" />
+    <ClCompile Include="AContactUpdater.cpp" />
+    <ClCompile Include="ADataExchanger.cpp" />
+    <ClCompile Include="ADependencyResolver.cpp" />
+    <ClCompile Include="ASettingsChecker.cpp" />
+    <ClCompile Include="ASettingsKeeper.cpp" />
+    <ClCompile Include="AFileSystemService.cpp" />
+    <ClCompile Include="AttrEditorViewModel.cpp" />
+    <ClCompile Include="AttrTraits.cpp" />
+    <ClCompile Include="ClipboardService.cpp" />
+    <ClCompile Include="ConnectionSettings.cpp" />
+    <ClCompile Include="Contact.cpp" />
+    <ClCompile Include="ContactAttributeValidator.cpp" />
+    <ClCompile Include="ContactDetailsModel.cpp" />
+    <ClCompile Include="ContactFinder.cpp" />
+    <ClCompile Include="ContactPhotoProvider.cpp" />
+    <ClCompile Include="ContactsKeeper.cpp" />
+    <ClCompile Include="ContactsModel.cpp" />
+    <ClCompile Include="ContactUpdater.cpp" />
+    <ClCompile Include="DataExchanger.cpp" />
+    <ClCompile Include="DependencyResolver.cpp" />
+    <ClCompile Include="FileSystemService.cpp" />
+    <ClCompile Include="GdiPlusInitializer.cpp" />
+    <ClCompile Include="LdapRequestCreator.cpp" />
+    <ClCompile Include="MainWindowViewModel.cpp" />
+    <ClCompile Include="Password.cpp" />
+    <ClCompile Include="QmlAdBookBL.cpp" />
+    <ClInclude Include="QSettingsAutoEndGroup.h" />
+    <ClInclude Include="SearchFilter.h" />
+    <ClInclude Include="SearchFilterRule.h" />
+    <QtMoc Include="SearchFilterRulesModel.h" />
+    <QtMoc Include="SearchFiltersModel.h" />
+    <ClInclude Include="SearchFiltersSettings.h" />
+    <ClInclude Include="SearchFilterType.h" />
+    <QtMoc Include="SearchFilterTypesModel.h" />
+    <ClInclude Include="SettingsChecker.h" />
+    <QtMoc Include="SettingsDlgViewModel.h" />
+    <ClInclude Include="SettingsKeeper.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClCompile Include="SearchFilter.cpp" />
+    <ClCompile Include="SearchFilterRule.cpp" />
+    <ClCompile Include="SearchFilterRulesModel.cpp" />
+    <ClCompile Include="SearchFiltersModel.cpp" />
+    <ClCompile Include="SearchFiltersSettings.cpp" />
+    <ClCompile Include="SearchFilterType.cpp" />
+    <ClCompile Include="SearchFilterTypesModel.cpp" />
+    <ClCompile Include="SettingsChecker.cpp" />
+    <ClCompile Include="SettingsDlgViewModel.cpp" />
+    <ClCompile Include="SettingsKeeper.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdBookBL\AdBookBL.vcxproj">
+      <Project>{4ddcfdb2-4424-493b-a255-638087313fd8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

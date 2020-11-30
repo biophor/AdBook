@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -30,12 +30,12 @@ public:
     {
         delete _password;
     }
-    property String^ Dc {
+    property String^ Address {
         String^ get() {
             return _address;
         }
-        void set(String^ dc) {
-            _address = dc;
+        void set(String^ address) {
+            _address = address;
         }
     }
     property String^ LdapPath {
@@ -70,17 +70,17 @@ public:
             _useCurrentUserCredentials = value;
         }
     }
-    property bool UseDomainYouAreLoggedIn {
+    property bool ConnectDomainYouLoggedIn {
         bool get() {
-            return _useDomainYouAreLoggedIn;
+            return _connectDomainYouLoggedIn;
         }
         void set(bool value) {
-            _useDomainYouAreLoggedIn = value;
+            _connectDomainYouLoggedIn = value;
         }
     }
     adbook::ConnectionParams ToUnderlyingType();
 private:
-    bool _useDomainYouAreLoggedIn = true;
+    bool _connectDomainYouLoggedIn = true;
     bool _useCurrentUserCredentials = true;
     SecureString^ _password;
     String ^ _address, ^ _login;

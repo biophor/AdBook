@@ -1,6 +1,6 @@
 #include "pch.h"
 
-TEST(AdPersonDescTests, CanWriteStringAttribute) {
+TEST(AdPersonDescTests, Can_write_string_attribute) {
     // Arrange
     adbook::AdPersonDesc adp;
     // Act
@@ -10,7 +10,7 @@ TEST(AdPersonDescTests, CanWriteStringAttribute) {
 
 }
 
-TEST(AdPersonDescTests, CanReadStringAttribute) {
+TEST(AdPersonDescTests, Can_read_string_attribute) {
     // Arrange
     adbook::AdPersonDesc adp;
 
@@ -22,7 +22,7 @@ TEST(AdPersonDescTests, CanReadStringAttribute) {
     ASSERT_STREQ(adp.GetStringAttrPtr(L"cn"), L"John Dow");
 }
 
-TEST(AdPersonDescTests, CanWriteBinaryAttribute) {
+TEST(AdPersonDescTests, Can_write_binary_attribute) {
     // Arrange
     adbook::AdPersonDesc adp;
     std::vector<byte> data = { 1,2,3 };
@@ -34,7 +34,7 @@ TEST(AdPersonDescTests, CanWriteBinaryAttribute) {
     ASSERT_TRUE(adp.IsAttributeSet(L"thumbnailPhoto"));
 }
 
-TEST(AdPersonDescTests, CanReadBinaryAttribute) {
+TEST(AdPersonDescTests, Can_read_binary_attribute) {
     // Arrange
     adbook::AdPersonDesc adp;
     std::vector<byte> data = { 1,2,3 };
@@ -50,7 +50,7 @@ TEST(AdPersonDescTests, CanReadBinaryAttribute) {
     ASSERT_TRUE(0 == memcmp(dataReadPtr, data.data(), numBytesRead));
 }
 
-TEST(AdPersonDescTests, CompairingStringAttributes) {
+TEST(AdPersonDescTests, Compairing_string_attributes) {
     // Arrange
     adbook::AdPersonDesc adp1, adp2;
     adp1.SetStringAttr(L"cn", L"John Dow");
@@ -67,7 +67,7 @@ TEST(AdPersonDescTests, CompairingStringAttributes) {
 }
 
 
-TEST(AdPersonDescTests, CanSpecifyWritableAttributes)
+TEST(AdPersonDescTests, Can_specify_writable_attributes)
 {
     // Arrange
     adbook::AdPersonDesc adp;
@@ -75,6 +75,7 @@ TEST(AdPersonDescTests, CanSpecifyWritableAttributes)
     attrIds.insert(adbook::Attributes::AttrId::CommonName);
     attrIds.insert(adbook::Attributes::AttrId::Company);
     attrIds.insert(adbook::Attributes::AttrId::Department);
+
     // Act
     adp.SetWritableAttributes(attrIds);
 
@@ -87,8 +88,7 @@ TEST(AdPersonDescTests, CanSpecifyWritableAttributes)
     ASSERT_TRUE( adp.GetWritableAttributes() == attrIds);
 }
 
-
-TEST(AdPersonDescTests, CanRetrieveDnAttr)
+TEST(AdPersonDescTests, Can_retrieve_dn_attr)
 {
     // Arrange
     adbook::AdPersonDesc adp;

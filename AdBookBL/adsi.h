@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -40,5 +40,28 @@ using LdapAttrName = std::wstring;
 using StringAttrVal = std::wstring;
 using BinaryAttrVal = std::vector<BYTE>;
 
+void ADsGetObjectWrp (
+    const std::wstring & ldapPath,
+    const IID & iid,
+    void ** pp
+);
+
+void ADsOpenObjectWrp (
+    const std::wstring & ldapPath,
+    const std::wstring & login,
+    const std::wstring & password,
+    const IID & iid,
+    void ** pp
+);
+
+IDirectoryObjectPtr ADsGetDirectoryObject (
+    const std::wstring & ldapPath
+);
+
+IDirectoryObjectPtr ADsOpenDirectoryObject (
+    const std::wstring & ldapPath,
+    const std::wstring & login,
+    const std::wstring & password
+);
 
 }   // namespace adbook

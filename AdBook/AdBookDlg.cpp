@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -299,7 +299,7 @@ void CAdBookDlg::InitSearchFiltersList()
     for (const auto & i : _appSettings.GetMainWndSettings().GetSearchFilters())
     {
         int idx=0;
-        auto attrId = boost::numeric_cast<adbook::Attributes::AttrId>(i.attrId);
+        auto attrId = static_cast<adbook::Attributes::AttrId>(i.attrId);
         if (attributes.IsAttrSupported(attrId))
         {
             idx = _searchFilters.InsertItem(_searchFilters.GetItemCount(), attributes.GetUiAttrName(attrId).c_str());
@@ -639,16 +639,19 @@ void CAdBookDlg::OnBnClickedButtonAdd()
     GetDlgItemText(IDC_COMBO_TEXT, val);
     VERIFY(!val.IsEmpty());
 
-    LVFINDINFO fi = { LVFI_STRING, static_cast<LPCWSTR>(attrDisplayName) };
-    int idx = _searchFilters.FindItem(&fi);
-    if (-1 == idx)
+    for (int i = 0, numItems = _searchFilters.GetItemCount(); i < numItems; ++i)
     {
-        idx = _searchFilters.InsertItem(_searchFilters.GetItemCount(), attrDisplayName);
+        const auto itemData = static_cast<DWORD>(_searchFilters.GetItemData(i));
+        const auto lattrId = static_cast<adbook::Attributes::AttrId>(LOWORD(itemData));
+        const auto lrule = static_cast<adbook::LdapRequestBuilder::MatchingRule>(HIWORD(itemData));
+        const CString lval = _searchFilters.GetItemText(i, ValueColumnId);
+        if (lattrId == attrId && lrule == rule && !lval.CompareNoCase(val)) {
+            // duplicate found.
+            return;
+        }
     }
-    else
-    {
-        _searchFilters.SetItemText(idx, 0, attrDisplayName);
-    }
+
+    const int idx = _searchFilters.InsertItem(_searchFilters.GetItemCount(), attrDisplayName);
     VERIFY(_searchFilters.SetItemText(idx, ConditionColumnId, conditionDisplayName));
     VERIFY(_searchFilters.SetItemText(idx, ValueColumnId, val));
     const DWORD itemData = MAKELONG(attrId, rule);
@@ -693,7 +696,7 @@ void CAdBookDlg::OnBnClickedButtonFind()
     }
     catch (const adbook::Error & e)
     {
-        AfxMessageBox(e.What().c_str(), MB_ICONERROR);
+        AfxMessageBox(e.What(), MB_ICONERROR);
     }
     catch (const std::exception &)
     {
@@ -788,23 +791,33 @@ std::wstring CAdBookDlg::ConstructLdapRequest()
     auto & attributes = adbook::Attributes::GetInstance();
     adbook::LdapRequestBuilder lr;
     const int itemCount = _searchFilters.GetItemCount();
+
     for (int i = 0; i < itemCount; ++i)
     {
         const auto itemData = static_cast<DWORD>(_searchFilters.GetItemData(i));
         const auto id = static_cast<adbook::Attributes::AttrId>(LOWORD(itemData));
-        const auto mr = static_cast<adbook::LdapRequestBuilder::MatchingRule>(HIWORD(itemData));
-        const CString val = _searchFilters.GetItemText(i, ValueColumnId);
         if (id == AllAttributes)
         {
+            const auto mr = static_cast<adbook::LdapRequestBuilder::MatchingRule>(HIWORD(itemData));
+            const CString val = _searchFilters.GetItemText(i, ValueColumnId);
             const auto attrNames = attributes.GetLdapAttrNames();
             for (const auto & ii : attrNames)
             {
-                lr.AddRule(ii, mr, static_cast<PCWSTR>(val));
+                if (attributes.IsEditableString(attributes.GetAttrId(ii.c_str()))) {
+                    lr.AddRule(ii, mr, static_cast<PCWSTR>(val));
+                }
             }
             lr.AddOR();
         }
-        else
+    }
+    for (int i = 0; i < itemCount; ++i)
+    {
+        const auto itemData = static_cast<DWORD>(_searchFilters.GetItemData(i));
+        const auto id = static_cast<adbook::Attributes::AttrId>(LOWORD(itemData));
+        if (id != AllAttributes)
         {
+            const auto mr = static_cast<adbook::LdapRequestBuilder::MatchingRule>(HIWORD(itemData));
+            const CString val = _searchFilters.GetItemText(i, ValueColumnId);
             lr.AddRule(id, mr, static_cast<PCWSTR>(val));
         }
     }
@@ -925,7 +938,7 @@ LRESULT CAdBookDlg::OnUmStop(WPARAM, LPARAM)
     }
     catch (const adbook::Error & e)
     {
-        AfxMessageBox(e.What().c_str(), MB_ICONERROR);
+        AfxMessageBox(e.What(), MB_ICONERROR);
     }
     catch (const std::exception & )
     {
@@ -1045,6 +1058,9 @@ void CAdBookDlg::OnLvnGetdispinfoListResults(NMHDR *pNMHDR, LRESULT *pResult)
         if (person.IsAttributeSet(attrName))
         {
             StringCchCopyW(pDispInfo->item.pszText, pDispInfo->item.cchTextMax, person.GetStringAttr(attrName).c_str());
+        }
+        else {
+            StringCchCopyW(pDispInfo->item.pszText, pDispInfo->item.cchTextMax, L"");
         }
     }
     *pResult = 0;
@@ -1237,7 +1253,7 @@ void CAdBookDlg::DisplaySvAttrEditor(CListCtrl & personDetails)
         return;
     }
     std::unique_lock<decltype(_peopleMutex)> lg(_peopleMutex);
-    auto & person = _people.at(boost::numeric_cast<size_t>(selPerson));
+    auto & person = _people.at(static_cast<size_t>(selPerson));
     SvAttrEditor sae(person, aid, this);
     if (sae.DoModal() != IDOK)
     {
@@ -1255,7 +1271,7 @@ void CAdBookDlg::DisplaySvAttrEditor(CListCtrl & personDetails)
     }
     catch (const adbook::Error & e)
     {
-        AfxMessageBox(e.What().c_str(), MB_ICONERROR);
+        AfxMessageBox(e.What(), MB_ICONERROR);
         return;
     }
     catch (const std::exception &)
@@ -1326,7 +1342,7 @@ void CAdBookDlg::OnSelectPhoto()
     try
     {
         std::lock_guard<decltype(_peopleMutex)> lk(_peopleMutex);
-        auto & person = _people.at(boost::numeric_cast<size_t>(selPerson));
+        auto & person = _people.at(static_cast<size_t>(selPerson));
         const auto dn = person.GetDn();
         const auto attrName = attributes.GetLdapAttrName(adbook::Attributes::ThumbnailPhoto);
         CString confirm;
@@ -1343,7 +1359,7 @@ void CAdBookDlg::OnSelectPhoto()
     }
     catch (const adbook::Error & e)
     {
-        AfxMessageBox(e.What().c_str(), MB_ICONERROR);
+        AfxMessageBox(e.What(), MB_ICONERROR);
     }
     catch (const std::exception &)
     {
@@ -1363,7 +1379,7 @@ void CAdBookDlg::OnClearPhoto()
     try
     {
         std::lock_guard<decltype(_peopleMutex)> lk(_peopleMutex);
-        auto & person = _people.at(boost::numeric_cast<size_t>(selPerson));
+        auto & person = _people.at(static_cast<size_t>(selPerson));
         const auto dn = person.GetDn();
         auto connector = _adFactory->CreateConnector();
 
@@ -1376,7 +1392,7 @@ void CAdBookDlg::OnClearPhoto()
     }
     catch (const adbook::Error & e)
     {
-        AfxMessageBox(e.What().c_str(), MB_ICONERROR);
+        AfxMessageBox(e.What(), MB_ICONERROR);
     }
     catch (const std::exception &)
     {

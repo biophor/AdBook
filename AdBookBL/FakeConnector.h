@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,17 +29,12 @@ namespace adbook
 class ADBOOKBL_API FakeConnector : public AbstractAdConnector
 {
 public:
-
     virtual ~FakeConnector() override;
     void Connect(const ConnectionParams & connectionParams) override;
     void Connect(const ConnectionParams & connectionSettings, const std::wstring & distinguishedName) override;
     void Disconnect() override;
     bool IsConnected() const override;
 
-    std::wstring GetLdapPath() override;
-    std::wstring GetRDN() override;
-
-    IDirectoryObjectPtr GetDirectoryObject() const override;
     void Rename(const std::wstring & newName) override;
     void UploadStringAttr(const std::wstring & attrName, const std::wstring & attrVal) override;
     std::wstring DownloadStringAttr(const std::wstring & attrName) override;

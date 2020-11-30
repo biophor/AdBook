@@ -97,7 +97,7 @@ namespace WfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0, 19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("200, 200")]
         public global::System.Drawing.Point MainFormLocation {
             get {
                 return ((global::System.Drawing.Point)(this["MainFormLocation"]));
@@ -109,7 +109,7 @@ namespace WfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("300, 300")]
+        [global::System.Configuration.DefaultSettingValueAttribute("600, 400")]
         public global::System.Drawing.Size MainFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["MainFormSize"]));
@@ -133,7 +133,7 @@ namespace WfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("136")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int MainFormSplitterDistance {
             get {
                 return ((int)(this["MainFormSplitterDistance"]));
@@ -145,7 +145,7 @@ namespace WfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("286")]
+        [global::System.Configuration.DefaultSettingValueAttribute("400")]
         public int MainFormBottomSplitterDistance {
             get {
                 return ((int)(this["MainFormBottomSplitterDistance"]));
@@ -157,7 +157,7 @@ namespace WfAdBook.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("128")]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
         public int MainFormBottomRightSplitterDistance {
             get {
                 return ((int)(this["MainFormBottomRightSplitterDistance"]));

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -57,7 +57,7 @@ QVariant ContactListModel::data(const QModelIndex & index, int nRole) const
 
 int ContactListModel::rowCount(const QModelIndex & ) const
 {
-    return  boost::numeric_cast<int>(_contacts.size());
+    return  static_cast<int>(_contacts.size());
 }
 
 int ContactListModel::columnCount(const QModelIndex & ) const
@@ -89,9 +89,10 @@ bool ContactListModel::insertRows(int row, int count, const QModelIndex & parent
         QMutexLocker locker(&_contactsMutex);
         _contacts.insert(_contacts.begin()+row, count, adbook::AdPersonDesc());
     }
-    catch (const std::exception &)
+    catch (const std::exception & e)
     {
         endInsertRows();
+        MY_TRACE("%s %s", __FUNCTION__, e.what());
         return false;
     }
     endInsertRows();
@@ -116,9 +117,10 @@ bool ContactListModel::removeRows(int row, int count, const QModelIndex & parent
             _contacts.erase(_contacts.cbegin() + row, _contacts.cbegin() + row + count);
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
         endRemoveRows();
+        MY_TRACE("%s %s", __FUNCTION__, e.what());
         return false;
     }
     endRemoveRows();
@@ -129,7 +131,7 @@ void ContactListModel::AddContacts(std::list<adbook::AdPersonDesc> && contacts)
 {
     QMutexLocker locker(&_contactsMutex);
     int endPos = rowCount();
-    insertRows(endPos, boost::numeric_cast<int>(contacts.size()));
+    insertRows(endPos, static_cast<int>(contacts.size()));
     for (auto & item : contacts) {
         _contacts.at(endPos++) = std::move(item);
     }
@@ -166,13 +168,13 @@ void ContactListModel::sort(int column, Qt::SortOrder order)
 adbook::AdPersonDesc ContactListModel::GetContact(int row) const
 {
     QMutexLocker locker(&_contactsMutex);
-    return _contacts.at(boost::numeric_cast<size_t>(row));
+    return _contacts.at(static_cast<size_t>(row));
 }
 
 void ContactListModel::SetContact(int r, const adbook::AdPersonDesc & apd)
 {
     QMutexLocker locker(&_contactsMutex);
-    _contacts.at(boost::numeric_cast<size_t>(r)) = apd;
+    _contacts.at(static_cast<size_t>(r)) = apd;
     QModelIndex topLeft = createIndex(r, 0), bottomRight = createIndex(r, columnCount() - 1);
     emit dataChanged(topLeft, bottomRight);
 }

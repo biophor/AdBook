@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -54,10 +54,10 @@ void NativeAdSearcherPtr::ReleaseNativeResources()
             handle = IntPtr::Zero;
         }
         catch (const adbook::Error & e) {
-            OutputDebugStringW(e.What().c_str());
+            MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
         }
         catch (const std::exception & e) {
-            OutputDebugStringA(e.what());
+            MY_TRACE("%s %s", __FUNCTION__, e.what());
         }
     }
 }
@@ -138,9 +138,11 @@ void AdSearchTask::TaskProc(Object^ arg)
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew AdSearchTaskError(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew AdSearchTaskError(gcnew String(e.What()));
     }
     catch (const std::exception & e) {
+        MY_TRACE("%s %s", __FUNCTION__, e.what());
         throw gcnew System::Exception(gcnew String(e.what()));
     }
 
@@ -156,7 +158,8 @@ void AdSearchTask::Cancel()
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew System::Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew System::Exception(gcnew String(e.What()));
     }
 }
 
@@ -184,7 +187,8 @@ void AdSearchTask::EnsureSearchIsNotRunning()
         GC::KeepAlive(this);
     }
     catch (const adbook::Error & e) {
-        throw gcnew System::Exception(gcnew String(e.What().c_str()));
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        throw gcnew System::Exception(gcnew String(e.What()));
     }
 }
 

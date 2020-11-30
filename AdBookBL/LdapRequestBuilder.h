@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -26,23 +26,28 @@ namespace adbook
 class ADBOOKBL_API LdapRequestBuilder final
 {
 public:
-    LdapRequestBuilder();
-    ~LdapRequestBuilder();
-
-    enum MatchingRule
-    {
+    enum MatchingRule {
         InvalidMatchingRule = 0, ExactMatch, Contains, BeginWith, EndWith
     };
 
-    void AddRule(const Attributes::AttrId attrId, const MatchingRule rule, const std::wstring & value);
-    void AddRule(const std::wstring & attrName, const MatchingRule rule, const std::wstring & value);
+    void AddRule(
+        const Attributes::AttrId attrId,
+        const MatchingRule rule,
+        const std::wstring & value
+    );
+
+    void AddRule(
+        const std::wstring & attrName,
+        const MatchingRule rule,
+        const std::wstring & value
+    );
+
     void AddOR();  // before: (x=1)(y=2)    after: (|(x=1)(y=2))
     void AddAND(); // before: (x=1)(y=2)    after: (&(x=1)(y=2))
     void AddNOT(); // before: (x=1)         after: (!(x=1))
+    void AddObjectCategoryRule();
     std::wstring Get() const;
-
     void Clear();
-
 private:
     std::wstring request_;
 };

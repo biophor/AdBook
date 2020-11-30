@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -35,7 +35,7 @@ using adbookcli;
 namespace WfAdBook
 {
     public partial class SettingsForm : Form //-V3073
-    {        
+    {
         private FontEntryItem ContactDetailsEntryItem { get; set; }
         private FontEntryItem ContactListEntryItem { get; set; }
         private FontEntryItem FilterListEntryItem { get; set; }
@@ -66,7 +66,7 @@ namespace WfAdBook
         public SettingsForm()
         {
             InitializeComponent();
-            Location = Properties.Settings.Default.SettingsFormLocation;            
+            Location = Properties.Settings.Default.SettingsFormLocation;
             LoadSettings();
             Disposed += SettingsForm_Disposed;
         }
@@ -106,7 +106,7 @@ namespace WfAdBook
             if (!VerifyConnectionSettings()) {
                 return;
             }
-            SaveSettings();            
+            SaveSettings();
             Close();
         }
         SecureString StringToSecureString(string s)
@@ -131,11 +131,11 @@ namespace WfAdBook
         private void SaveConnectionSettings()
         {
             using (ConnectionSettings cs = new ConnectionSettings()) {
-                cs.Dc = tboxDc.Text;
+                cs.Address = tboxDc.Text;
                 cs.Login = tboxUserName.Text;
                 cs.Password = StringToSecureString(tboxPassword.Text);
                 cs.UseCurrentUserCredentials = rbuttonCurUserCred.Checked;
-                cs.UseDomainYouAreLoggedIn = rbuttonDefaultDomain.Checked;
+                cs.ConnectDomainYouLoggedIn = rbuttonDefaultDomain.Checked;
                 cs.Save();
             }
         }
@@ -154,8 +154,8 @@ namespace WfAdBook
         }
         private void LoadConnectionSettings()
         {
-            using (ConnectionSettings cs = new ConnectionSettings()) {                
-                tboxDc.Text = cs.Dc;
+            using (ConnectionSettings cs = new ConnectionSettings()) {
+                tboxDc.Text = cs.Address;
                 tboxUserName.Text = cs.Login;
                 if (cs.Password.Length > 0) {
                     tboxPassword.Text = SecureStringToString(cs.Password);
@@ -165,8 +165,8 @@ namespace WfAdBook
                 }
                 rbuttonCurUserCred.Checked = cs.UseCurrentUserCredentials;
                 rbuttonSpecifyCred.Checked = !cs.UseCurrentUserCredentials;
-                rbuttonDefaultDomain.Checked = cs.UseDomainYouAreLoggedIn;
-                rbuttonSpecifyDomain.Checked = !cs.UseDomainYouAreLoggedIn;
+                rbuttonDefaultDomain.Checked = cs.ConnectDomainYouLoggedIn;
+                rbuttonSpecifyDomain.Checked = !cs.ConnectDomainYouLoggedIn;
             }
         }
         private void LoadFontSettings()
@@ -180,10 +180,10 @@ namespace WfAdBook
             ContactListEntryItem = new FontEntryItem(
                 fontSettings.ContactListFont,
                 Properties.Resources.ContactListFontEntry
-            );            
+            );
             ContactDetailsEntryItem = new FontEntryItem(
                 fontSettings.ContactDetailsFont,
-                Properties.Resources.ContactDetailsFontEntry                
+                Properties.Resources.ContactDetailsFontEntry
             );
             lbox.Items.Add(FilterListEntryItem);
             lbox.Items.Add(ContactListEntryItem);
@@ -208,7 +208,7 @@ namespace WfAdBook
             tboxDc.Enabled = rbuttonSpecifyDomain.Checked;
         }
         private void rbuttonSpecifyCred_CheckedChanged(object sender, EventArgs e)
-        {            
+        {
             labelPassword.Enabled = rbuttonSpecifyCred.Checked;
             tboxPassword.Enabled = rbuttonSpecifyCred.Checked;
             labelUserName.Enabled = rbuttonSpecifyCred.Checked;
@@ -220,11 +220,11 @@ namespace WfAdBook
                 return;
             }
             using (ConnectionSettings cs = new ConnectionSettings()) {
-                cs.Dc = tboxDc.Text;
+                cs.Address = tboxDc.Text;
                 cs.Login = tboxUserName.Text;
                 cs.Password = StringToSecureString(tboxPassword.Text);
                 cs.UseCurrentUserCredentials = rbuttonCurUserCred.Checked;
-                cs.UseDomainYouAreLoggedIn = rbuttonDefaultDomain.Checked;
+                cs.ConnectDomainYouLoggedIn = rbuttonDefaultDomain.Checked;
 
                 using (var adc = adbookcli.AdAccessFactory.GetInstance().CreateConnector()) {
                     try {
@@ -258,7 +258,7 @@ namespace WfAdBook
                 return;
             }
             labelFontPreview.Font = selItem.EntryFont;
-            labelFontPreview.Text = selItem.EntryFont.FontFamily.Name + " " + 
+            labelFontPreview.Text = selItem.EntryFont.FontFamily.Name + " " +
                 selItem.EntryFont.SizeInPoints.ToString();
         }
         private void buttonSelectFont_Click(object sender, EventArgs e)

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -27,10 +27,19 @@ class ADBOOKBL_API AbstractAdPersonDescKeeper
 {
 public:
     virtual ~AbstractAdPersonDescKeeper() = 0;
-    // to keep separate data for each connection settings
-    virtual void SetNameByConnectionParams(const ConnectionParams & connectionParams) = 0;
-    virtual void Load(std::vector<AdPersonDesc> & ) = 0;
-    virtual void Save(const std::vector<AdPersonDesc> & ) = 0;
+
+    // to keep separate data for different connection settings
+    virtual void SetNameByConnectionParams (
+        const ConnectionParams & connectionParams
+    ) = 0;
+
+    virtual void Load (
+        std::vector<AdPersonDesc> &
+    ) = 0;
+
+    virtual void Save (
+        const std::vector<AdPersonDesc> &
+    ) = 0;
 };
 
 }

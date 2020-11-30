@@ -62,9 +62,6 @@
 #include <Strsafe.h>
 #include <limits.h>
 #include "AdBookBL/export.h"
-#include <boost/numeric/conversion/cast.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/scope_exit.hpp>
 
 #ifdef _UNICODE
 #if defined _M_IX86

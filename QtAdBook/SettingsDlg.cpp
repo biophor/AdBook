@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -112,11 +112,11 @@ void SettingsDlg::OnTestClicked()
     try
     {
         adbook::ConnectionParams connectionParams;
-        connectionParams.SetDomainController(ui.domain->text().trimmed().toStdWString());
+        connectionParams.SetAddress(ui.domain->text().trimmed().toStdWString());
         connectionParams.SetLogin(ui.login->text().trimmed().toStdWString());
         connectionParams.SetPassword(ui.password->text().trimmed().toStdWString());
-        connectionParams.ConnectDomainYouAreLoggedIn(ui.defaultDc->isChecked());
-        connectionParams.UseCurrentUserCredentials(ui.currentUser->isChecked());
+        connectionParams.Set_ConnectDomainYouLoggedIn(ui.defaultDc->isChecked());
+        connectionParams.Set_ConnectAsCurrentUser(ui.currentUser->isChecked());
 
         auto connector = _adFactory->CreateConnector();
         WaitCursor wc;
@@ -153,21 +153,21 @@ void SettingsDlg::LoadWindowSettings()
 void SettingsDlg::ReadSettings()
 {
     adbook::ConnectionParams connectionParams = _appSettings.GetConnectionParams();
-    ui.domain->setText(QString::fromStdWString(connectionParams.GetDomainController()));
+    ui.domain->setText(QString::fromStdWString(connectionParams.GetAddress()));
     ui.login->setText(QString::fromStdWString(connectionParams.GetLogin()));
-    ui.defaultDc->setChecked(connectionParams.CurrentDomain());
-    ui.currentUser->setChecked(connectionParams.IsCurrentUserCredentialsUsed());
+    ui.defaultDc->setChecked(connectionParams.Get_ConnectDomainYouLoggedIn());
+    ui.currentUser->setChecked(connectionParams.Get_ConnectAsCurrentUser());
     ui.password->setText(QString::fromStdWString(connectionParams.GetPassword()));
 }
 
 void SettingsDlg::WriteSettings()
 {
     adbook::ConnectionParams connectionParams;
-    connectionParams.SetDomainController(ui.domain->text().trimmed().toStdWString());
+    connectionParams.SetAddress(ui.domain->text().trimmed().toStdWString());
     connectionParams.SetLogin(ui.login->text().trimmed().toStdWString());
     connectionParams.SetPassword(ui.password->text().trimmed().toStdWString());
-    connectionParams.ConnectDomainYouAreLoggedIn(ui.defaultDc->isChecked());
-    connectionParams.UseCurrentUserCredentials(ui.currentUser->isChecked());
+    connectionParams.Set_ConnectDomainYouLoggedIn(ui.defaultDc->isChecked());
+    connectionParams.Set_ConnectAsCurrentUser(ui.currentUser->isChecked());
     _appSettings.SetConnectionParams(connectionParams);
 }
 

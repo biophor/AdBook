@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -22,9 +22,6 @@ You should have received a copy of the GNU General Public License along with
 #include "stdafx.h"
 #include "AdSearcher.h"
 #include "AdConnector.h"
-#include "FakeSearcher.h"
-#include "FakeConnector.h"
-#include "FakeDataSource.h"
 #include "Attributes.h"
 #include "AdPersonDescSqliteKeeper.h"
 #include "AbstractAdAccessFactory.h"
@@ -65,10 +62,6 @@ public:
 
     virtual ~RealFactory() = default;
 
-    ProductsType GetProductType() const override {
-        return ProductsType::Real;
-    }
-
     RealFactory(const RealFactory & factory) = delete;
     RealFactory(RealFactory && factory) = delete;
 
@@ -78,88 +71,25 @@ private:
     std::shared_ptr<AdPersonDescSqliteKeeper> _adPersonDescKeeper;
 };
 
+std::shared_ptr<AbstractAdAccessFactory> globalFactory;
 
-class FakeFactory: public AbstractAdAccessFactory
+std::shared_ptr<AbstractAdAccessFactory> GetAdAccessFactory()
 {
-public:
-    FakeFactory() {
-        bool fakeData = true;
-        _adPersonDescKeeper = std::make_shared<AdPersonDescSqliteKeeper>(fakeData);
+    if (!globalFactory) {
+        globalFactory = std::make_shared< RealFactory>();
     }
-    std::unique_ptr<AbstractAdConnector> CreateConnector() override {
-        return std::make_unique<FakeConnector>();
-    }
-    std::unique_ptr<AbstractAdSearcher> CreateSearcher() override {
-        return std::make_unique<FakeSearcher>();
-    }
-    std::shared_ptr<AbstractAdPersonDescKeeper> GetAdPersonDescKeeper() override {
-        return _adPersonDescKeeper;
-    }
-
-    AbstractAdConnector * CreateConnectorRawPtr() override {
-        return new FakeConnector();
-    }
-
-    AbstractAdSearcher * CreateSearcherRawPtr() override {
-        return new FakeSearcher();
-    }
-
-    AbstractAdPersonDescKeeper * GetAdPersonDescKeeperRawPtr() override {
-        static AdPersonDescSqliteKeeper sqliteKeeper(true);
-        return &sqliteKeeper;
-    }
-
-    virtual ~FakeFactory() {
-        FakeDataSource::GetDataSource().PreExitCleanup();
-    }
-
-    ProductsType GetProductType() const override {
-        return ProductsType::Fake;
-    }
-
-    FakeFactory(const FakeFactory & factory) = delete;
-    FakeFactory(FakeFactory && factory) = delete;
-
-    FakeFactory & operator = (const FakeFactory & factory) = delete;
-    FakeFactory & operator = (FakeFactory && factory) = delete;
-private:
-    std::shared_ptr<AdPersonDescSqliteKeeper> _adPersonDescKeeper;
-};
-
-std::shared_ptr<AbstractAdAccessFactory> CreateAdAccessFactory(
-    AbstractAdAccessFactory::ProductsType factoryPurpose
-)
-{
-    switch (factoryPurpose)
-    {
-    case AbstractAdAccessFactory::ProductsType::Real:
-        return std::make_shared<RealFactory>();
-
-    case AbstractAdAccessFactory::ProductsType::Fake:
-        return std::make_unique<FakeFactory>();
-
-    default:
-        throw std::invalid_argument("invalid factoryPurpose");
-    }
+    return globalFactory;
 }
 
-AbstractAdAccessFactory * CreateAdAccessFactoryRawPtr(
-    AbstractAdAccessFactory::ProductsType factoryPurpose
-)
+AbstractAdAccessFactory * CreateAdAccessFactoryRawPtr()
 {
-    switch (factoryPurpose)
-    {
-    case AbstractAdAccessFactory::ProductsType::Real:
-        return new RealFactory();
-
-    case AbstractAdAccessFactory::ProductsType::Fake:
-        return new FakeFactory();
-
-    default:
-        throw std::invalid_argument("invalid factoryPurpose");
-    }
+    return new RealFactory();
 }
 
+void SetAdAccessFactory( std::shared_ptr<AbstractAdAccessFactory> factory )
+{
+    globalFactory = factory;
+}
 
 }   // namespace adbook
 

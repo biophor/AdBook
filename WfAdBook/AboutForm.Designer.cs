@@ -51,10 +51,10 @@
             this.label1.Location = new System.Drawing.Point(31, 9);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(215, 39);
+            this.label1.Size = new System.Drawing.Size(218, 39);
             this.label1.TabIndex = 3;
-            this.label1.Text = "Active Directory Contact Book, Version 1.4\r\nCopyright(C) 2015-2017 Goncharov Andr" +
-    "ei\r\nThe latest release can be downloaded here:";
+            this.label1.Text = "Active Directory Contact Book, Version 1.4.4\r\nCopyright(C) 2015-2017 Goncharov An" +
+    "drei\r\nThe latest release can be downloaded here:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // linkLabel

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -72,33 +72,33 @@ Attributes::Attributes()
     std::call_once(AttributeTablesPopulated, &Attributes::PopulateTables);
 }
 
-bool Attributes::IsString(const AttrId id) const
+bool Attributes::IsString( const AttrId id ) const
 {
     return mainAttrInfo_.at(id).isString;
 }
 
-bool Attributes::IsEditable(const AttrId id) const
+bool Attributes::IsEditable( const AttrId id ) const
 {
     return mainAttrInfo_.at(id).isEditable;
 }
 
-bool Attributes::IsEditableString(const AttrId id) const
+bool Attributes::IsEditableString( const AttrId id ) const
 {
     const auto & x = mainAttrInfo_.at(id);
     return x.isEditable && x.isString;
 }
 
-std::wstring Attributes::GetLdapAttrName(const AttrId id) const
+std::wstring Attributes::GetLdapAttrName( const AttrId id ) const
 {
     return std::wstring(mainAttrInfo_.at(id).ldapAttrName);
 }
 
-const wchar_t * Attributes::GetLdapAttrNamePtr(const AttrId id) const
+const wchar_t * Attributes::GetLdapAttrNamePtr( const AttrId id ) const
 {
     return mainAttrInfo_.at(id).ldapAttrName;
 }
 
-size_t Attributes::GetAttrMaxLength(const AttrId id) const
+size_t Attributes::GetAttrMaxLength( const AttrId id ) const
 {
     return mainAttrInfo_.at(id).maxLen;
 }
@@ -129,7 +129,7 @@ size_t Attributes::GetBinaryAttrMaxLength() const
     return maxLen;
 }
 
-std::wstring Attributes::GetAttrOid(const AttrId id) const
+std::wstring Attributes::GetAttrOid( const AttrId id ) const
 {
     return std::wstring(mainAttrInfo_.at(id).attrOid);
 }
@@ -139,7 +139,7 @@ size_t Attributes::GetAttrCount() const noexcept
     return mainAttrInfo_.size();
 }
 
-std::wstring Attributes::GetUiAttrName(const AttrId id) const
+std::wstring Attributes::GetUiAttrName( const AttrId id ) const
 {
     wchar_t buf[256];
     if (!LoadStringW(moduleHandle, mainAttrInfo_.at(id).uiIds, buf, _countof(buf)))
@@ -149,9 +149,11 @@ std::wstring Attributes::GetUiAttrName(const AttrId id) const
     return buf;
 }
 
-Attributes::AttrId Attributes::GetAttrId(const wchar_t * attrName) const
+Attributes::AttrId Attributes::GetAttrId( const wchar_t * attrName ) const
 {
-    BOOST_ASSERT(attrName != nullptr);
+    if (!attrName) {
+        throw HrError(E_INVALIDARG, L"attrName is nullptr", __FUNCTIONW__);
+    }
     return nameToIdMap_.at(attrName);
 }
 
@@ -178,14 +180,16 @@ const std::vector<Attributes::AttrId> & Attributes::GetAttrIds() const
     return attrIds_;
 }
 
-bool Attributes::IsAttrSupported(const AttrId attrId) const noexcept
+bool Attributes::IsAttrSupported( const AttrId attrId ) const noexcept
 {
     return (mainAttrInfo_.find(attrId) != mainAttrInfo_.end());
 }
 
-bool Attributes::IsAttrSupported(const wchar_t * ldapAttrName) const
+bool Attributes::IsAttrSupported( const wchar_t * ldapAttrName ) const
 {
-    BOOST_ASSERT(ldapAttrName != nullptr);
+    if (!ldapAttrName) {
+        throw HrError(E_INVALIDARG, L"ldapAttrName is nullptr", __FUNCTIONW__);
+    }
     return (nameToIdMap_.find(ldapAttrName) != nameToIdMap_.end());
 }
 

@@ -220,13 +220,13 @@
     <value>Authentication</value>
   </data>
   <data name="SettingsWindow_ConnectDefault" xml:space="preserve">
-    <value>Connect to the domain you logged on to</value>
+    <value>Connect the domain you logged on to</value>
   </data>
   <data name="SettingsWindow_ConnectionGrp" xml:space="preserve">
     <value>Connection</value>
   </data>
   <data name="SettingsWindow_ConnectTo" xml:space="preserve">
-    <value>_Connect to a specifiec domain:</value>
+    <value>_Connect the following domain:</value>
   </data>
   <data name="SettingsWindow_CurUser" xml:space="preserve">
     <value>Use the current user's credentials</value>
@@ -269,5 +269,14 @@
   </data>
   <data name="AppTitleForMessageBox" xml:space="preserve">
     <value>AdBook</value>
+  </data>
+  <data name="PersonEditorWindow_ClearPhoto" xml:space="preserve">
+    <value>Clear the photo</value>
+  </data>
+  <data name="Filter_Names" xml:space="preserve">
+    <value>Names: Common name, Given name, Surname, Display name</value>
+  </data>
+  <data name="Filter_Phones" xml:space="preserve">
+    <value>Phones: Home phone, work phone, mobile phone</value>
   </data>
 </root>

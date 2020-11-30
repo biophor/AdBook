@@ -2,10 +2,10 @@
 <!--Compatible with WiX Toolset v3.10-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
-  <?define MySource = "../WinFormsVersionSetup/bin/x64/Release/" ?>  
-	<Bundle Name="Active Directory Contact Book" 
-          Version="1.4.2.0" 
-          Manufacturer="Andrei Goncharov" 
+  <?define MySource = "../WinFormsVersionSetup/bin/x64/Release/" ?>
+	<Bundle Name="Active Directory Contact Book"
+          Version="1.4.4.0"
+          Manufacturer="Andrei Goncharov"
           UpgradeCode="8879000c-dd5f-4495-bc6e-ad4487f17584">
 		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
           <bal:WixStandardBootstrapperApplication
@@ -18,16 +18,16 @@
       <PackageGroupRef Id="NetFx452Web"/>
       <PackageGroupRef Id="Windows61KB2999226"/>
       <PackageGroupRef Id="WfAdBook"/>
-      
+
 			<!-- TODO: Define the list of chained packages. -->
 			<!-- <MsiPackage SourceFile="path\to\your.msi" /> -->
 		</Chain>
 	</Bundle>
-  
+
   <Fragment>
     <PackageGroup Id="WfAdBook">
       <MsiPackage
-        SourceFile="$(var.MySource)WfAdBookSetup.msi"        
+        SourceFile="$(var.MySource)WfAdBookSetup.msi"
         InstallCondition="VersionNT64 >= v6.1" />
     </PackageGroup>
     <PackageGroup Id="Windows61KB2999226">

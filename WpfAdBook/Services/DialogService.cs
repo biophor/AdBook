@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -80,6 +80,9 @@ namespace WpfAdBook.Services
         {
             _editPersonWindow = new EditPersonWindow();
             _editPersonWindow.Owner = Application.Current.MainWindow;
+
+            RestoreEditPersonWindowState();
+
             _editPersonWindow.ShowDialog();
         }
 
@@ -89,6 +92,26 @@ namespace WpfAdBook.Services
                 _editPersonWindow.Close();
                 _editPersonWindow = null;
             }
+        }
+
+        public void SaveEditPersonWindowState()
+        {
+            _settingService.EditPersonWndSize = new System.Drawing.Size(
+                    (int)_editPersonWindow.Width, (int)_editPersonWindow.Height
+                    );
+
+            _settingService.EditPersonWndPos = new System.Drawing.Point(
+                (int)_editPersonWindow.Left, (int)_editPersonWindow.Top
+                );
+        }
+
+        public void RestoreEditPersonWindowState()
+        {
+            _editPersonWindow.Width = _settingService.EditPersonWndSize.Width;
+            _editPersonWindow.Height = _settingService.EditPersonWndSize.Height;
+
+            _editPersonWindow.Left = _settingService.EditPersonWndPos.X;
+            _editPersonWindow.Top = _settingService.EditPersonWndPos.Y;
         }
 
         public string SelectPhoto()

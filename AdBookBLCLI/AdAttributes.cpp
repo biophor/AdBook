@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -41,10 +41,10 @@ void NativeAttributesPtr::ReleaseNativeResources()
             }
         }
         catch (const adbook::Error & e) {
-            OutputDebugStringW(e.What().c_str());
+            MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
         }
         catch (const std::exception & e) {
-            OutputDebugStringA(e.what());
+            MY_TRACE("%s %s", __FUNCTION__, e.what());
         }
     }
 }
@@ -66,7 +66,7 @@ static AdAttributes::AdAttributes()
         String^ displayName = gcnew String(attributes.GetUiAttrName(attrId).c_str());
         bool isReadOnly = !attributes.IsEditable(attrId);
         bool isString = attributes.IsString(attrId);
-        Int32 maxLen = boost::numeric_cast<Int32>(attributes.GetAttrMaxLength(attrId));
+        Int32 maxLen = static_cast<Int32>(attributes.GetAttrMaxLength(attrId));
         AdAttribute attr(id, oid, ldapName, displayName, isReadOnly, isString, maxLen);
         dict[id] = %attr;
         dict2[ldapName] = %attr;
@@ -74,14 +74,14 @@ static AdAttributes::AdAttributes()
     _attrIds = ids;
     _attrMapById = dict;
     _attrMapByName = dict2;
-    _textAttrMaxLength = boost::numeric_cast<Int32>(attributes.GetTextAttrMaxLength());
-    _binaryAttrMaxLength = boost::numeric_cast<Int32>(attributes.GetBinaryAttrMaxLength());
+    _textAttrMaxLength = static_cast<Int32>(attributes.GetTextAttrMaxLength());
+    _binaryAttrMaxLength = static_cast<Int32>(attributes.GetBinaryAttrMaxLength());
 
     List<String^>^ names = gcnew List<String^>();
     for (const auto & attrName : attributes.GetLdapAttrNames()) {
         names->Add(gcnew String(attrName.c_str()));
     }
-    _ldapAttrNames = names;        
+    _ldapAttrNames = names;
 }
 
 

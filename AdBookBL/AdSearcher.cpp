@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License along with
 
 #include "stdafx.h"
 #include "error.h"
+#include "debug.h"
 #include "shared.h"
 #include "AdSearcher.h"
 
@@ -37,69 +38,96 @@ struct AdSearcherData
     AdSearcher::OnNewItem onNewItem;
     AdSearcher::OnStart onStart;
     AdSearcher::OnStop onStop;
+    AdSearcher::OnError onError;
 };
 
-AdSearcher::AdSearcher() : dataPtr_{ new AdSearcherData() }
-{
+AdSearcher::AdSearcher() : _dataPtr{ new AdSearcherData() }
+{}
 
-}
+AdSearcher::~AdSearcher() = default;
 
-AdSearcher::~AdSearcher()
+void AdSearcher::SetCallbacks (
+    const OnNewItem & onNewItem,
+    const OnStart & onStart,
+    const OnStop & onStop
+)
 {
-}
-
-void AdSearcher::SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop)
-{
-    if (IsStarted())
-    {
+    if (IsStarted()) {
         HR_ERROR(E_UNEXPECTED);
     }
-    dataPtr_->onNewItem = onNewItem;
-    dataPtr_->onStart = onStart;
-    dataPtr_->onStop = onStop;
+    _dataPtr->onNewItem = onNewItem;
+    _dataPtr->onStart = onStart;
+    _dataPtr->onStop = onStop;
 }
 
-void AdSearcher::Start(const std::wstring & ldapRequest, const ConnectionParams & connectionParams)
+void AdSearcher::SetCallbacks (
+    const OnNewItem & onNewItem,
+    const OnStart & onStart,
+    const OnStop & onStop,
+    const OnError & onError
+)
+{
+    if (IsStarted()) {
+        HR_ERROR(E_UNEXPECTED);
+    }
+    _dataPtr->onNewItem = onNewItem;
+    _dataPtr->onStart = onStart;
+    _dataPtr->onStop = onStop;
+    _dataPtr->onError = onError;
+}
+
+void AdSearcher::Start (
+    const std::wstring & ldapRequest,
+    const ConnectionParams & connectionParams
+)
 {
     if (IsStarted())
     {
         Stop();
         Wait();
     }
-    dataPtr_->connectionParams = connectionParams;
-    dataPtr_->dirSearchPtr = nullptr;
-    dataPtr_->searchHandle = nullptr;
+    _dataPtr->connectionParams = connectionParams;
+    _dataPtr->dirSearchPtr = nullptr;
+    _dataPtr->searchHandle = nullptr;
+    _dataPtr->stopFlag = false;
 
-    dataPtr_->stopFlag = false;
-    dataPtr_->searchResultFuture = std::async(std::launch::async, &AdSearcher::ThreadProc, this, dataPtr_->connectionParams, ldapRequest);
+    _dataPtr->searchResultFuture = std::async (
+        std::launch::async,
+        &AdSearcher::ThreadProc,
+        this,
+        _dataPtr->connectionParams,
+        ldapRequest
+    );
 }
 
 bool AdSearcher::IsStarted() const
 {
-    if (dataPtr_->searchResultFuture.valid())
-    {
-        return (dataPtr_->searchResultFuture.wait_for(std::chrono::seconds(0)) == std::future_status::timeout);
+    if (_dataPtr->searchResultFuture.valid()) {
+        return (_dataPtr->searchResultFuture.wait_for (
+            std::chrono::seconds(0)) == std::future_status::timeout
+            );
     }
     return false;
 }
 
 void AdSearcher::Stop()
 {
-    if (IsStarted() && !(dataPtr_->stopFlag))
+    if (IsStarted() && !(_dataPtr->stopFlag))
     {
-        dataPtr_->stopFlag = true;
-        std::lock_guard<std::recursive_mutex> guard(dataPtr_->searchHandleMutex);
-        if (dataPtr_->dirSearchPtr && dataPtr_->searchHandle)
+        _dataPtr->stopFlag = true;
+
+        std::lock_guard<std::recursive_mutex> guard(_dataPtr->searchHandleMutex);
+
+        if (_dataPtr->dirSearchPtr && _dataPtr->searchHandle)
         {
-            HRESULT hr = dataPtr_->dirSearchPtr->AbandonSearch(dataPtr_->searchHandle);
+            HRESULT hr = _dataPtr->dirSearchPtr->AbandonSearch(_dataPtr->searchHandle);
             if (HRESULT_FROM_WIN32(ERROR_GEN_FAILURE) == hr)
             {
                 // not an error.
                 return;
             }
-            if (FAILED(hr))
-            {
-                HR_ERROR(hr);
+            if (FAILED(hr)) {
+                throw HrError(hr, L"IDirectorySearch::AbandonSearch() failed.", __FUNCTIONW__);
             }
         }
     }
@@ -107,11 +135,19 @@ void AdSearcher::Stop()
 
 void AdSearcher::Wait()
 {
-    dataPtr_->searchResultFuture.wait();
+    if (_dataPtr && _dataPtr->searchResultFuture.valid()) {
+        _dataPtr->searchResultFuture.wait();
+    }
 }
 
+void AdSearcher::PropogateSearchException()
+{
+    if (_dataPtr && _dataPtr->searchResultFuture.valid()) {
+        _dataPtr->searchResultFuture.get();
+    }
+}
 
-void AdSearcher::SetupSearchPrefs(IDirectorySearchPtr & dsp)
+void AdSearcher::SetupSearchPrefs( IDirectorySearchPtr & dsp )
 {
     ADSVALUE asyncSearch{};
     asyncSearch.dwType = ADSTYPE_BOOLEAN;
@@ -131,23 +167,25 @@ void AdSearcher::SetupSearchPrefs(IDirectorySearchPtr & dsp)
         { ADS_SEARCHPREF_PAGESIZE, pageSize }
     };
     const HRESULT hr = dsp->SetSearchPreference(&asi[0], _countof(asi));
-    if (FAILED(hr))
-    {
-        throw HrError(hr);
+    if (FAILED(hr)) {
+        throw HrError(hr, L"IDirectorySearch::SetSearchPreference() failed.", __FUNCTIONW__);
     }
     for (const auto & i : asi)
     {
         if (ADS_STATUS_S_OK != i.dwStatus)
         {
-            HR_ERROR(E_UNEXPECTED);
+            throw HrError(E_UNEXPECTED, L"unexpected status.", __FUNCTIONW__);
         }
     }
 }
 
 // creating a list of the pointers to the attr names
-std::vector<WcharBuf> AdSearcher::CreateAttrListToRetrieve(std::vector<wchar_t *> & apv)
+std::vector<WcharBuf> AdSearcher::CreateAttrListToRetrieve(
+    std::vector<wchar_t *> & apv
+)
 {
     apv.clear();
+
     // several adsi functions require writable INput buffers.
     std::vector<WcharBuf> av = Attributes::GetInstance().GetAdsiComplientAttrNames();
 
@@ -160,31 +198,35 @@ std::vector<WcharBuf> AdSearcher::CreateAttrListToRetrieve(std::vector<wchar_t *
         av.push_back(std::move(buf));
     }
 
-    std::for_each(av.begin(), av.end(),
+    std::for_each(
+        av.begin(), av.end(),
         [&apv](WcharBuf & attrName) {
-            BOOST_ASSERT(!attrName.empty());
-            apv.push_back(&attrName[0]);
+            if (!attrName.empty()) {
+                apv.push_back(attrName.data());
+            }
         }
     );
     return av;
 }
 
-void AdSearcher::ExecuteSearch(
+void AdSearcher::ExecuteSearch (
     IDirectorySearchPtr & dsp,
     WcharBuf & searchFilter,
     std::vector<wchar_t *> & attrsToRetrieve,
     ADS_SEARCH_HANDLE & searchHandle
 )
 {
-    HRESULT hr = dsp->ExecuteSearch(&searchFilter[0], &attrsToRetrieve[0],
-        boost::numeric_cast<DWORD>(attrsToRetrieve.size()), &searchHandle);
-    if (FAILED(hr))
-    {
-        HR_ERROR(hr);
+    HRESULT hr = dsp->ExecuteSearch (
+        &searchFilter[0],
+        &attrsToRetrieve[0],
+        static_cast<DWORD>(attrsToRetrieve.size()),
+        &searchHandle
+    );
+    if (FAILED(hr)) {
+        throw HrError( hr, L"ExecuteSearch() failed.", __FUNCTIONW__ );
     }
-    if (nullptr == searchHandle)
-    {
-        HR_ERROR(E_UNEXPECTED);
+    if (nullptr == searchHandle) {
+        throw HrError(E_UNEXPECTED, L"searchHandle is nullptr.", __FUNCTIONW__);
     }
 }
 
@@ -193,8 +235,7 @@ class LastWill
 {
 public:
     LastWill(funcT func, T val) : func_(func), val_(val) { }
-    ~LastWill()
-    {
+    ~LastWill() {
         func_(val_);
     }
 private:
@@ -208,9 +249,13 @@ auto CreateLastWill(funcT func, T t)
     return LastWill<funcT, T>(func, t);
 }
 
-
-void AdSearcher::ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person)
+void AdSearcher::ReadColumn (
+    ADS_SEARCH_COLUMN & col,
+    AdPersonDesc & person
+)
 {
+    static auto & attrTraits = Attributes::GetInstance();
+
     switch (col.dwADsType)
     {
     case ADSTYPE_CASE_IGNORE_STRING:
@@ -219,15 +264,20 @@ void AdSearcher::ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person)
     case ADSTYPE_NUMERIC_STRING:
     case ADSTYPE_DN_STRING:
     {
-        BOOST_ASSERT(col.pszAttrName);
+        if (nullptr == col.pszAttrName) {
+            throw HrError(E_UNEXPECTED, L"col.pszAttrName is nullptr.", __FUNCTIONW__);
+        }
         if (!wcscmp(col.pszAttrName, AdAttrWritableAttrs))
         {
             AdPersonDesc::AttrIds ais;
-            for (size_t i = 0, maxi = boost::numeric_cast<size_t>(col.dwNumValues); i < maxi; ++i)
+            for (size_t i = 0, maxi = static_cast<size_t>(col.dwNumValues); i < maxi; ++i)
             {
-                if (Attributes::GetInstance().IsAttrSupported(col.pADsValues[i].CaseExactString))
+                if (attrTraits.IsAttrSupported(col.pADsValues[i].CaseExactString))
                 {
-                    ais.insert(Attributes::GetInstance().GetAttrId(col.pADsValues[i].CaseExactString));
+                    auto attrId = attrTraits.GetAttrId(col.pADsValues[i].CaseExactString);
+                    if (attrId != Attributes::AttrId::Dn) { // Dn can't be modified directly
+                        ais.insert(attrId);
+                    }
                 }
             }
             person.SetWritableAttributes(std::move(ais));
@@ -244,7 +294,7 @@ void AdSearcher::ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person)
         if (!bav.empty())
         {
             memcpy_s(&bav[0], bav.size(), col.pADsValues[0].OctetString.lpValue,
-                boost::numeric_cast<size_t>(col.pADsValues[0].OctetString.dwLength)
+                static_cast<size_t>(col.pADsValues[0].OctetString.dwLength)
             );
         }
         person.SetBinaryAttr(col.pszAttrName, std::move(bav));
@@ -254,56 +304,70 @@ void AdSearcher::ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person)
 }
 
 
-void AdSearcher::ReadNextEntry(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle,
-    std::vector<WcharBuf> & attrNames)
+void AdSearcher::ReadNextEntry (
+    IDirectorySearchPtr & dsp,
+    ADS_SEARCH_HANDLE & searchHandle,
+    std::vector<WcharBuf> & attrNames
+)
 {
-    BOOST_ASSERT(dsp != nullptr && searchHandle != nullptr);
+    if (!dsp) {
+        throw HrError(E_INVALIDARG, L"dsp is nullptr.", __FUNCTIONW__);
+    }
+    if (!searchHandle) {
+        throw HrError(E_INVALIDARG, L"searchHandle is nullptr.", __FUNCTIONW__);
+    }
+
     AdPersonDesc personDesc;
     for (auto & an : attrNames)
     {
-        BOOST_ASSERT(!an.empty());
+        if (an.empty()) {
+            throw HrError(E_INVALIDARG, L"attrNames contains an empty item.", __FUNCTIONW__);
+        }
         ADS_SEARCH_COLUMN col = {};
         const HRESULT hr = dsp->GetColumn(searchHandle, &an[0], &col);
-        if (E_ADS_COLUMN_NOT_SET == hr)
-        {
+        if (E_ADS_COLUMN_NOT_SET == hr) {
             continue;
         }
-        if (FAILED(hr))
-        {
-            HR_ERROR(hr);
+        if (FAILED(hr)) {
+            throw HrError(hr, L"GetColumn() failed.", __FUNCTIONW__);
         }
-        auto lastWill = CreateLastWill(std::bind(&IDirectorySearch::FreeColumn, dsp, std::placeholders::_1), &col);
+        auto lastWill = CreateLastWill (
+            std::bind(&IDirectorySearch::FreeColumn, dsp, std::placeholders::_1),
+            &col
+        );
         ReadColumn(col, personDesc);
     }
-    if (!personDesc.IsAttributeSet(L"cn"))
-    {
-        HR_ERROR(E_UNEXPECTED);
+    if (!personDesc.IsAttributeSet(L"cn")) {
+        throw HrError(E_UNEXPECTED, L"CN not found.", __FUNCTIONW__);
     }
-    if (dataPtr_->onNewItem)
-    {
-        dataPtr_->onNewItem(std::move(personDesc));
+    if (_dataPtr->onNewItem) {
+        _dataPtr->onNewItem(std::move(personDesc));
     }
 }
 
-void AdSearcher::IterateThroughSearchResults(IDirectorySearchPtr & dsp, ADS_SEARCH_HANDLE & searchHandle,
-    std::vector<WcharBuf> & attrNames)
+void AdSearcher::IterateThroughSearchResults (
+    IDirectorySearchPtr & dsp,
+    ADS_SEARCH_HANDLE & searchHandle,
+    std::vector<WcharBuf> & attrNames
+)
 {
     HRESULT hr = S_OK;
-    while (!(dataPtr_->stopFlag) && SUCCEEDED(hr = dsp->GetNextRow(searchHandle)))
+    while (!(_dataPtr->stopFlag) && SUCCEEDED(hr = dsp->GetNextRow(searchHandle)))
     {
         if (S_OK == hr)
         {
-            //Sleep(100);
             ReadNextEntry(dsp, searchHandle, attrNames);
-
         }
         else if (S_ADS_NOMORE_ROWS == hr)
         {
             DWORD error = ERROR_SUCCESS;
             wchar_t errorDesc[512], provider[512];
-            ADsGetLastError(&error, errorDesc, _countof(errorDesc), provider, _countof(provider));
-            if (ERROR_MORE_DATA != error)
-            {
+            ADsGetLastError (
+                &error,
+                errorDesc, _countof(errorDesc),
+                provider, _countof(provider)
+            );
+            if (ERROR_MORE_DATA != error) {
                 break;
             }
         }
@@ -316,29 +380,39 @@ void AdSearcher::IterateThroughSearchResults(IDirectorySearchPtr & dsp, ADS_SEAR
     {
         if (HRESULT_FROM_WIN32(ERROR_CANCELLED) != hr)  // ERROR_CANCELED - is not an error
         {
-            HR_ERROR(hr);
+            throw HrError(hr, L"IDirectorySearch::GetNextRow() failed.", __FUNCTIONW__);
         }
     }
 }
 
-void AdSearcher::SetCancelationHandle(const IDirectorySearchPtr & dsp, const ADS_SEARCH_HANDLE & searchHandle)
+void AdSearcher::SetCancelationHandle (
+    const IDirectorySearchPtr & dsp,
+    const ADS_SEARCH_HANDLE & searchHandle
+)
 {
-    std::lock_guard<std::recursive_mutex> guard(dataPtr_->searchHandleMutex);
-    dataPtr_->dirSearchPtr = dsp;
-    dataPtr_->searchHandle = searchHandle;
+    std::lock_guard<std::recursive_mutex> guard(_dataPtr->searchHandleMutex);
+    _dataPtr->dirSearchPtr = dsp;
+    _dataPtr->searchHandle = searchHandle;
+}
+
+void AdSearcher::ResetCancelationHandle()
+{
+    std::lock_guard<std::recursive_mutex> guard(_dataPtr->searchHandleMutex);
+    _dataPtr->dirSearchPtr = nullptr;
+    _dataPtr->searchHandle = nullptr;
 }
 
 class AdsSearchHandleCloser final {
     IDirectorySearch * _directorySearch;
     ADS_SEARCH_HANDLE _handle;
 public:
-    AdsSearchHandleCloser(IDirectorySearch * directorySearch, ADS_SEARCH_HANDLE handle):
-        _directorySearch(directorySearch), _handle(handle)
+    AdsSearchHandleCloser(IDirectorySearch * directorySearch, ADS_SEARCH_HANDLE handle)
+        : _directorySearch(directorySearch), _handle(handle)
     { }
     void Close() {
         HRESULT hr = _directorySearch->CloseSearchHandle(_handle);
         if (FAILED(hr)) {
-            throw HrError(hr, __FUNCTIONW__);
+            throw HrError(hr, L"IDirectorySearch::CloseSearchHandle() failed.", __FUNCTIONW__);
         }
     }
     ~AdsSearchHandleCloser() {
@@ -351,15 +425,17 @@ public:
     AdsSearchHandleCloser& operator=(AdsSearchHandleCloser&&) = delete;
 };
 
-void AdSearcher::ThreadProc(ConnectionParams connectionParams, std::wstring ldapRequest) //-V813
+void AdSearcher::ThreadProc (
+    ConnectionParams connectionParams,
+    std::wstring ldapRequest
+) //-V813
 {
     ComAutoInitializer comAutoInitializer;
 
     try
     {
-        if (dataPtr_->onStart)
-        {
-            dataPtr_->onStart();
+        if (_dataPtr->onStart) {
+            _dataPtr->onStart();
         }
 
         AdConnector connector;
@@ -369,31 +445,57 @@ void AdSearcher::ThreadProc(ConnectionParams connectionParams, std::wstring ldap
         SetupSearchPrefs(directorySearchPtr);
 
         WcharBuf searchFilter = ToWcharBuf(ldapRequest);
-        BOOST_ASSERT(!searchFilter.empty());
+        if (searchFilter.empty()) {
+            throw HrError(E_INVALIDARG, L"searchFilter is empty.", __FUNCTIONW__);
+        }
 
         std::vector<wchar_t *> apv;
         std::vector<WcharBuf> attrListToBeRetrieved = CreateAttrListToRetrieve(apv);
-        BOOST_ASSERT((!attrListToBeRetrieved.empty()) && (apv.size() == attrListToBeRetrieved.size()));
+        if (attrListToBeRetrieved.empty()) {
+            throw HrError(E_UNEXPECTED, L"attrListToBeRetrieved is empty.", __FUNCTIONW__);
+        }
+        if (apv.size() != attrListToBeRetrieved.size()) {
+            throw HrError(E_UNEXPECTED, L"internal error.", __FUNCTIONW__);
+        }
 
         ADS_SEARCH_HANDLE searchHandle = nullptr;
-        ExecuteSearch(directorySearchPtr, searchFilter, apv, searchHandle);
-        AdsSearchHandleCloser handleCloser(directorySearchPtr, searchHandle);
-        SetCancelationHandle(directorySearchPtr, searchHandle);
-        IterateThroughSearchResults(directorySearchPtr, searchHandle, attrListToBeRetrieved);
-        if (dataPtr_->onStop)
-        {
-            dataPtr_->onStop();
+        ExecuteSearch( directorySearchPtr, searchFilter, apv, searchHandle );
+
+        AdsSearchHandleCloser handleCloser( directorySearchPtr, searchHandle );
+        SetCancelationHandle( directorySearchPtr, searchHandle );
+
+        IterateThroughSearchResults( directorySearchPtr, searchHandle, attrListToBeRetrieved );
+
+        if (_dataPtr->onStop) {
+            _dataPtr->onStop();
         }
+        ResetCancelationHandle();
     }
-    catch (const std::exception &)
+    catch (const Error & e)
     {
-        if (dataPtr_->onStop)
-        {
-            dataPtr_->onStop();
+        MY_TRACE(L"%s %s", __FUNCTIONW__, e.What(), e.Where());
+        ResetCancelationHandle();
+        if (_dataPtr->onError) {
+            _dataPtr->onError(e.What());
+        }
+        if (_dataPtr->onStop) {
+            _dataPtr->onStop();
+        }
+        ResetCancelationHandle();
+        throw;
+    }
+    catch (const std::exception & e)
+    {
+        MY_TRACE("%s %s", __FUNCTION__, e.what());
+        ResetCancelationHandle();
+        if (_dataPtr->onError) {
+            _dataPtr->onError(ToWstring(e.what()));
+        }
+        if (_dataPtr->onStop) {
+            _dataPtr->onStop();
         }
         throw;
     }
-    SetCancelationHandle(nullptr, nullptr);
 }
 
 }   // namespace adbook

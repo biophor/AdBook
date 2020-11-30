@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -29,11 +29,6 @@ namespace adbook
 class ADBOOKBL_API AbstractAdAccessFactory
 {
 public:
-    enum class ProductsType {
-        Fake,    // the factory creates fake objects with limited functionality
-        Real
-    };
-
     virtual std::unique_ptr<AbstractAdConnector> CreateConnector() = 0;
     virtual std::unique_ptr<AbstractAdSearcher> CreateSearcher() = 0;
     virtual std::shared_ptr<AbstractAdPersonDescKeeper> GetAdPersonDescKeeper() = 0;
@@ -43,18 +38,16 @@ public:
     virtual AbstractAdPersonDescKeeper * GetAdPersonDescKeeperRawPtr() = 0;
 
     virtual ~AbstractAdAccessFactory() = 0;
-    virtual ProductsType GetProductType() const = 0;
 };
 
+ADBOOKBL_API std::shared_ptr<AbstractAdAccessFactory> GetAdAccessFactory();
 
-std::shared_ptr<AbstractAdAccessFactory> ADBOOKBL_API CreateAdAccessFactory(
-    AbstractAdAccessFactory::ProductsType factoryPurpose
+ADBOOKBL_API AbstractAdAccessFactory * CreateAdAccessFactoryRawPtr();
+
+ADBOOKBL_API void SetAdAccessFactory (
+    std::shared_ptr<AbstractAdAccessFactory> factory
 );
 
-
-AbstractAdAccessFactory ADBOOKBL_API *  CreateAdAccessFactoryRawPtr(
-    AbstractAdAccessFactory::ProductsType factoryPurpose
-);
 
 }   // namespace adbook
 

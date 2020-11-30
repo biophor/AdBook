@@ -271,4 +271,13 @@
   <data name="AppTitleForMessageBox" xml:space="preserve">
     <value>AdBook</value>
   </data>
+  <data name="PersonEditorWindow_ClearPhoto" xml:space="preserve">
+    <value>Удалить фото</value>
+  </data>
+  <data name="Filter_Names" xml:space="preserve">
+    <value>Имена: общее имя, имя, фамилия, отображаемое имя</value>
+  </data>
+  <data name="Filter_Phones" xml:space="preserve">
+    <value>Телефоны: домашний, рабочий, мобильный</value>
+  </data>
 </root>

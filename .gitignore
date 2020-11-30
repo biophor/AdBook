@@ -14,3 +14,5 @@
 /packages/
 *.htm
 /bin/
+/QtQuickAdBookPrototype1/
+*.rar

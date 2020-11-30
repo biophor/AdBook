@@ -45,7 +45,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -74,6 +74,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="ValidationRules\CnAttrValidationRule.cs" />
+    <Compile Include="ViewModels\AnyAttrsFilterVM.cs" />
+    <Compile Include="ViewModels\FilterMatchingRuleVM.cs" />
+    <Compile Include="ViewModels\FilterRuleVM.cs" />
+    <Compile Include="ViewModels\NameAttrsFilterVM.cs" />
+    <Compile Include="ViewModels\PhoneAttrsFilterVM.cs" />
+    <Compile Include="ViewModels\PredefinedFilterListVM.cs" />
+    <Compile Include="ViewModels\PredefinedMatchingRulesVM.cs" />
+    <Compile Include="ViewModels\SingleAttrFilterVM.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>

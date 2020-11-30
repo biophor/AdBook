@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -40,7 +40,7 @@ namespace WpfAdBook_IntegrationTests
             using (SettingsService service = new SettingsService(false)) {
                 service.ConnectionParams.LdapPath = "LDAP://localhost:55555/cn=FAKE,dc=settings,dc=local";
                 service.ConnectionParams = new adbookcli.ConnectionParams();
-                service.ConnectionParams.Dc = "somedc1.somedomain.com";
+                service.ConnectionParams.Address = "somedc1.somedomain.com";
                 service.ConnectionParams.UseCurrentUserCredentials = false;
                 service.ConnectionParams.Login = "user";
                 SecureString password = new SecureString();

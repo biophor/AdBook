@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License along with
 
 
 #include "stdafx.h"
+#include "debug.h"
 #include "error.h"
 #include "shared.h"
 #include "dllmain.h"
@@ -30,13 +31,13 @@ You should have received a copy of the GNU General Public License along with
 namespace adbook
 {
 
-AdPersonDescSqliteKeeper::AdPersonDescSqliteKeeper(bool fakeData)
+AdPersonDescSqliteKeeper::AdPersonDescSqliteKeeper( bool fakeData )
     : _fakeData{ fakeData }
-{
+{ }
 
-}
-
-void AdPersonDescSqliteKeeper::SetNameByConnectionParams(const ConnectionParams & connectionParams)
+void AdPersonDescSqliteKeeper::SetNameByConnectionParams (
+    const ConnectionParams & connectionParams
+)
 {
     _connectionParams = connectionParams;
 }
@@ -54,17 +55,25 @@ namespace
         SimpleInterprocessSync(const wchar_t * mtxName)
         {
             _mutexHandle = CreateMutexW(nullptr, FALSE, mtxName);
-            if (nullptr == _mutexHandle)
-            {
+            if (nullptr == _mutexHandle) {
                 throw HrError(HRESULT_FROM_WIN32(GetLastError()), __FUNCTIONW__);
             }
-            BOOST_VERIFY(WAIT_OBJECT_0 == WaitForSingleObject(_mutexHandle, INFINITE));
+            DWORD waitResult = WaitForSingleObject(_mutexHandle, INFINITE);
+            if (WAIT_OBJECT_0 != waitResult) {
+                throw Error(L"unexpected waitResult.", __FUNCTIONW__);
+            }
         }
+
         ~SimpleInterprocessSync()
         {
-            BOOST_VERIFY(ReleaseMutex(_mutexHandle));
-            BOOST_VERIFY(CloseHandle(_mutexHandle));
+            MY_VERIFY(ReleaseMutex(_mutexHandle));
+            MY_VERIFY(CloseHandle(_mutexHandle));
         }
+
+        SimpleInterprocessSync(const SimpleInterprocessSync &) = delete;
+        SimpleInterprocessSync(SimpleInterprocessSync &&) = delete;
+        SimpleInterprocessSync & operator = (const SimpleInterprocessSync &) = delete;
+        SimpleInterprocessSync & operator = (SimpleInterprocessSync &&) = delete;
     private:
         HANDLE _mutexHandle = nullptr;
     };
@@ -73,15 +82,15 @@ namespace
 
 std::wstring AdPersonDescSqliteKeeper::GetDbFileNameSuffix(const ConnectionParams & connectionParams)
 {
-    if (connectionParams.IsCurrentUserCredentialsUsed() && connectionParams.CurrentDomain()) {
+    if (connectionParams.Get_ConnectAsCurrentUser() && connectionParams.Get_ConnectDomainYouLoggedIn()) {
         return {};
     }
     std::hash<std::wstring> hasher;
-    std::wstring address = boost::to_lower_copy(boost::trim_copy(connectionParams.GetDomainController()));
+    std::wstring address = ToLower(connectionParams.GetAddress());
 
     size_t hashValue = hasher(address);
-    if (!connectionParams.IsCurrentUserCredentialsUsed()) {
-        std::wstring login = boost::to_lower_copy(connectionParams.GetLogin());
+    if (!connectionParams.Get_ConnectAsCurrentUser()) {
+        std::wstring login = ToLower(connectionParams.GetLogin());
         hashValue ^= hasher(login);
     }
     return std::to_wstring(hashValue);
@@ -90,12 +99,10 @@ std::wstring AdPersonDescSqliteKeeper::GetDbFileNameSuffix(const ConnectionParam
 std::wstring AdPersonDescSqliteKeeper::GetSqliteDbFileName(const ConnectionParams & connectionParams)
 {
     wchar_t buff[MAX_PATH] = {0};
-    if (_fakeData)
-    {
+    if (_fakeData) {
         wcscat_s(buff, L"FakeSearchResult");
     }
-    else
-    {
+    else {
         wcscat_s(buff, L"SearchResult");
     }
     const std::wstring dbFileNameSuffix = GetDbFileNameSuffix(connectionParams);
@@ -273,7 +280,7 @@ public:
         {
             return std::wstring();
         }
-        return std::wstring(text, text + boost::numeric_cast<size_t>(sizeInBytes) / sizeof(wchar_t));
+        return std::wstring(text, text + static_cast<size_t>(sizeInBytes) / sizeof(wchar_t));
     }
     std::vector<BYTE> GetColumnBlob(int index)
     {
@@ -283,7 +290,7 @@ public:
         {
             return std::vector<BYTE>();
         }
-        return std::vector<BYTE>(data, data + boost::numeric_cast<size_t>(sizeInBytes));
+        return std::vector<BYTE>(data, data + static_cast<size_t>(sizeInBytes));
     }
     ~SqliteSimpleWrapper()
     {
@@ -371,7 +378,7 @@ void AdPersonDescSqliteKeeper::InternalSave(const std::vector<AdPersonDesc> & pe
         if (!waVec.empty())
         {
             std::wstring paramName = std::wstring(L":") + writableAttrsColName;
-            sqlite.BindBlob(paramName, &waVec[0], boost::numeric_cast<int>(waVec.size()));
+            sqlite.BindBlob(paramName, &waVec[0], static_cast<int>(waVec.size()));
         }
         for (const auto id : attrIds)
         {
@@ -395,7 +402,7 @@ void AdPersonDescSqliteKeeper::InternalSave(const std::vector<AdPersonDesc> & pe
                 const BYTE * attrValue = personDesc.GetBinaryAttrPtr(attrName, attrSize);
                 if (attrValue)
                 {
-                    sqlite.BindBlob(paramName, attrValue, boost::numeric_cast<int>(attrSize));
+                    sqlite.BindBlob(paramName, attrValue, static_cast<int>(attrSize));
                 }
             }
         }
@@ -445,7 +452,7 @@ void AdPersonDescSqliteKeeper::InternalLoad(std::vector<AdPersonDesc> & people)
                         std::vector<BYTE> attrValue = sqlite.GetColumnBlob(i);
                         AdPersonDesc::AttrIds wa;
                         std::transform(attrValue.cbegin(), attrValue.cend(), std::inserter(wa, wa.end()),
-                            [](const BYTE b) { return boost::numeric_cast<Attributes::AttrId>(b); });
+                            [](const BYTE b) { return static_cast<Attributes::AttrId>(b); });
                         personDesc.SetWritableAttributes(std::move(wa));
                     }
                     continue;
@@ -480,7 +487,7 @@ void AdPersonDescSqliteKeeper::InternalLoad(std::vector<AdPersonDesc> & people)
     sqlite.FinalizeStatement();
 }
 
-void AdPersonDescSqliteKeeper::Load(std::vector<AdPersonDesc> & people)
+void AdPersonDescSqliteKeeper::Load( std::vector<AdPersonDesc> & people )
 {
     try
     {
@@ -489,13 +496,14 @@ void AdPersonDescSqliteKeeper::Load(std::vector<AdPersonDesc> & people)
         SimpleInterprocessSync simpleSync(mutexName);
         InternalLoad(people);
     }
-    catch (std::exception &)
+    catch (std::exception & e)
     {
+        MY_TRACE_STDEXCEPTION(e);
         HR_ERROR(E_UNEXPECTED);
     }
 }
 
-void AdPersonDescSqliteKeeper::Save(const std::vector<AdPersonDesc> & people)
+void AdPersonDescSqliteKeeper::Save( const std::vector<AdPersonDesc> & people )
 {
     try
     {
@@ -504,8 +512,9 @@ void AdPersonDescSqliteKeeper::Save(const std::vector<AdPersonDesc> & people)
         SimpleInterprocessSync simpleSync(mutexName);
         InternalSave(people);
     }
-    catch (std::exception &)
+    catch (std::exception & e)
     {
+        MY_TRACE_STDEXCEPTION(e);
         HR_ERROR(E_UNEXPECTED);
     }
 }

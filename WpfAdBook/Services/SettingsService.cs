@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -48,8 +48,12 @@ namespace WpfAdBook.Services
         public ObservableCollection<AdPersonVM> SavedSearchResult { get; set; } = new ObservableCollection<AdPersonVM>();
 
         public System.Drawing.Size MainWndSize { get; set; } = new System.Drawing.Size(500, 700);
-        public System.Drawing.Point MainWndPos { get; set; } = new System.Drawing.Point(100, 100);
+        public System.Drawing.Point MainWndPos { get; set; } = new System.Drawing.Point(200, 200);
         public bool MainWndMaximized { get; set; } = false;
+
+        public System.Drawing.Size EditPersonWndSize { get; set; } = new System.Drawing.Size(400, 300);
+        public System.Drawing.Point EditPersonWndPos { get; set; } = new System.Drawing.Point(200, 200);
+        public string SerializedFilterValues { get; set; }
 
         public SettingsService(bool autoLoadSettings)
         {
@@ -116,14 +120,17 @@ namespace WpfAdBook.Services
             else {
                 Properties.Settings.Default.Password = "";
             }
-            Properties.Settings.Default.DomainOrDc = ConnectionParams.Dc;
-            Properties.Settings.Default.ConnectToDefaultDomain = ConnectionParams.UseDomainYouAreLoggedIn;
+            Properties.Settings.Default.Address = ConnectionParams.Address;
+            Properties.Settings.Default.ConnectDomainYouLoggedIn = ConnectionParams.ConnectDomainYouLoggedIn;
             Properties.Settings.Default.UseCurrentUserCredentials = ConnectionParams.UseCurrentUserCredentials;
-            Properties.Settings.Default.FilterRules = FilteringParams.SerializedFilterRules;
+            Properties.Settings.Default.SerializedFilterRules = FilteringParams.SerializedFilterRules;
             Properties.Settings.Default.StrictFiltering = FilteringParams.StrictFiltering;
             Properties.Settings.Default.MainWndSize = MainWndSize;
             Properties.Settings.Default.MainWndPos = MainWndPos;
             Properties.Settings.Default.MainWndMaximized = MainWndMaximized;
+            Properties.Settings.Default.EditPersonWndSize = EditPersonWndSize;
+            Properties.Settings.Default.EditPersonWndPos = EditPersonWndPos;
+            Properties.Settings.Default.SerializedFilterValues = SerializedFilterValues;
             Properties.Settings.Default.Save();
 
             using (var adplk = _adAccessFactory.GetPersonDescKeeper()) {
@@ -144,14 +151,17 @@ namespace WpfAdBook.Services
             else {
                 ConnectionParams.Password = new SecureString();
             }
-            ConnectionParams.Dc = Properties.Settings.Default.DomainOrDc;
-            ConnectionParams.UseDomainYouAreLoggedIn = Properties.Settings.Default.ConnectToDefaultDomain;
+            ConnectionParams.Address = Properties.Settings.Default.Address;
+            ConnectionParams.ConnectDomainYouLoggedIn = Properties.Settings.Default.ConnectDomainYouLoggedIn;
             ConnectionParams.UseCurrentUserCredentials = Properties.Settings.Default.UseCurrentUserCredentials;
-            FilteringParams.SerializedFilterRules = Properties.Settings.Default.FilterRules;
+            FilteringParams.SerializedFilterRules = Properties.Settings.Default.SerializedFilterRules;
             FilteringParams.StrictFiltering = Properties.Settings.Default.StrictFiltering;
             MainWndSize = Properties.Settings.Default.MainWndSize;
             MainWndPos = Properties.Settings.Default.MainWndPos;
             MainWndMaximized = Properties.Settings.Default.MainWndMaximized;
+            EditPersonWndSize = Properties.Settings.Default.EditPersonWndSize;
+            EditPersonWndPos = Properties.Settings.Default.EditPersonWndPos;
+            SerializedFilterValues = Properties.Settings.Default.SerializedFilterValues;
 
             using (var adplk = _adAccessFactory.GetPersonDescKeeper()) {
                 adplk.SetNameByConnectionParams(_connectionParams);

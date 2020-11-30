@@ -1,101 +1,101 @@
 ﻿<UserControl
-  x:Class="WpfAdBook.Controls.PersonListControl"
-  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:local="clr-namespace:WpfAdBook.Controls"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  d:DesignHeight="300"
-  d:DesignWidth="300"
-  x:ClassModifier="internal"
-  mc:Ignorable="d">
-  <Grid>
-    <DataGrid
-      AlternatingRowBackground="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
-      AutoGenerateColumns="False"
-      IsReadOnly="True"
-      ItemsSource="{Binding PersonListSource}"
-      SelectedItem="{Binding SelectedPerson, Mode=OneWayToSource}"
-      SelectionMode="Single"
-      VirtualizingStackPanel.VirtualizationMode="Recycling">
-      <DataGrid.Resources>
-        <Style TargetType="DataGridCell">
-          <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}" />
-        </Style>
-        <Style TargetType="ToolTip">
-          <Setter Property="Visibility" Value="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget, Converter={StaticResource trimmedTextBlockVisibilityConverter}}" />
-        </Style>
-      </DataGrid.Resources>
+    x:Class="WpfAdBook.Controls.PersonListControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfAdBook.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
+    x:ClassModifier="internal"
+    mc:Ignorable="d">
+    <Grid>
+        <DataGrid
+            AlternatingRowBackground="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding PersonListSource}"
+            SelectedItem="{Binding SelectedPerson, Mode=OneWayToSource}"
+            SelectionMode="Single"
+            VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Content.Text}" />
+                </Style>
+                <Style TargetType="ToolTip">
+                    <Setter Property="Visibility" Value="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget, Converter={StaticResource trimmedTextBlockVisibilityConverter}}" />
+                </Style>
+            </DataGrid.Resources>
 
-      <DataGrid.Columns>
+            <DataGrid.Columns>
 
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[cn].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=CommonName.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[cn].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=CommonName.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
 
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[mail].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Email.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[company].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Company.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[title].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Title.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[department].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Department.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[st].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=State.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[employeeID].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=EmpId.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[sn].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=SurName.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[givenName].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=GivenName.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[telephoneNumber].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=WorkPhone.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[homePhone].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=HomePhone.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[mobile].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=MobilePhone.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-        <DataGridTextColumn Binding="{Binding Path=TextAttrs[l].Value}">
-          <DataGridTextColumn.Header>
-            <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Locality.DisplayName}" />
-          </DataGridTextColumn.Header>
-        </DataGridTextColumn>
-      </DataGrid.Columns>
-    </DataGrid>
-  </Grid>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[mail].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Email.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[company].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Company.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[title].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Title.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[department].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Department.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[st].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=State.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[employeeID].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=EmpId.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[sn].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=SurName.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[givenName].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=GivenName.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[telephoneNumber].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=WorkPhone.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[homePhone].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=HomePhone.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[mobile].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=MobilePhone.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=TextAttrs[l].Value}">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{Binding Source={StaticResource globalAdAttributesVM}, Path=Locality.DisplayName}" />
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
 </UserControl>

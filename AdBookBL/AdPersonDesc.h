@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -35,55 +35,105 @@ public:
     ~AdPersonDesc() = default;
 
     template <class StringAttrValType>
-    void SetStringAttr(const LdapAttrName & an, StringAttrValType && sav);
+    void SetStringAttr (
+        const LdapAttrName & an,
+        StringAttrValType && sav
+    );
 
-    const wchar_t * GetStringAttrPtr(const LdapAttrName & an) const;
-    StringAttrVal GetStringAttr(const LdapAttrName & an) const;
+    const wchar_t * GetStringAttrPtr (
+        const LdapAttrName & an
+    ) const;
+
+    StringAttrVal GetStringAttr (
+        const LdapAttrName & an
+    ) const;
 
     // return true if the first range is lexicographically less than the second.
-    bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, Attributes::AttrId id) const;
-    bool LexicographicalCompareStringAttrs(const AdPersonDesc & apd, const std::wstring & ldapAttrName) const;
+    bool LexicographicalCompareStringAttrs (
+        const AdPersonDesc & apd,
+        Attributes::AttrId id
+    ) const;
+
+    bool LexicographicalCompareStringAttrs (
+        const AdPersonDesc & apd,
+        const std::wstring & ldapAttrName
+    ) const;
 
     template <class BinaryAttrValType>
-    void SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && bav);
+    void SetBinaryAttr (
+        const LdapAttrName & an,
+        BinaryAttrValType && bav
+    );
 
-    const BYTE * GetBinaryAttrPtr(const LdapAttrName & an, size_t & attrSize) const;
-    BinaryAttrVal GetBinaryAttr(const LdapAttrName & an) const;
+    const BYTE * GetBinaryAttrPtr (
+        const LdapAttrName & an,
+        size_t & attrSize
+    ) const;
+
+    BinaryAttrVal GetBinaryAttr (
+        const LdapAttrName & an
+    ) const;
 
     using AttrIds = std::set<Attributes::AttrId>;
 
     template <class AttrIdsType>
-    void SetWritableAttributes(AttrIdsType && ait);
+    void SetWritableAttributes (
+        AttrIdsType && ait
+    );
 
     AttrIds GetWritableAttributes() const;
 
-    bool IsAttributeSet(const LdapAttrName & an) const;
-    bool IsAttributeWritable(const Attributes::AttrId id) const noexcept;
+    bool IsAttributeSet (
+        const LdapAttrName & an
+    ) const;
+
+    bool IsAttributeWritable (
+        const Attributes::AttrId id
+    ) const noexcept;
 
     StringAttrVal GetDn() const;
 
+    friend bool operator == ( const AdPersonDesc & adp1, const AdPersonDesc & adp2 ) {
+        return
+            adp1.writableAttributes_ == adp2.writableAttributes_ &&
+            adp1.stringAttrs_ == adp2.stringAttrs_ &&
+            adp1.binaryAttrs_ == adp2.binaryAttrs_;
+    }
 private:
     AttrIds writableAttributes_; // It's based on the AD attribute 'allowedAttributesEffective'
     std::map<LdapAttrName, StringAttrVal> stringAttrs_;
     std::map<LdapAttrName, BinaryAttrVal> binaryAttrs_;
 };
 
+
 template <class StringAttrValType>
-void AdPersonDesc::SetStringAttr(const LdapAttrName & an, StringAttrValType && sav)
+void AdPersonDesc::SetStringAttr (
+    const LdapAttrName & an,
+    StringAttrValType && sav
+)
 {
-    BOOST_ASSERT(!an.empty());
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     stringAttrs_[an] = std::forward<StringAttrValType>(sav);
 }
 
 template <class BinaryAttrValType>
-void AdPersonDesc::SetBinaryAttr(const LdapAttrName & an, BinaryAttrValType && bav)
+void AdPersonDesc::SetBinaryAttr (
+    const LdapAttrName & an,
+    BinaryAttrValType && bav
+)
 {
-    BOOST_ASSERT(!an.empty());
+    if (an.empty()) {
+        throw HrError(E_INVALIDARG, L"an is empty", __FUNCTIONW__);
+    }
     binaryAttrs_[an] = std::forward<BinaryAttrValType>(bav);
 }
 
 template <class AttrIdsType>
-void AdPersonDesc::SetWritableAttributes(AttrIdsType && ait)
+void AdPersonDesc::SetWritableAttributes (
+    AttrIdsType && ait
+)
 {
     writableAttributes_ = std::forward<AttrIdsType>(ait);
 }

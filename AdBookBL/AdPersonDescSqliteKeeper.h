@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -27,17 +27,41 @@ class AdPersonDescSqliteKeeper : public AbstractAdPersonDescKeeper
 {
 public:
     AdPersonDescSqliteKeeper(bool fakeData);
+
     // set the filename where data is saved.
-    void SetNameByConnectionParams(const ConnectionParams & connectionParams) override;
-    void Load(std::vector<AdPersonDesc> &) override;
-    void Save(const std::vector<AdPersonDesc> &) override;
+    void SetNameByConnectionParams (
+        const ConnectionParams & connectionParams
+    ) override;
+
+    void Load (
+        std::vector<AdPersonDesc> &
+    ) override;
+
+    void Save (
+        const std::vector<AdPersonDesc> &
+    ) override;
 
 private:
-    static std::wstring GetDbFileNameSuffix(const ConnectionParams & connectionParams);
-    std::wstring GetSqliteDbFilePath(const ConnectionParams & connectionParams);
-    std::wstring GetSqliteDbFileName(const ConnectionParams & connectionParams);
-    void InternalLoad(std::vector<AdPersonDesc> & people);
-    void InternalSave(const std::vector<AdPersonDesc> & people);
+    static std::wstring GetDbFileNameSuffix (
+        const ConnectionParams & connectionParams
+    );
+
+    std::wstring GetSqliteDbFilePath (
+        const ConnectionParams & connectionParams
+    );
+
+    std::wstring GetSqliteDbFileName (
+        const ConnectionParams & connectionParams
+    );
+
+    void InternalLoad (
+        std::vector<AdPersonDesc> & people
+    );
+
+    void InternalSave (
+        const std::vector<AdPersonDesc> & people
+    );
+
 private:
     bool _fakeData = false;
     ConnectionParams _connectionParams;

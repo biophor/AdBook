@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -31,9 +31,9 @@ QList<FilterListModel::ColumnDef> FilterListModel::_columns = {
 };
 
 FilterListModel::FilterListModel(
-    AppSettings & appSettings,    
+    AppSettings & appSettings,
     QObject * parent
-) 
+)
     : QStandardItemModel(parent), _appSettings{ appSettings }
 {
     auto colNames = GetColumnNames();
@@ -46,7 +46,7 @@ int FilterListModel::FindFilter(FilterTypeItem * filterTypeItem, FilterCondition
 {
     QList<QStandardItem*> sameItems = findItems(filterTypeItem->text(), Qt::MatchExactly);
     for (auto it : sameItems) {
-        int r = it->row();        
+        int r = it->row();
         bool typeEqual = static_cast<FilterTypeItem*>(it)->GetFilterCode() ==
             filterTypeItem->GetFilterCode();
         bool conditionEqual = static_cast<FilterConditionItem*>(item(r, ConditionColId))->GetMatchingRule() ==
@@ -68,7 +68,7 @@ int FilterListModel::AddFilter(FilterTypeItem * filterTypeItem, FilterConditionI
     }
     QList<QStandardItem*> items{ filterTypeItem, conditionItem, new QStandardItem(filterValue) };
     appendRow(items);
-    return rowCount() - 1;    
+    return rowCount() - 1;
 }
 
 std::wstring FilterListModel::ConstructLdapRequest(bool AllConditionsShouldBeMet)
@@ -80,7 +80,7 @@ std::wstring FilterListModel::ConstructLdapRequest(bool AllConditionsShouldBeMet
         FilterConditionItem * condition = GetFilterCondition(i);
         QString filterValue = GetFilterValue(i);
         if (typeItem->GetFilterType() == FilterType::Composite) {
-            if (typeItem->GetFilterCode() == static_cast<int>(CompositeFilterId::AnyAttribute)) {
+            if (typeItem->GetFilterCode() == FilterCode(CompositeFilterId::AnyAttribute)) {
                 auto & attributes = adbook::Attributes::GetInstance();
                 const auto attrIds = attributes.GetAttrIds();
                 for (const auto & ii : attrIds) {
@@ -91,12 +91,14 @@ std::wstring FilterListModel::ConstructLdapRequest(bool AllConditionsShouldBeMet
                 lr.AddOR();
             }
         }
-        else if (typeItem->GetFilterType() == FilterType::LdapAttr) {
-            lr.AddRule(static_cast<adbook::Attributes::AttrId>(typeItem->GetFilterCode()),
+    }
+    for (int i = 0; i < itemCount; ++i) {
+        FilterTypeItem * typeItem = GetFilterType(i);
+        FilterConditionItem * condition = GetFilterCondition(i);
+        QString filterValue = GetFilterValue(i);
+        if (typeItem->GetFilterType() == FilterType::LdapAttr) {
+            lr.AddRule(std::get<adbook::Attributes::AttrId>(typeItem->GetFilterCode()),
                 condition->GetMatchingRule(), filterValue.toStdWString());
-        }
-        else {
-
         }
     }
     if (itemCount != 0) {
@@ -141,23 +143,23 @@ void FilterListModel::SaveState()
     for (int i = 0, count = rowCount(); i < count; ++i) {
         FilterTypeItem * type = GetFilterType(i);
         FilterConditionItem * cond = GetFilterCondition(i);
-        fls.AddFilter({ type->GetFilterCode2(), GetFilterValue(i), cond->GetMatchingRule() });
+        fls.AddFilter({ type->GetFilterCode(), GetFilterValue(i), cond->GetMatchingRule() });
     }
     _appSettings.SetFilterListSettings(fls);
 }
 
 void FilterListModel::LoadState
 (
-    FilterCode filterCode, 
-    const QString & filterValue, 
+    FilterCode filterCode,
+    const QString & filterValue,
     FilterCondition condition
 )
-{    
+{
     if (filterValue.trimmed().isEmpty()) {
         throw adbook::HrError(E_INVALIDARG, L"filterValue is empty", __FUNCTIONW__);
     }
-    FilterTypeItem * typeItem = nullptr;    
-    if (auto compositeFilterIdPtr = std::get_if<CompositeFilterId>(&filterCode)) {        
+    FilterTypeItem * typeItem = nullptr;
+    if (auto compositeFilterIdPtr = std::get_if<CompositeFilterId>(&filterCode)) {
         if (CompositeFilterId::AnyAttribute == *compositeFilterIdPtr) {
             typeItem = new FilterTypeItem(CompositeFilterId::AnyAttribute);
         }
@@ -173,7 +175,7 @@ void FilterListModel::LoadState
     }
     FilterConditionItem * condItem = new FilterConditionItem(condition);
     AddFilter(typeItem, condItem, filterValue);
-    
+
 }
 
 void FilterListModel::LoadState()

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -34,14 +34,14 @@ class QtAdBook : public QDialog
 
 public:
     QtAdBook(
-        std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,                
+        std::shared_ptr<adbook::AbstractAdAccessFactory> adFactory,
         AppSettings & appSettings,
         QWidget *parent = 0
     );
     ~QtAdBook();
 protected:
     void closeEvent(QCloseEvent *event);
-private:    
+private:
     void InitSignalConnections();
     void InitSearchResultList();
     void InitFilterListNames();
@@ -62,7 +62,7 @@ private:
 signals:
     void SearchStartedSignal();
     void SearchStoppedSignal();
-    void OneOrMoreContactsFoundSignal();    
+    void OneOrMoreContactsFoundSignal();
 private slots:
     void OnAbout();
     void OnSearchStarted();
@@ -86,7 +86,7 @@ private slots:
 private:
     Ui::QtAdBookClass ui;
 
-    std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;    
+    std::shared_ptr<adbook::AbstractAdAccessFactory> _adFactory;
     AppSettings & _appSettings;
     std::unique_ptr<adbook::AbstractAdSearcher> _adSearcher;
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -28,7 +28,7 @@ class FilterListModel : public QStandardItemModel
 public:
     FilterListModel(AppSettings & appSettings, QObject *parent = Q_NULLPTR);
 
-    int FindFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem, 
+    int FindFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem,
         const QString & filterValue
     );
 
@@ -41,7 +41,7 @@ public:
     QString GetFilterValue(int r) {
         return item(r, ValueColId)->text();
     }
-    int AddFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem, 
+    int AddFilter(FilterTypeItem * filterTypeItem, FilterConditionItem * conditionItem,
         const QString & filterValue
     );
     std::wstring ConstructLdapRequest(bool AllConditionsShouldBeMet);
@@ -49,11 +49,11 @@ public:
 
     void SaveState();
     void LoadState();
-private:    
+private:
     void LoadState(FilterCode filterCode, const QString & filterValue, FilterCondition condition);
-    
-    enum ColumnId { 
-        FilterNameColId = 0, ConditionColId = 1, ValueColId = 2 
+
+    enum ColumnId {
+        FilterNameColId = 0, ConditionColId = 1, ValueColId = 2
     };
     struct ColumnDef {
         ColumnId colId;
@@ -67,7 +67,7 @@ private:
         return rv;
     }
     static QList<ColumnDef> _columns;
-    AppSettings & _appSettings;    
+    AppSettings & _appSettings;
 };
 
 #endif // FILTERLISTMODEL_H

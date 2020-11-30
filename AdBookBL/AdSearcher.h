@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2021 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -39,22 +39,42 @@ public:
     AdSearcher & operator = (const AdSearcher &) = delete;
     AdSearcher & operator = (AdSearcher &&) = delete;
 
-    virtual void SetCallbacks(const OnNewItem & onNewItem, const OnStart & onStart, const OnStop & onStop) override;
-    virtual void Start(const std::wstring & ldapRequest, const ConnectionParams & cs) override;
-    virtual bool IsStarted() const override;
-    virtual void Stop() override;
-    virtual void Wait() override;
+    void SetCallbacks (
+        const OnNewItem & onNewItem,
+        const OnStart & onStart,
+        const OnStop & onStop
+    ) override;
+
+    void SetCallbacks (
+        const OnNewItem & onNewItem,
+        const OnStart & onStart,
+        const OnStop & onStop,
+        const OnError & onError
+    ) override;
+
+    void Start (
+        const std::wstring & ldapRequest,
+        const ConnectionParams & cs
+    ) override;
+
+    bool IsStarted() const override;
+    void Stop() override;
+    void Wait() override;
+    void PropogateSearchException() override;
 
 private:
-    void ThreadProc(ConnectionParams cs, std::wstring ldapRequest);
+    void ThreadProc (
+        ConnectionParams cs,
+        std::wstring ldapRequest
+    );
 
-    void IterateThroughSearchResults(
+    void IterateThroughSearchResults (
         IDirectorySearchPtr & dsp,
         ADS_SEARCH_HANDLE & searchHandle,
         std::vector<WcharBuf> & attrNames
     );
 
-    void ReadNextEntry(
+    void ReadNextEntry (
         IDirectorySearchPtr & dsp,
         ADS_SEARCH_HANDLE & searchHandle,
         std::vector<WcharBuf> & attrNames
@@ -62,20 +82,29 @@ private:
 
     void ReadColumn(ADS_SEARCH_COLUMN & col, AdPersonDesc & person);
 
-    void SetCancelationHandle(const IDirectorySearchPtr & dsp, const ADS_SEARCH_HANDLE & searchHandle);
+    void SetCancelationHandle (
+        const IDirectorySearchPtr & dsp,
+        const ADS_SEARCH_HANDLE & searchHandle
+    );
 
-    void SetupSearchPrefs(IDirectorySearchPtr & dsp);
+    void ResetCancelationHandle();
 
-    std::vector<WcharBuf> CreateAttrListToRetrieve(std::vector<wchar_t *> & apv);
+    void SetupSearchPrefs (
+        IDirectorySearchPtr & dsp
+    );
 
-    void ExecuteSearch(
+    std::vector<WcharBuf> CreateAttrListToRetrieve (
+        std::vector<wchar_t *> & apv
+    );
+
+    void ExecuteSearch (
         IDirectorySearchPtr & dsp,
         WcharBuf & searchFilter,
         std::vector<wchar_t *> & attrsToRetrieve,
         ADS_SEARCH_HANDLE & searchHandle
     );
 private:
-    std::shared_ptr<AdSearcherData> dataPtr_;
+    std::shared_ptr<AdSearcherData> _dataPtr;
 };
 
 }

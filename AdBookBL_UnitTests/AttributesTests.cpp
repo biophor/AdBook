@@ -1,6 +1,7 @@
 #include "pch.h"
 
-TEST(AttributesTests, CanProvideTheListOfSupportedAttributes) {
+TEST(AttributesTests, Can_provide_the_list_of_supported_attributes)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     size_t numAttrs = attrs.GetAttrCount();
@@ -24,7 +25,8 @@ TEST(AttributesTests, CanProvideTheListOfSupportedAttributes) {
     ASSERT_TRUE(std::find(attrIds.begin(), attrIds.end(), adbook::Attributes::Dn) != attrIds.end());
 }
 
-TEST(AttributesTests, CanConvertBetweenAttrIdAndAttrName) {
+TEST(AttributesTests, Can_convert_between_AttrId_and_ldap_attr_name)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -37,7 +39,8 @@ TEST(AttributesTests, CanConvertBetweenAttrIdAndAttrName) {
     }
 }
 
-TEST(AttributesTests, IsAttibuteSupportedMustReturnTrueForSupportedAttributes) {
+TEST(AttributesTests, Provide_information_on_supported_attributes)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -47,30 +50,13 @@ TEST(AttributesTests, IsAttibuteSupportedMustReturnTrueForSupportedAttributes) {
         ASSERT_TRUE(attrs.IsAttrSupported(attrName.c_str()));
         ASSERT_TRUE(attrs.IsAttrSupported(attrId));
     }
-}
-
-TEST(AttributesTests, IsAttibuteSupportedMustReturnFalseForUnsupportedAttributes) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-    std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
-    // Act & Assert
+    // Assert
     ASSERT_FALSE(attrs.IsAttrSupported(L"InvalidAttrName"));
     ASSERT_FALSE(attrs.IsAttrSupported(static_cast<adbook::Attributes::AttrId>(99)));
 }
 
-//
-TEST(AttributesTests, GetAdsiComplientAttrNamesMethodTest) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-    std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
-    std::vector<adbook::WcharBuf> attrNames = attrs.GetAdsiComplientAttrNames();
-    // Act & Assert
-    for (auto && attrName : attrNames) {
-        ASSERT_TRUE(attrs.IsAttrSupported(attrName.data()));
-    }
-}
-
-TEST(AttributesTests, IsStringMethodTest) {
+TEST(AttributesTests, Provides_information_on_attribute_type)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -86,7 +72,8 @@ TEST(AttributesTests, IsStringMethodTest) {
     }
 }
 
-TEST(AttributesTests, IsEditableMethodTest) {
+TEST(AttributesTests, Provides_information_on_attributes_which_can_be_changed_directly)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -102,7 +89,8 @@ TEST(AttributesTests, IsEditableMethodTest) {
     }
 }
 
-TEST(AttributesTests, IsEditableStringMethodTest) {
+TEST(AttributesTests, Provides_information_on_string_attrs_which_can_be_changed_directly)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -118,7 +106,8 @@ TEST(AttributesTests, IsEditableStringMethodTest) {
     }
 }
 
-TEST(AttributesTests, GetAttrOidMustReturnOidLikeString) {
+TEST(AttributesTests, Provides_information_on_attribute_oids)
+{
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -130,8 +119,7 @@ TEST(AttributesTests, GetAttrOidMustReturnOidLikeString) {
     }
 }
 
-
-TEST(AttributesTests, GetUiAttrNameMustReturnNonEmptyString) {
+TEST(AttributesTests, Provides_user_friendly_names_on_attributes) {
     // Arrange
     const auto & attrs = adbook::Attributes::GetInstance();
     std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
@@ -140,52 +128,6 @@ TEST(AttributesTests, GetUiAttrNameMustReturnNonEmptyString) {
     for (auto attrId : attrIds) {
         std::wstring uiName = attrs.GetUiAttrName(attrId);
         ASSERT_TRUE(!uiName.empty());
-    }
-}
-
-TEST(AttributesTests, GetAttrMaxLengthMustReturnNonZeroSize) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-    std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
-
-    // Act & Assert
-    for (auto attrId : attrIds) {
-        size_t maxLength = attrs.GetAttrMaxLength(attrId);
-        ASSERT_TRUE(maxLength > 0);
-    }
-}
-
-
-TEST(AttributesTests, GetBinaryAttrMaxLengthMustReturnNonZeroSize) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-
-    // Act & Assert
-    size_t maxLength = attrs.GetBinaryAttrMaxLength();
-    ASSERT_TRUE(maxLength > 0);
-}
-
-TEST(AttributesTests, GetTextAttrMaxLengthMustReturnNonZeroSize) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-
-    // Act & Assert
-    size_t maxLength = attrs.GetTextAttrMaxLength();
-    ASSERT_TRUE(maxLength > 0);
-}
-
-
-TEST(AttributesTests, GetLdapAttrNamePtrMustReturnPointerToAttrName) {
-    // Arrange
-    const auto & attrs = adbook::Attributes::GetInstance();
-    std::vector<adbook::Attributes::AttrId> attrIds = attrs.GetAttrIds();
-
-    // Act & Assert
-    for (auto attrId : attrIds) {
-        std::wstring ldapName = attrs.GetLdapAttrName(attrId);
-        const wchar_t * ldapNamePtr = attrs.GetLdapAttrNamePtr(attrId);
-        ASSERT_TRUE(ldapNamePtr != nullptr);
-        ASSERT_TRUE(ldapName == ldapNamePtr);
     }
 }
 

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2020 Goncharov Andrei.
+Copyright (C) 2015-2020 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -189,7 +189,7 @@ void AppSettingsRegistryKeeper::LoadSearchFilters(std::list<SearchFilter> & sear
         SearchFilter sf;
         CString sectionName = CString(sfBaseSectionName) + std::to_wstring(i).c_str();
         sf.attrId = app->GetProfileIntW(sectionName, attrIdName, 0);
-        sf.rule = boost::numeric_cast<adbook::LdapRequestBuilder::MatchingRule>(
+        sf.rule = static_cast<adbook::LdapRequestBuilder::MatchingRule>(
             app->GetProfileIntW(sectionName, ruleIdName, adbook::LdapRequestBuilder::InvalidMatchingRule)
             );
         sf.attrValue = app->GetProfileStringW(sectionName, attrValName);
@@ -201,7 +201,7 @@ void AppSettingsRegistryKeeper::SaveSearchFilters(const std::list<SearchFilter> 
 {
     auto app = AfxGetApp();
     const size_t numItems = searchFilters.size();
-    VERIFY(app->WriteProfileInt(baseSectionName, numItemsName, boost::numeric_cast<int>(numItems)));
+    VERIFY(app->WriteProfileInt(baseSectionName, numItemsName, static_cast<int>(numItems)));
     UINT searchFilterIndex = 0;
     for (const auto & searchFilter : searchFilters)
     {
@@ -223,7 +223,7 @@ std::vector<BYTE> ProtectPassword(const std::wstring & password)
     }
     std::vector<wchar_t> buffToProtect(password.cbegin(), password.cend());
     DATA_BLOB db;
-    db.cbData = boost::numeric_cast<DWORD>(password.length() * sizeof(wchar_t));
+    db.cbData = static_cast<DWORD>(password.length() * sizeof(wchar_t));
     db.pbData = reinterpret_cast<BYTE*>(&buffToProtect[0]);
     DATA_BLOB dbr;
     // the following function may fail for several reasons.
@@ -231,7 +231,7 @@ std::vector<BYTE> ProtectPassword(const std::wstring & password)
     {
         HR_ERROR(HRESULT_FROM_WIN32(GetLastError()));
     }
-    std::vector<BYTE> result(dbr.pbData, dbr.pbData + boost::numeric_cast<size_t>(dbr.cbData));
+    std::vector<BYTE> result(dbr.pbData, dbr.pbData + static_cast<size_t>(dbr.cbData));
     LocalFree(dbr.pbData);
     return result;
 }
@@ -258,7 +258,7 @@ std::wstring UnprotectPassword(std::vector<BYTE> protectedPassword)
         return std::wstring();
     }
     DATA_BLOB db;
-    db.cbData = boost::numeric_cast<DWORD>(protectedPassword.size());
+    db.cbData = static_cast<DWORD>(protectedPassword.size());
     db.pbData = &protectedPassword[0];
     DATA_BLOB dbr;
     if (!CryptUnprotectData(&db, nullptr, nullptr, nullptr, nullptr, 0, &dbr))
@@ -267,7 +267,7 @@ std::wstring UnprotectPassword(std::vector<BYTE> protectedPassword)
     }
     return std::wstring(
         reinterpret_cast<const wchar_t *>(dbr.pbData),
-        boost::numeric_cast<size_t>(dbr.cbData) / sizeof(wchar_t)
+        static_cast<size_t>(dbr.cbData) / sizeof(wchar_t)
     );
 }
 
@@ -307,7 +307,7 @@ void AppSettingsRegistryKeeper::LoadConnectionParams(
         BYTE * dataPtr = nullptr;
         UINT dataSizeInBytes = 0;
         if (app->GetProfileBinary(section, param, &dataPtr, &dataSizeInBytes) && dataPtr && dataSizeInBytes) {
-            auto ret = std::vector<BYTE>(dataPtr, dataPtr + boost::numeric_cast<size_t>(dataSizeInBytes));
+            auto ret = std::vector<BYTE>(dataPtr, dataPtr + static_cast<size_t>(dataSizeInBytes));
             delete[] dataPtr;
             dataPtr = nullptr;
             return ret;
@@ -317,10 +317,10 @@ void AppSettingsRegistryKeeper::LoadConnectionParams(
         }
     };
     // connection settings
-    connectionParams.SetDomainController(getcs(connectionSettingsSection, dcNameParam));
+    connectionParams.SetAddress(static_cast<LPCWSTR>(getcs(connectionSettingsSection, dcNameParam)));
     connectionParams.SetLogin(getcs(connectionSettingsSection, userNameParam));
-    connectionParams.UseCurrentUserCredentials(getbool(connectionSettingsSection, currentUserCredParam, true));
-    connectionParams.ConnectDomainYouAreLoggedIn(getbool(connectionSettingsSection, currentDomainParam, true));
+    connectionParams.Set_ConnectAsCurrentUser(getbool(connectionSettingsSection, currentUserCredParam, true));
+    connectionParams.Set_ConnectDomainYouLoggedIn(getbool(connectionSettingsSection, currentDomainParam, true));
 
     std::vector<BYTE> protectedPassword = getbin(connectionSettingsSection, protectedPasswordParam);
     std::wstring password;
@@ -348,10 +348,10 @@ void AppSettingsRegistryKeeper::SaveConnectionParams(const adbook::ConnectionPar
     // connection settings
     auto & cs = connectionParams;
     VERIFY(app);
-    VERIFY(app->WriteProfileStringW(connectionSettingsSection, dcNameParam, cs.GetDomainController().c_str()));
+    VERIFY(app->WriteProfileStringW(connectionSettingsSection, dcNameParam, cs.GetAddress().c_str()));
     VERIFY(app->WriteProfileStringW(connectionSettingsSection, userNameParam, cs.GetLogin().c_str()));
-    VERIFY(app->WriteProfileInt(connectionSettingsSection, currentUserCredParam, cs.IsCurrentUserCredentialsUsed() ? 1 : 0));
-    VERIFY(app->WriteProfileInt(connectionSettingsSection, currentDomainParam, cs.CurrentDomain() ? 1 : 0));
+    VERIFY(app->WriteProfileInt(connectionSettingsSection, currentUserCredParam, cs.Get_ConnectAsCurrentUser() ? 1 : 0));
+    VERIFY(app->WriteProfileInt(connectionSettingsSection, currentDomainParam, cs.Get_ConnectDomainYouLoggedIn() ? 1 : 0));
 
     std::wstring password = cs.GetPassword();
     if (!password.empty())
@@ -360,7 +360,7 @@ void AppSettingsRegistryKeeper::SaveConnectionParams(const adbook::ConnectionPar
         if (TryToProtectPassword(password, protectedPassword))
         {
             VERIFY(app->WriteProfileBinary(connectionSettingsSection, protectedPasswordParam,
-                &protectedPassword[0], boost::numeric_cast<UINT>(protectedPassword.size()))
+                &protectedPassword[0], static_cast<UINT>(protectedPassword.size()))
             );
         }
         else

@@ -1,7 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /*
-Copyright (C) 2015-2017 Goncharov Andrei.
+Copyright (C) 2015-2017 Andrei Goncharov.
 
 This file is part of the 'Active Directory Contact Book'.
 'Active Directory Contact Book' is free software: you can redistribute it
@@ -94,8 +94,8 @@ namespace WfAdBook
             else {
                 Properties.Settings.Default.Password = "";
             }
-            Properties.Settings.Default.DomainOrDc = Dc;
-            Properties.Settings.Default.ConnectDefaultDomain = UseDomainYouAreLoggedIn;
+            Properties.Settings.Default.DomainOrDc = Address;
+            Properties.Settings.Default.ConnectDefaultDomain = ConnectDomainYouLoggedIn;
             Properties.Settings.Default.UseCurrentUserCredentials = UseCurrentUserCredentials;
             Properties.Settings.Default.Save();
         }
@@ -108,8 +108,8 @@ namespace WfAdBook
             else {
                 Password = new SecureString();
             }
-            Dc = Properties.Settings.Default.DomainOrDc;
-            UseDomainYouAreLoggedIn = Properties.Settings.Default.ConnectDefaultDomain;
+            Address = Properties.Settings.Default.DomainOrDc;
+            ConnectDomainYouLoggedIn = Properties.Settings.Default.ConnectDefaultDomain;
             UseCurrentUserCredentials = Properties.Settings.Default.UseCurrentUserCredentials;
         }
     }
